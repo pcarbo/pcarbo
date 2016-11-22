@@ -1,13 +1,23 @@
 #!/bin/bash
 
-# Explain here what this script does, and how to use it.
+# This bash script illustrates how to use the sbatch command in SLURM
+# to submit a job to the broadwl partition, in which some of the
+# script parameters are specified in the command line. The output of
+# running this script is a text file containing normally distributed
+# random numbers; see the comments at the top of gen.rnorm.data.R for
+# details.
 #
-# Example:
+# Here is an example of running this script using SLURM from the
+# shell:
 #
 #   sbatch --job-name=gen-rnormdata-sbatch --output=sbatch.out \
 #          --error=sbatch.err gen_rnorm_data.sbatch \
-#          normaldata1.txt 1 20 4
-#
+#          normaldata.txt 3 20 4
+# 
+# When the SLURM job is completed, file normaldata.txt will contain a
+# 20 x 4 matrix of numbers drawn from the standard normal
+# distribution, in which the pseudorandom number generator in R is
+# initialized with seed=3.
 
 #SBATCH --time=00:05:00
 #SBATCH --partition=broadwl

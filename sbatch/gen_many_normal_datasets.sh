@@ -10,6 +10,11 @@
 # In this example, we generate data sets with 1000 samples (rows) and
 # 20 features (columns), but this is easily modified in the for-loop
 # below.
+#
+# Note that, as of this writing, there is a limit of 50 jobs per user
+# on the broadwl partition, so this script will not work if you set
+# the first argument to a number greater than 50. Run the command
+# "rcchelp qos" on midway to get more details about this.
 
 # Get the script parameter specified as a command-line argument.
 NUMDATASETS=${1}

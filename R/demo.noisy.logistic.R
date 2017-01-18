@@ -1,5 +1,5 @@
-# Demonstration estimation of noise parameter in "noisy" regression
-# model is not possible.
+# Small demo script to illustrate that estimating the noise parameter
+# in the "noisy" regression model does not work well.
 library(ggplot2)
 library(ggthemes)
 

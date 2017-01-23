@@ -1,7 +1,5 @@
 # TO DO: Explain here what this script does, and how to use it.
 
-library(varbvs)
-
 # SCRIPT PARAMETERS
 # -----------------
 r <- 0.6         # Proportion of variance in trait explained by SNPs.

@@ -1,4 +1,19 @@
-# TO DO: Explain here what this script does, and how to use it.
+# Small script to simulated data that models the an idealized
+# genome-wide association study, in which all single nucleotide
+# polymorphisms (SNPs) have alternative alleles at high frequencies in
+# the population (>5%), and all SNPs contribute some (small) amount of
+# variation to the quantitative trait. The SNPs are divided into two
+# sets: those that contribute a very small amount of variation, and
+# those that contribute a larger amount of variable (these are the
+# "QTLs"---quantitative trait loci).
+#
+# Adjust the five parameters below (r, d, n, p, i) to control how the
+# data are enerated.
+#
+# Peter Carbonetto
+# University of Chicago
+# January 23, 2017
+#
 
 # SCRIPT PARAMETERS
 # -----------------

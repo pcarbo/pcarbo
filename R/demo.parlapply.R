@@ -4,13 +4,16 @@
 #
 #   - Explain how to install cfwlab package.
 #
+#   - sinteractive --partition=broadwl --account=rcc-staff \
+#       --cpus-per-task=10 --mem=8G
+#
 library(parallel)
 library(cfwlab)
 
 # SCRIPT PARAMETERS
 # -----------------
 trait <- "soleus" # Phenotype to analyze.
-nc    <- 2        # Number of cores (CPUs) to use.
+nc    <- 4        # Number of cores (CPUs) to use.
 ns    <- 100      # Number of Monte Carlo samples.
 
 # Initialize the random number generator.
@@ -27,6 +30,11 @@ if (!exists("nc")) {
 
 # FUNCTION DEFINITIONS
 # --------------------
+# Distribute the elements of x evenly (or as evenly as possible) into
+# k list elements.
+distribute <- function (x, k)
+  split(x,rep(1:k,length.out = length(x)))
+
 # Replicate vector x to create an n x m matrix, where m = length(x).
 rep.row <- function (x, n)
   matrix(x,n,length(x),byrow = TRUE)
@@ -42,10 +50,10 @@ normalizelogweights <- function (logw) {
   return(w / sum(w))
 }
 
-# Computes the marginal likelihood the regression model of Y given X
-# assuming that the prior variance of the regression coefficients is
+# Computes the marginal log-likelihood the regression model of Y given
+# X assuming that the prior variance of the regression coefficients is
 # sa. Here K is the "kinship" matrix K = tcrossprod(X)/p.
-compute.log.weight <- function (X, y, K, sa) {
+compute.log.weight <- function (X, K, y, sa) {
     
   # Compute the covariance of Y (divided by residual variance) and
   # its Choleksy decomposition. If H is not positive definite, L = FALSE.
@@ -59,6 +67,11 @@ compute.log.weight <- function (X, y, K, sa) {
     out <- 0
   return(out)
 }
+
+# Compute the marginal log-likelihood for multiple settings of the
+# prior variance parameter.
+compute.log.weights <- function (X, K, y, sa)
+  sapply(as.list(sa),function (sa) compute.log.weight(X,K,y,sa))
 
 # LOAD DATA
 # ---------
@@ -102,12 +115,22 @@ cat("Acquiring settings for prior variance of polygenic effects.\n")
 sx <- sum(apply(X,2,sd)^2)
 sa <- p*h/(1-h)/sx
   
-# Compute the normalized importance weights.
+# Compute the log-importance weights.
 cat("Computing importance weights for",ns,"hyperparameter settings.\n")
+samples <- distribute(1:ns,nc)
 r <- system.time(logw <-
-       sapply(as.list(sa),function (x) compute.log.weight(K,x)))
-w <- normalizelogweights(logw)
+       mclapply(samples,function (i) compute.log.weights(X,K,y,sa[i])))
 cat(sprintf("Computation took %0.2f seconds.\n",r["elapsed"]))
+
+stop()
+
+# Aggregate the outputs from the individual CPUs.
+logw <- do.call(c,logw)
+logw[unlist(samples)] <- logw
+
+# Normalize the importance weights.
+w <- normalizelogweights(logw)
+
 
 # SAVE RESULTS TO FILE
 # --------------------

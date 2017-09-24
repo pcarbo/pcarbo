@@ -7,14 +7,20 @@
 #   - sinteractive --partition=broadwl --account=rcc-staff \
 #       --cpus-per-task=10 --mem=8G
 #
+#   - export OPENBLAS_NUM_THREADS=10
+#
+# TO DO:
+#
+#   - Change this to a uniform grid instead of a Monte Carlo estimate.
+#
 library(parallel)
 library(cfwlab)
 
 # SCRIPT PARAMETERS
 # -----------------
 trait <- "soleus" # Phenotype to analyze.
-nc    <- 4        # Number of cores (CPUs) to use.
-ns    <- 100      # Number of Monte Carlo samples.
+nc    <- 10       # Number of cores (CPUs) to use.
+ns    <- 20       # Number of Monte Carlo samples.
 
 # Initialize the random number generator.
 set.seed(1)
@@ -53,25 +59,37 @@ normalizelogweights <- function (logw) {
 # Computes the marginal log-likelihood the regression model of Y given
 # X assuming that the prior variance of the regression coefficients is
 # sa. Here K is the "kinship" matrix K = tcrossprod(X)/p.
-compute.log.weight <- function (X, K, y, sa) {
+compute.log.weight <- function (K, y, sa) {
     
   # Compute the covariance of Y (divided by residual variance) and
   # its Choleksy decomposition. If H is not positive definite, L = FALSE.
   H <- diag(n) + sa*K
-  L <- t(tryCatch(chol(H),error = function(e) FALSE))
+  R <- t(tryCatch(chol(H),error = function(e) FALSE))
 
   # Compute the log-importance weight.
-  if (is.matrix(L))
-    out <- (-determinant(sum(y*solve(H,y))*H,logarithm = TRUE)$modulus/2)
-  else
+  if (is.matrix(R)) {
+    # This first line is equivalent to x <- solve(H,y), but faster.
+    x   <- backsolve(R,forwardsolve(t(R),y))
+    out <- (-determinant(sum(y*x)*H,logarithm = TRUE)$modulus/2)
+  } else
     out <- 0
   return(out)
 }
 
 # Compute the marginal log-likelihood for multiple settings of the
 # prior variance parameter.
-compute.log.weights <- function (X, K, y, sa)
-  sapply(as.list(sa),function (sa) compute.log.weight(X,K,y,sa))
+compute.log.weights <- function (K, y, sa, verbose = TRUE) {
+  n   <- length(sa)
+  out <- rep(0,n)
+  for (i in 1:n) {
+    if (verbose)
+      cat(sprintf("%d ",i))
+    out[i] <- compute.log.weight(K,y,sa[i])
+  }
+  if (verbose)
+    cat("\n")
+  return(out)
+}
 
 # LOAD DATA
 # ---------
@@ -100,7 +118,8 @@ y <- y - mean(y)
 # Compute the kinship matrix.
 cat("Computing kinship matrix.\n")
 r <- system.time(K <- tcrossprod(X)/p)
-cat(sprintf("Computation took %0.2f seconds.\n",r["elapsed"]))
+cat(sprintf("Computation took %0.2f seconds (multicore speedup = %0.1fx).\n",
+            summary(r)["elapsed"],summary(r)["user"]/summary(r)["elapsed"]))
 
 # COMPUTE IMPORTANCE SAMPLING ESTIMATE
 # ------------------------------------
@@ -117,10 +136,9 @@ sa <- p*h/(1-h)/sx
   
 # Compute the log-importance weights.
 cat("Computing importance weights for",ns,"hyperparameter settings.\n")
-samples <- distribute(1:ns,nc)
-r <- system.time(logw <-
-       mclapply(samples,function (i) compute.log.weights(X,K,y,sa[i])))
-cat(sprintf("Computation took %0.2f seconds.\n",r["elapsed"]))
+r <- system.time(logw <- compute.log.weights(K,y,sa))
+cat(sprintf("Computation took %0.2f seconds (multicore speedup = %0.1fx).\n",
+            summary(r)["elapsed"],summary(r)["user"]/summary(r)["elapsed"]))
 
 stop()
 
@@ -131,6 +149,8 @@ logw[unlist(samples)] <- logw
 # Normalize the importance weights.
 w <- normalizelogweights(logw)
 
+# Compute the mean and variance of the PVE estimate (h).
+# TO DO.
 
 # SAVE RESULTS TO FILE
 # --------------------

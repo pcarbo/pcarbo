@@ -1,5 +1,3 @@
-# TO DO: Explain here what this script does, and how to use it.
-#
 # NOTES:
 #
 #   - Explain how to install cfwlab package.
@@ -9,18 +7,24 @@
 #
 #   - export OPENBLAS_NUM_THREADS=10
 #
+#   - R CMD SHLIB setblas.o
+#
 # TO DO:
 #
 #   - Change this to a uniform grid instead of a Monte Carlo estimate.
 #
+#   - Explain here what this script does, and how to use it.
+#
+#   - Convert this script to an R Markdown document.
+#
 library(parallel)
 library(cfwlab)
+dyn.load("setblas.so")
 
 # SCRIPT PARAMETERS
 # -----------------
 trait <- "soleus" # Phenotype to analyze.
-nc    <- 10       # Number of cores (CPUs) to use.
-ns    <- 20       # Number of Monte Carlo samples.
+ns    <- 100      # Number of Monte Carlo samples.
 
 # Initialize the random number generator.
 set.seed(1)
@@ -45,6 +49,12 @@ distribute <- function (x, k)
 rep.row <- function (x, n)
   matrix(x,n,length(x),byrow = TRUE)
 
+# Set the number of threads used by OpenBLAS.
+set.blas.num.threads <- function (n) {
+  .Call("set_blas_Call",n = as.integer(n))
+  return(n)
+}
+
 # Takes as input an array of unnormalized log-importance weights and
 # returns normalized importance weights such that the sum of the
 # normalized importance weights is equal to one. I guard against
@@ -59,7 +69,7 @@ normalizelogweights <- function (logw) {
 # Computes the marginal log-likelihood the regression model of Y given
 # X assuming that the prior variance of the regression coefficients is
 # sa. Here K is the "kinship" matrix K = tcrossprod(X)/p.
-compute.log.weight <- function (K, y, sa) {
+compute.log.weight <- function (K, y, sa, use.backsolve = TRUE) {
     
   # Compute the covariance of Y (divided by residual variance) and
   # its Choleksy decomposition. If H is not positive definite, L = FALSE.
@@ -68,27 +78,37 @@ compute.log.weight <- function (K, y, sa) {
 
   # Compute the log-importance weight.
   if (is.matrix(R)) {
-    # This first line is equivalent to x <- solve(H,y), but faster.
-    x   <- backsolve(R,forwardsolve(t(R),y))
-    out <- (-determinant(sum(y*x)*H,logarithm = TRUE)$modulus/2)
+    if (use.backsolve)
+      x <- backsolve(R,forwardsolve(t(R),y))
+    else
+      x <- solve(H,y)
+    logw <- (-determinant(sum(y*x)*H,logarithm = TRUE)$modulus/2)
   } else
-    out <- 0
-  return(out)
+    logw <- 0
+  return(logw)
 }
 
 # Compute the marginal log-likelihood for multiple settings of the
 # prior variance parameter.
-compute.log.weights <- function (K, y, sa, verbose = TRUE) {
-  n   <- length(sa)
-  out <- rep(0,n)
-  for (i in 1:n) {
-    if (verbose)
-      cat(sprintf("%d ",i))
-    out[i] <- compute.log.weight(K,y,sa[i])
-  }
-  if (verbose)
-    cat("\n")
-  return(out)
+compute.log.weights <- function (K, y, sa, use.backsolve = TRUE) {
+  n    <- length(sa)
+  logw <- rep(0,n)
+  for (i in 1:n)
+    logw[i] <- compute.log.weight(K,y,sa[i],use.backsolve)
+  return(logw)
+}
+
+# This is a multicore variant of compute.log.weights.
+compute.log.weights.multicore <- function (K, y, sa, nc = 2,
+                                           use.backsolve = TRUE) {
+  n       <- length(sa)
+  samples <- distribute(1:n,nc)
+  logw    <- mclapply(samples,
+               function (i) compute.log.weights(K,y,sa[i],use.backsolve),
+               mc.cores = nc)
+  logw    <- do.call(c,logw)
+  logw[unlist(samples)] <- logw
+  return(logw)
 }
 
 # LOAD DATA
@@ -118,8 +138,7 @@ y <- y - mean(y)
 # Compute the kinship matrix.
 cat("Computing kinship matrix.\n")
 r <- system.time(K <- tcrossprod(X)/p)
-cat(sprintf("Computation took %0.2f seconds (multicore speedup = %0.1fx).\n",
-            summary(r)["elapsed"],summary(r)["user"]/summary(r)["elapsed"]))
+cat(sprintf("Computation took %0.2f seconds.\n",summary(r)["elapsed"]))
 
 # COMPUTE IMPORTANCE SAMPLING ESTIMATE
 # ------------------------------------
@@ -133,18 +152,18 @@ h <- runif(ns)
 cat("Acquiring settings for prior variance of polygenic effects.\n")
 sx <- sum(apply(X,2,sd)^2)
 sa <- p*h/(1-h)/sx
-  
-# Compute the log-importance weights.
-cat("Computing importance weights for",ns,"hyperparameter settings.\n")
-r <- system.time(logw <- compute.log.weights(K,y,sa))
-cat(sprintf("Computation took %0.2f seconds (multicore speedup = %0.1fx).\n",
-            summary(r)["elapsed"],summary(r)["user"]/summary(r)["elapsed"]))
 
 stop()
 
-# Aggregate the outputs from the individual CPUs.
-logw <- do.call(c,logw)
-logw[unlist(samples)] <- logw
+# Compute the log-importance weights.
+cat("Computing importance weights for",ns,"hyperparameter settings.\n")
+r <- system.time(logw <- compute.log.weights(K,y,sa,use.backsolve = TRUE))
+cat(sprintf("Computation took %0.2f seconds.\n",summary(r)["elapsed"]))
+
+r <- system.time(logw <- compute.log.weights.multicore(K,y,sa,nc = 1,
+                                                       use.backsolve = TRUE))
+
+.Call("set_blas_Call",n = as.integer(2))
 
 # Normalize the importance weights.
 w <- normalizelogweights(logw)

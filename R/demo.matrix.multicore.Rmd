@@ -153,13 +153,14 @@ compute.log.weights.multicore <- function (K, y, sa, nc = 2,
 
 ## Load data
 
-Load the phenotype and genotype data.
+Load the phenotype and genotype data. Here, we analyze soleus muscle
+weight, but other phenotypes are available in this data set.
 
 ```{r load-data}
 data(cfw.pheno)
 data(cfw.geno)
 X <- cfw.geno
-y <- cfw.pheno[[trait]]
+y <- cfw.pheno[["soleus"]]
 rm(cfw.geno,cfw.pheno)
 ```
 
@@ -219,7 +220,7 @@ sa <- p*h/(1-h)/sx
 Compute the log-importance weights.
 
 ```{r}
-# r <- system.time(logw <- compute.log.weights(K,y,sa,use.backsolve = TRUE))
+logw <- compute.log.weights(K,y,sa,use.backsolve = TRUE)
 # r <- system.time(logw <- compute.log.weights.multicore(K,y,sa,nc = nc))
 ```
 
@@ -230,7 +231,7 @@ w <- normalizelogweights(logw)
 ## Session information
 
 This is the operating system, version of R and the packages that were
-used to generate these results.
+used to generate these results given above.
 
 ```{r session-info}
 sessionInfo()

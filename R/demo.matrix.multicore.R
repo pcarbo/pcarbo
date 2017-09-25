@@ -9,9 +9,9 @@
 #
 #   - R CMD SHLIB setblas.o
 #
-# TO DO:
+#   - Does not work on Windows (due to mclapply).
 #
-#   - Change this to a uniform grid instead of a Monte Carlo estimate.
+# TO DO:
 #
 #   - Explain here what this script does, and how to use it.
 #
@@ -160,10 +160,7 @@ cat("Computing importance weights for",ns,"hyperparameter settings.\n")
 r <- system.time(logw <- compute.log.weights(K,y,sa,use.backsolve = TRUE))
 cat(sprintf("Computation took %0.2f seconds.\n",summary(r)["elapsed"]))
 
-r <- system.time(logw <- compute.log.weights.multicore(K,y,sa,nc = 1,
-                                                       use.backsolve = TRUE))
-
-.Call("set_blas_Call",n = as.integer(2))
+r <- system.time(logw <- compute.log.weights.multicore(K,y,sa,nc = nc))
 
 # Normalize the importance weights.
 w <- normalizelogweights(logw)
@@ -171,6 +168,3 @@ w <- normalizelogweights(logw)
 # Compute the mean and variance of the PVE estimate (h).
 # TO DO.
 
-# SAVE RESULTS TO FILE
-# --------------------
-# TO DO.

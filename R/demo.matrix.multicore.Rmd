@@ -27,17 +27,17 @@ knitr::opts_chunk$set(
 2. Download source file
    [setblas.c](https://github.com/pcarbo/pcarbo/blob/master/R/setblas.c)
    and build the shared object file in the same directory as your
-   working directory in R: `R CMD SHLIB setblas.c`
+   R working directory: `R CMD SHLIB setblas.c`
 
-3. If you are on a compute cluster...
-
-```
-sinteractive --partition=broadwl --cpus-per-task=10 --mem=8G
-```
+3. If you logged in to a compute cluster, request a compute node and
+   request resources for your computing. For example, on the RCC
+   compute cluster, I requested a compute node with 8 GB of memory and
+   10 cores (CPUs):
+   `sinteractive --partition=broadwl --cpus-per-task=10 --mem=8G`
 
 4. Set the number of threads used by the BLAS library installed with
    R. For example, if you have installed R with OpenBLAS, you can set
-   the number of threads to 2 with this bash command:
+   the number of threads to 2 with this command in the bash shell:
    `export OPENBLAS_NUM_THREADS=2`.
 
 5. Start up R or RStudio.
@@ -61,11 +61,11 @@ set.seed(1)
 ## Function definitions
 
 Here we define a few functions that will be useful below in our
-experiments. You don't have to understand the code; just make sure
+experiments. You don't have to understand the code---just make sure
 that these functions are defined in your environment to run the
 examples below.
 
-This function distribute the elements of `x` evenly (or as evenly as
+This function distributes the elements of `x` evenly (or as evenly as
 possible) into `k` list elements.
 
 ```{r distribute}
@@ -106,9 +106,9 @@ normalizelogweights <- function (logw) {
 
 This function computes the marginal log-likelihood the regression
 model of Y given X assuming that the prior variance of the regression
-coefficients is sa. Here `K` is the "kinship" matrix `K =
-tcrossprod(X)/p`. Note that `H` is the covariance matrix of Y divided
-by residual variance.
+coefficients is sa. Here K is the "kinship" matrix, `K =
+tcrossprod(X)/p`. Also, H is the covariance matrix of Y divided by
+residual variance.
 
 ```{r computelogweight}
 compute.log.weight <- function (K, y, sa, use.backsolve = TRUE) {
@@ -130,28 +130,23 @@ This function computes the marginal log-likelihood for multiple
 settings of the prior variance parameter.
 
 ```{r computelogweights}
-compute.log.weights <- function (K, y, sa, use.backsolve = TRUE) {
-  n    <- length(sa)
-  logw <- rep(0,n)
-  for (i in 1:n)
-    logw[i] <- compute.log.weight(K,y,sa[i],use.backsolve)
-  return(logw)
-}
+compute.log.weights <- function (K, y, sa, use.backsolve = TRUE)
+  sapply(as.list(sa),function (x) compute.log.weight(K,y,x,use.backsolve))
 ```
 
-This is a multicore variant of the above function  implemented using
-the "mclapply" function.
+This is a multicore variant of the above function implemented using
+the "mclapply" function. Input argument `nc` specifies the number of
+cores (CPUs) to use for the computation. Note that the mclapply relies
+on forking and therefore will not work on a computer running Windows.
 
 ```{r computelogweights-mulicore}
-compute.log.weights.multicore <- function (K, y, sa, nc = 2,
-                                           use.backsolve = TRUE) {
-  n       <- length(sa)
-  samples <- distribute(1:n,nc)
-  logw    <- mclapply(samples,
-               function (i) compute.log.weights(K,y,sa[i],use.backsolve),
-               mc.cores = nc)
-  logw    <- do.call(c,logw)
-  logw[unlist(samples)] <- logw
+compute.log.weights.multicore <-
+  function (K, y, sa, nc = 2, use.backsolve = TRUE) {
+  samples <- distribute(1:length(sa),nc)
+  logw <- mclapply(samples,
+          function (i) compute.log.weights(K,y,sa[i],use.backsolve),
+          mc.cores = nc)
+  logw[unlist(samples)] <- do.call(c,logw)
   return(logw)
 }
 ```
@@ -188,7 +183,7 @@ X <- X - rep.row(colMeans(X),n)
 y <- y - mean(y)
 ```
 
-Compute the kinship matrix.
+Compute the kinship matrix. This computation may take a minute or two.
 
 ```{r compute-kinship}
 K <- tcrossprod(X)/p
@@ -199,10 +194,11 @@ K <- tcrossprod(X)/p
 In this section, we will compute an importance sampling estimate of
 the proportion of variance in the quantitative trait explained by the
 available genotypes (abbreviated as "PVE"). This is a numerically
-intensive operation because it involves factorizing a large matrix
-separately for each Monte Carlo sample. We will explore how increasing
-the number of threads available for the matrix computations (BLAS) and
-for the Monte Carlo computations improves the computation time.
+intensive operation because it involves factorizing a large, symmetric
+matrix separately for each Monte Carlo sample. We will explore how
+increasing the number of threads available for the matrix computations
+(BLAS) and for the Monte Carlo computations improves the computation
+time.
 
 First, draw samples of the PVE estimate from the proposal
 distribution, which is uniform on [0,1]. Here, we compute the
@@ -222,15 +218,46 @@ sx <- sum(apply(X,2,sd)^2)
 sa <- p*h/(1-h)/sx
 ```
 
-Compute the log-importance weights.
+Now we reach the numerically intensive part. First, let's compute the
+importance weights without taking advantage of any multithreaded or
+parallel computing capabilities. Since I am using OpenBLAS, I can set
+the number of matrix operation threads using `set.blas.num.threads`,
+but you may need to set it a different way.
 
 ```{r}
-logw <- compute.log.weights(K,y,sa,use.backsolve = TRUE)
-# r <- system.time(logw <- compute.log.weights.multicore(K,y,sa,nc = nc))
+set.blas.num.threads(1)
+system.time(logw <- compute.log.weights(K,y,sa,use.backsolve = TRUE))
 ```
+
+The "elapsed" time tells us the amount of time it took to compute the
+importance weights.
+
+Also, here I am using a "trick" to improve the speed of one of the
+matrix operations, and you can set `use.backsolve = FALSE` to see how
+much of an improvement this trick gives you.
+
+On my compute node, I have 10 CPUs available, so let's speed up the
+matrix computations by using all 10 CPUs:
+
+```{r}
+set.blas.num.threads(10)
+system.time(logw <- compute.log.weights(K,y,sa,use.backsolve = TRUE))
+```
+
+We've obtained a substantial improvement in computation time, but it
+is far from the "ideal" of 10x improvement. That is because there is a
+significant amount of overhead in parallelizing these computations.
+
+Experiment with different numbers of threads to compare performance
+gains.
+
+Once we have done the hard work of computing the importance weights,
+we can quickly compute a Monte Carlo estimate of the posterior mean
+PVE:
 
 ```{r compute-posterior-stats}
 w <- normalizelogweights(logw)
+sum(w * h)
 ```
 
 ## Session information

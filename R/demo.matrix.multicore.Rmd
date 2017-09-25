@@ -1,10 +1,15 @@
 ---
 title: "Multicore matrix computation demo"
 author: "Peter Carbonetto"
-output: html_document
+date: September 25, 2017
+output:
+  html_document:
+    theme: readable
+    include:
+      before_body: include/header.html
 ---
 
-Give overview of the analysis here. Notes: Does not work in Windows.
+Give overview of the analysis here. Does not work in Windows.
 
 ```{r set-chunk-options, include=FALSE}
 knitr::opts_chunk$set(
@@ -32,8 +37,8 @@ sinteractive --partition=broadwl --cpus-per-task=10 --mem=8G
 
 4. Set the number of threads used by the BLAS library installed with
    R. For example, if you have installed R with OpenBLAS, you can set
-   the number of threads to 2 with this bash command: `export
-   OPENBLAS_NUM_THREADS=20`.
+   the number of threads to 2 with this bash command:
+   `export OPENBLAS_NUM_THREADS=2`.
 
 5. Start up R or RStudio.
 

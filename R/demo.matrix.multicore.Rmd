@@ -1,0 +1,237 @@
+---
+title: "Multicore matrix computation demo"
+author: "Peter Carbonetto"
+output: html_document
+---
+
+Give overview of the analysis here. Notes: Does not work in Windows.
+
+```{r set-chunk-options, include=FALSE}
+knitr::opts_chunk$set(
+  comment = "#",
+  collapse = TRUE,
+  fig.align = "center",
+  tidy = FALSE,
+  fig.path = paste0("figure/",knitr::current_input(),"/"))
+```
+
+## Initial setup
+
+1. Install the [cfwlab package](https://github.com/pcarbo/cfwlab).
+
+2. Download source file
+   [setblas.c](https://github.com/pcarbo/pcarbo/blob/master/R/setblas.c)
+   and build the shared object file in the same directory as your
+   working directory in R: `R CMD SHLIB setblas.c`
+
+3. If you are on a compute cluster...
+
+```
+sinteractive --partition=broadwl --cpus-per-task=10 --mem=8G
+```
+
+4. Set the number of threads used by the BLAS library installed with
+   R. For example, if you have installed R with OpenBLAS, you can set
+   the number of threads to 2 with this bash command: `export
+   OPENBLAS_NUM_THREADS=20`.
+
+5. Start up R or RStudio.
+
+## Setting up your R environment
+
+Load the parallel package, cfwlab package, and the "setblas" function.
+
+```{r load-pkgs}
+library(parallel)
+library(cfwlab)
+dyn.load("setblas.so")
+```
+
+Initialize the random number generator.
+
+```{r set-seed}
+set.seed(1)
+```
+
+## Function definitions
+
+Here we define a few functions that will be useful below in our
+experiments. You don't have to understand the code; just make sure
+that these functions are defined in your environment to run the
+examples below.
+
+This function distribute the elements of `x` evenly (or as evenly as
+possible) into `k` list elements.
+
+```{r distribute}
+distribute <- function (x, k)
+  split(x,rep(1:k,length.out = length(x)))
+```
+
+This function replicates vector `x` to create an `n x m` matrix,
+where `m = length(x)`.
+
+```{r reprow}
+rep.row <- function (x, n)
+  matrix(x,n,length(x),byrow = TRUE)
+```
+
+This function sets the number of threads used by OpenBLAS.
+
+```{r}
+set.blas.num.threads <- function (n) {
+  .Call("set_blas_Call",n = as.integer(n))
+  return(n)
+}
+```
+
+This function takes as input an array of unnormalized log-importance
+weights and returns normalized importance weights such that the sum of
+the normalized importance weights is equal to 1. We guard against
+underflow or overflow by adjusting the log-importance weights so that
+the largest importance weight is 1.
+
+```{r normalizelogweights}
+normalizelogweights <- function (logw) {
+  c <- max(logw)
+  w <- exp(logw - c)
+  return(w / sum(w))
+}
+```
+
+This function computes the marginal log-likelihood the regression
+model of Y given X assuming that the prior variance of the regression
+coefficients is sa. Here `K` is the "kinship" matrix `K =
+tcrossprod(X)/p`. Note that `H` is the covariance matrix of Y divided
+by residual variance.
+
+```{r computelogweight}
+compute.log.weight <- function (K, y, sa, use.backsolve = TRUE) {
+  H <- diag(n) + sa*K
+  R <- t(tryCatch(chol(H),error = function(e) FALSE))
+  if (is.matrix(R)) {
+    if (use.backsolve)
+      x <- backsolve(R,forwardsolve(t(R),y))
+    else
+      x <- solve(H,y)
+    logw <- (-determinant(sum(y*x)*H,logarithm = TRUE)$modulus/2)
+  } else
+    logw <- 0
+  return(logw)
+}
+```
+
+This function computes the marginal log-likelihood for multiple
+settings of the prior variance parameter.
+
+```{r computelogweights}
+compute.log.weights <- function (K, y, sa, use.backsolve = TRUE) {
+  n    <- length(sa)
+  logw <- rep(0,n)
+  for (i in 1:n)
+    logw[i] <- compute.log.weight(K,y,sa[i],use.backsolve)
+  return(logw)
+}
+```
+
+This is a multicore variant of the above function  implemented using
+the "mclapply" function.
+
+```{r computelogweights-mulicore}
+compute.log.weights.multicore <- function (K, y, sa, nc = 2,
+                                           use.backsolve = TRUE) {
+  n       <- length(sa)
+  samples <- distribute(1:n,nc)
+  logw    <- mclapply(samples,
+               function (i) compute.log.weights(K,y,sa[i],use.backsolve),
+               mc.cores = nc)
+  logw    <- do.call(c,logw)
+  logw[unlist(samples)] <- logw
+  return(logw)
+}
+```
+
+## Load data
+
+Load the phenotype and genotype data.
+
+```{r load-data}
+data(cfw.pheno)
+data(cfw.geno)
+X <- cfw.geno
+y <- cfw.pheno[[trait]]
+rm(cfw.geno,cfw.pheno)
+```
+
+Remove the rows containing missing data.
+
+```{r filter-missing}
+rows <- which(!is.na(y))
+y    <- y[rows]
+X    <- X[rows,]
+```
+
+## Preprocess data
+
+Center y and the columns of X.
+
+```{r center-data}
+n <- nrow(X)
+p <- ncol(X)
+X <- X - rep.row(colMeans(X),n)
+y <- y - mean(y)
+```
+
+Compute the kinship matrix.
+
+```{r compute-kinship}
+K <- tcrossprod(X)/p
+```
+
+## Estimate proportion of variance explained
+
+In this section, we will compute an importance sampling estimate of
+the proportion of variance in the quantitative trait explained by the
+available genotypes (abbreviated as "PVE"). This is a numerically
+intensive operation because it involves factorizing a large matrix
+separately for each Monte Carlo sample. We will explore how increasing
+the number of threads available for the matrix computations (BLAS) and
+for the Monte Carlo computations improves the computation time.
+
+First, draw samples of the PVE estimate from the proposal
+distribution, which is uniform on [0,1]. Here, we compute the
+importance sampling estimate using 1,000 samples, but you can choose a
+larger or smaller number of samples.
+
+```{r draw-samples}
+ns <- 1000
+h  <- runif(ns)
+```
+
+For each PVE setting, get the prior variance of the regression
+coefficients assuming a fully "polygenic" model.
+
+```{r get-prior-settings}
+sx <- sum(apply(X,2,sd)^2)
+sa <- p*h/(1-h)/sx
+```
+
+Compute the log-importance weights.
+
+```{r}
+# r <- system.time(logw <- compute.log.weights(K,y,sa,use.backsolve = TRUE))
+# r <- system.time(logw <- compute.log.weights.multicore(K,y,sa,nc = nc))
+```
+
+```{r compute-posterior-stats}
+w <- normalizelogweights(logw)
+```
+
+## Session information
+
+This is the operating system, version of R and the packages that were
+used to generate these results.
+
+```{r session-info}
+sessionInfo()
+```

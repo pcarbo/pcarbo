@@ -325,5 +325,5 @@ in R:
 
 ```{r, eval=FALSE}
 library(rmarkdown)
-render("demo.matrix.multicore.Rmd")
+render("demo.matrix.multicore.Rmd",envir = new.env())
 ```

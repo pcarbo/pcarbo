@@ -130,17 +130,15 @@ div.section {
 </div>
 
 
-<p>Give overview of the analysis here. Does not work in Windows.</p>
+<p>The main aim of this R Markdown workbook is to demonstrate different types of multithreading analyzing a large data set in R: multithreaded matrix computations and multithreaded R code using the <code>parallel</code> package. These computations (multithreaded or otherwise) are used to generate estimates about the genetic basis of complex traits—specifically, the proportion of variance in these traits that can be explained by genetic factors.</p>
+<p><em>Important:</em> Some of the R code below will not work in Windows.</p>
 <div id="initial-setup" class="section level2">
 <h2>Initial setup</h2>
 <ol style="list-style-type: decimal">
 <li><p>Install the <a href="https://github.com/pcarbo/cfwlab">cfwlab package</a>.</p></li>
-<li><p>Download source file <a href="https://github.com/pcarbo/pcarbo/blob/master/R/setblas.c">setblas.c</a> and build the shared object file in the same directory as your working directory in R: <code>R CMD SHLIB setblas.c</code></p></li>
-<li><p>If you are on a compute cluster…</p></li>
-</ol>
-<pre><code>sinteractive --partition=broadwl --cpus-per-task=10 --mem=8G</code></pre>
-<ol start="4" style="list-style-type: decimal">
-<li><p>Set the number of threads used by the BLAS library installed with R. For example, if you have installed R with OpenBLAS, you can set the number of threads to 2 with this bash command: <code>export OPENBLAS_NUM_THREADS=2</code>.</p></li>
+<li><p>Download source file <a href="https://github.com/pcarbo/pcarbo/blob/master/R/setblas.c">setblas.c</a> and build the shared object file in the same directory as your R working directory: <code>R CMD SHLIB setblas.c</code></p></li>
+<li><p>If you logged in to a compute cluster, request a compute node and request resources for your computing. For example, on the RCC compute cluster, I requested a Broadwell compute node with 40 GB of memory and 8 cores (CPUs): <code>sinteractive --partition=broadwl    --cpus-per-task=8 --mem=40G</code></p></li>
+<li><p>Set the number of threads used by the BLAS library installed with R. For example, if you have installed R with OpenBLAS, you can set the number of threads to 2 with this command in the bash shell: <code>export OPENBLAS_NUM_THREADS=2</code>.</p></li>
 <li><p>Start up R or RStudio.</p></li>
 </ol>
 </div>
@@ -155,8 +153,8 @@ dyn.load(&quot;setblas.so&quot;)</code></pre>
 </div>
 <div id="function-definitions" class="section level2">
 <h2>Function definitions</h2>
-<p>Here we define a few functions that will be useful below in our experiments. You don’t have to understand the code; just make sure that these functions are defined in your environment to run the examples below.</p>
-<p>This function distribute the elements of <code>x</code> evenly (or as evenly as possible) into <code>k</code> list elements.</p>
+<p>Here we define a few functions that will be useful below in our experiments. You don’t have to understand the code—just make sure that these functions are defined in your environment to run the examples below.</p>
+<p>This function distributes the elements of <code>x</code> evenly (or as evenly as possible) into <code>k</code> list elements.</p>
 <pre class="r"><code>distribute &lt;- function (x, k)
   split(x,rep(1:k,length.out = length(x)))</code></pre>
 <p>This function replicates vector <code>x</code> to create an <code>n x m</code> matrix, where <code>m = length(x)</code>.</p>
@@ -173,10 +171,10 @@ dyn.load(&quot;setblas.so&quot;)</code></pre>
   w &lt;- exp(logw - c)
   return(w / sum(w))
 }</code></pre>
-<p>This function computes the marginal log-likelihood the regression model of Y given X assuming that the prior variance of the regression coefficients is sa. Here <code>K</code> is the “kinship” matrix <code>K = tcrossprod(X)/p</code>. Note that <code>H</code> is the covariance matrix of Y divided by residual variance.</p>
+<p>This function computes the marginal log-likelihood the regression model of Y given X assuming that the prior variance of the regression coefficients is sa. Here K is the “kinship” matrix, <code>K = tcrossprod(X)/p</code>. Also, H is the covariance matrix of Y divided by residual variance.</p>
 <pre class="r"><code>compute.log.weight &lt;- function (K, y, sa, use.backsolve = TRUE) {
   H &lt;- diag(n) + sa*K
-  R &lt;- t(tryCatch(chol(H),error = function(e) FALSE))
+  R &lt;- tryCatch(chol(H),error = function(e) FALSE)
   if (is.matrix(R)) {
     if (use.backsolve)
       x &lt;- backsolve(R,forwardsolve(t(R),y))
@@ -188,22 +186,16 @@ dyn.load(&quot;setblas.so&quot;)</code></pre>
   return(logw)
 }</code></pre>
 <p>This function computes the marginal log-likelihood for multiple settings of the prior variance parameter.</p>
-<pre class="r"><code>compute.log.weights &lt;- function (K, y, sa, use.backsolve = TRUE) {
-  n    &lt;- length(sa)
-  logw &lt;- rep(0,n)
-  for (i in 1:n)
-    logw[i] &lt;- compute.log.weight(K,y,sa[i],use.backsolve)
-  return(logw)
-}</code></pre>
-<p>This is a multicore variant of the above function implemented using the “mclapply” function.</p>
+<pre class="r"><code>compute.log.weights &lt;- function (K, y, sa, use.backsolve = TRUE)
+  sapply(as.list(sa),function (x) compute.log.weight(K,y,x,use.backsolve))</code></pre>
+<p>This is a multicore variant of the above function implemented using the “mclapply” function. Input argument <code>nc</code> specifies the number of cores (CPUs) to use for the computation. Note that the mclapply relies on forking and therefore will not work on a computer running Windows.</p>
 <pre class="r"><code>compute.log.weights.multicore &lt;- function (K, y, sa, nc = 2,
                                            use.backsolve = TRUE) {
-  n       &lt;- length(sa)
-  samples &lt;- distribute(1:n,nc)
+  samples &lt;- distribute(1:length(sa),nc)
   logw    &lt;- mclapply(samples,
                function (i) compute.log.weights(K,y,sa[i],use.backsolve),
                mc.cores = nc)
-  logw    &lt;- do.call(c,logw)
+  logw &lt;- do.call(c,logw)
   logw[unlist(samples)] &lt;- logw
   return(logw)
 }</code></pre>
@@ -214,8 +206,7 @@ dyn.load(&quot;setblas.so&quot;)</code></pre>
 <pre class="r"><code>data(cfw.pheno)
 data(cfw.geno)
 X &lt;- cfw.geno
-y &lt;- cfw.pheno[[&quot;soleus&quot;]]
-rm(cfw.geno,cfw.pheno)</code></pre>
+y &lt;- cfw.pheno[[&quot;soleus&quot;]]</code></pre>
 <p>Remove the rows containing missing data.</p>
 <pre class="r"><code>rows &lt;- which(!is.na(y))
 y    &lt;- y[rows]
@@ -228,22 +219,62 @@ X    &lt;- X[rows,]</code></pre>
 p &lt;- ncol(X)
 X &lt;- X - rep.row(colMeans(X),n)
 y &lt;- y - mean(y)</code></pre>
-<p>Compute the kinship matrix.</p>
+<p>Compute the kinship matrix. This computation may take a minute or two.</p>
 <pre class="r"><code>K &lt;- tcrossprod(X)/p</code></pre>
 </div>
-<div id="estimate-proportion-of-variance-explained" class="section level2">
-<h2>Estimate proportion of variance explained</h2>
-<p>In this section, we will compute an importance sampling estimate of the proportion of variance in the quantitative trait explained by the available genotypes (abbreviated as “PVE”). This is a numerically intensive operation because it involves factorizing a large matrix separately for each Monte Carlo sample. We will explore how increasing the number of threads available for the matrix computations (BLAS) and for the Monte Carlo computations improves the computation time.</p>
+<div id="estimate-pve" class="section level2">
+<h2>Estimate PVE</h2>
+<p>In this section, we will compute an importance sampling estimate of the proportion of variance in the quantitative trait explained by the available genotypes (abbreviated as “PVE”). This is a numerically intensive operation because it involves factorizing a large, symmetric matrix separately for each Monte Carlo sample. We will explore how increasing the number of threads available for the matrix computations (BLAS) and for the Monte Carlo computations improves the computation time.</p>
 <p>First, draw samples of the PVE estimate from the proposal distribution, which is uniform on [0,1]. Here, we compute the importance sampling estimate using 1,000 samples, but you can choose a larger or smaller number of samples.</p>
 <pre class="r"><code>ns &lt;- 1000
 h  &lt;- runif(ns)</code></pre>
 <p>For each PVE setting, get the prior variance of the regression coefficients assuming a fully “polygenic” model.</p>
 <pre class="r"><code>sx &lt;- sum(apply(X,2,sd)^2)
 sa &lt;- p*h/(1-h)/sx</code></pre>
-<p>Compute the log-importance weights.</p>
-<pre class="r"><code>logw &lt;- compute.log.weights(K,y,sa,use.backsolve = TRUE)
-# r &lt;- system.time(logw &lt;- compute.log.weights.multicore(K,y,sa,nc = nc))</code></pre>
-<pre class="r"><code>w &lt;- normalizelogweights(logw)</code></pre>
+<div id="without-parallel-computing" class="section level3">
+<h3>Without parallel computing</h3>
+<p>Now we reach the numerically intensive part. First, let’s compute the importance weights without taking advantage of any multithreaded or parallel computing capabilities. Since I am using OpenBLAS, I can set the number of matrix operation threads using <code>set.blas.num.threads</code>, but you may need to set it a different way.</p>
+<pre class="r"><code>set.blas.num.threads(1)
+# [1] 1
+system.time(logw &lt;- compute.log.weights(K,y,sa,use.backsolve = TRUE))
+#    user  system elapsed 
+#  60.170   3.531  63.684</code></pre>
+<p>The “elapsed” time tells us the amount of time it took to compute the importance weights.</p>
+<p>Also, here I am using a “trick” to improve the speed of one of the matrix operations, and you can set <code>use.backsolve = FALSE</code> to see how much of an improvement this trick gives you.</p>
+</div>
+<div id="multithreaded-matrix-operations" class="section level3">
+<h3>Multithreaded matrix operations</h3>
+<p>On my compute node, I have 8 CPUs available, so let’s speed up the matrix computations by using 8 CPUs:</p>
+<pre class="r"><code>set.blas.num.threads(8)
+# [1] 8
+system.time(logw &lt;- compute.log.weights(K,y,sa))
+#    user  system elapsed 
+#  101.68  118.20   27.55</code></pre>
+<p>We’ve obtained a substantial improvement in computation time without any change to our code. But it is far from the “ideal” of 8x improvement. That is because there is a significant amount of overhead in parallelizing these computations.</p>
+<p><strong>Exercise:</strong> Experiment with different numbers of threads to compare performance gains.</p>
+</div>
+<div id="multithreading-using-mclapply" class="section level3">
+<h3>Multithreading using “mclapply”</h3>
+<p>Next, let’s try a different parallelization scheme, in which we compute batches of importance weights in parallel. The last input argument specifies the number of threads; in my case, 8 seems ideal because I have 8 CPUs available to use:</p>
+<pre class="r"><code>set.blas.num.threads(1)
+# [1] 1
+system.time(logw &lt;- compute.log.weights.multicore(K,y,sa,nc = 8))
+#    user  system elapsed 
+#   8.812   3.313  12.129</code></pre>
+<p>Computing the importance weights in parallel—with no multithreading for the matrix (BLAS) operations—seems to be a more efficient use of the computing resources.</p>
+<p><em>Note of caution:</em> This type of multithreading will increase the memory requirements for our computation because we have to store the intermediate products of our matrix operations (the Cholesky factors) simultaneously for all the calls to <code>compute.log.weight</code> being executed in parallel. So we need to monitor memory usage (e.g., using <code>htop</code>) and make sure that we are not overloading the memory. If we overload the memory, there is a risk that the computation will stall, or the program will crash.</p>
+<p>We can of course combine the two types of multithreading in order to balance compute time and memory usage, e.g.:</p>
+<pre class="r"><code>set.blas.num.threads(2)
+# [1] 2
+system.time(logw &lt;- compute.log.weights.multicore(K,y,sa,nc = 4))
+#    user  system elapsed 
+#  119.10   59.86   16.17</code></pre>
+<p><strong>Exercise:</strong> Experiment with different allocations of the threads to the matrix computations and the <code>mclapply</code> call.</p>
+<p>Finally, once we have done the hard work of computing the importance weights, we can quickly compute a Monte Carlo estimate of the posterior mean PVE:</p>
+<pre class="r"><code>w &lt;- normalizelogweights(logw)
+sum(w * h)
+# [1] 0.2595</code></pre>
+</div>
 </div>
 <div id="session-information" class="section level2">
 <h2>Session information</h2>
@@ -271,6 +302,12 @@ sa &lt;- p*h/(1-h)/sx</code></pre>
 #  [5] tools_3.4.1     htmltools_0.3.6 yaml_2.1.14     Rcpp_0.12.12   
 #  [9] stringi_1.1.5   knitr_1.16      stringr_1.2.0   digest_0.6.12  
 # [13] evaluate_0.10.1</code></pre>
+</div>
+<div id="other-notes" class="section level2">
+<h2>Other notes</h2>
+<p>To generate a webpage from this document, I run the following commands in R:</p>
+<pre class="r"><code>library(rmarkdown)
+render(&quot;demo.matrix.multicore.Rmd&quot;,envir = new.env())</code></pre>
 </div>
 
 

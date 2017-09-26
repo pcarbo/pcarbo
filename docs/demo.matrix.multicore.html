@@ -238,7 +238,7 @@ sa &lt;- p*h/(1-h)/sx</code></pre>
 # [1] 1
 system.time(logw &lt;- compute.log.weights(K,y,sa,use.backsolve = TRUE))
 #    user  system elapsed 
-#  60.170   3.531  63.684</code></pre>
+#  60.692   2.236  62.912</code></pre>
 <p>The “elapsed” time tells us the amount of time it took to compute the importance weights.</p>
 <p>Also, here I am using a “trick” to improve the speed of one of the matrix operations, and you can set <code>use.backsolve = FALSE</code> to see how much of an improvement this trick gives you.</p>
 </div>
@@ -249,7 +249,7 @@ system.time(logw &lt;- compute.log.weights(K,y,sa,use.backsolve = TRUE))
 # [1] 8
 system.time(logw &lt;- compute.log.weights(K,y,sa))
 #    user  system elapsed 
-#  101.68  118.20   27.55</code></pre>
+#   102.3   123.2    28.3</code></pre>
 <p>We’ve obtained a substantial improvement in computation time without any change to our code. But it is far from the “ideal” of 8x improvement. That is because there is a significant amount of overhead in parallelizing these computations.</p>
 <p><strong>Exercise:</strong> Experiment with different numbers of threads to compare performance gains.</p>
 </div>
@@ -260,7 +260,7 @@ system.time(logw &lt;- compute.log.weights(K,y,sa))
 # [1] 1
 system.time(logw &lt;- compute.log.weights.multicore(K,y,sa,nc = 8))
 #    user  system elapsed 
-#   8.812   3.313  12.129</code></pre>
+#   84.61   34.31   11.44</code></pre>
 <p>Computing the importance weights in parallel—with no multithreading for the matrix (BLAS) operations—seems to be a more efficient use of the computing resources.</p>
 <p><em>Note of caution:</em> This type of multithreading will increase the memory requirements for our computation because we have to store the intermediate products of our matrix operations (the Cholesky factors) simultaneously for all the calls to <code>compute.log.weight</code> being executed in parallel. So we need to monitor memory usage (e.g., using <code>htop</code>) and make sure that we are not overloading the memory. If we overload the memory, there is a risk that the computation will stall, or the program will crash.</p>
 <p>We can of course combine the two types of multithreading in order to balance compute time and memory usage, e.g.:</p>
@@ -268,7 +268,7 @@ system.time(logw &lt;- compute.log.weights.multicore(K,y,sa,nc = 8))
 # [1] 2
 system.time(logw &lt;- compute.log.weights.multicore(K,y,sa,nc = 4))
 #    user  system elapsed 
-#  119.10   59.86   16.17</code></pre>
+#   63.39   23.68   15.39</code></pre>
 <p><strong>Exercise:</strong> Experiment with different allocations of the threads to the matrix computations and the <code>mclapply</code> call.</p>
 <p>Finally, once we have done the hard work of computing the importance weights, we can quickly compute a Monte Carlo estimate of the posterior mean PVE:</p>
 <pre class="r"><code>w &lt;- normalizelogweights(logw)
@@ -295,19 +295,18 @@ sum(w * h)
 # [8] base     
 # 
 # other attached packages:
-# [1] cfwlab_1.1-0  rmarkdown_1.6
+# [1] cfwlab_1.1-0  knitr_1.16    rmarkdown_1.6
 # 
 # loaded via a namespace (and not attached):
 #  [1] compiler_3.4.1  backports_1.1.0 magrittr_1.5    rprojroot_1.2  
 #  [5] tools_3.4.1     htmltools_0.3.6 yaml_2.1.14     Rcpp_0.12.12   
-#  [9] stringi_1.1.5   knitr_1.16      stringr_1.2.0   digest_0.6.12  
-# [13] evaluate_0.10.1</code></pre>
+#  [9] stringi_1.1.5   stringr_1.2.0   digest_0.6.12   evaluate_0.10.1</code></pre>
 </div>
 <div id="other-notes" class="section level2">
 <h2>Other notes</h2>
 <p>To generate a webpage from this document, I run the following commands in R:</p>
 <pre class="r"><code>library(rmarkdown)
-render(&quot;demo.matrix.multicore.Rmd&quot;,envir = new.env())</code></pre>
+render(&quot;demo.matrix.multicore.Rmd&quot;)</code></pre>
 </div>
 
 

@@ -33,7 +33,7 @@ knitr::opts_chunk$set(
    request resources for your computing. For example, on the RCC
    compute cluster, I requested a compute node with 8 GB of memory and
    10 cores (CPUs):
-   `sinteractive --partition=broadwl --cpus-per-task=10 --mem=8G`
+   `sinteractive --partition=broadwl --cpus-per-task=10 --mem=20G`
 
 4. Set the number of threads used by the BLAS library installed with
    R. For example, if you have installed R with OpenBLAS, you can set
@@ -113,10 +113,10 @@ residual variance.
 ```{r computelogweight}
 compute.log.weight <- function (K, y, sa, use.backsolve = TRUE) {
   H <- diag(n) + sa*K
-  R <- t(tryCatch(chol(H),error = function(e) FALSE))
+  L <- t(tryCatch(chol(H),error = function(e) FALSE))
   if (is.matrix(R)) {
     if (use.backsolve)
-      x <- backsolve(R,forwardsolve(t(R),y))
+      x <- backsolve(t(L),forwardsolve(L,y))
     else
       x <- solve(H,y)
     logw <- (-determinant(sum(y*x)*H,logarithm = TRUE)$modulus/2)
@@ -140,13 +140,15 @@ cores (CPUs) to use for the computation. Note that the mclapply relies
 on forking and therefore will not work on a computer running Windows.
 
 ```{r computelogweights-mulicore}
-compute.log.weights.multicore <-
-  function (K, y, sa, nc = 2, use.backsolve = TRUE) {
+compute.log.weights.multicore <- function (K, y, sa, nc = 2,
+                                           use.backsolve = TRUE) {
+  # n     <- length(sa)
   samples <- distribute(1:length(sa),nc)
-  logw <- mclapply(samples,
-          function (i) compute.log.weights(K,y,sa[i],use.backsolve),
-          mc.cores = nc)
-  logw[unlist(samples)] <- do.call(c,logw)
+  logw    <- mclapply(samples,
+               function (i) compute.log.weights(K,y,sa[i],use.backsolve),
+               mc.cores = nc)
+  logw <- do.call(c,logw)
+  logw[unlist(samples)] <- logw
   return(logw)
 }
 ```
@@ -189,7 +191,7 @@ Compute the kinship matrix. This computation may take a minute or two.
 K <- tcrossprod(X)/p
 ```
 
-## Estimate proportion of variance explained
+## Estimate PVE
 
 In this section, we will compute an importance sampling estimate of
 the proportion of variance in the quantitative trait explained by the
@@ -224,9 +226,9 @@ parallel computing capabilities. Since I am using OpenBLAS, I can set
 the number of matrix operation threads using `set.blas.num.threads`,
 but you may need to set it a different way.
 
-```{r}
-set.blas.num.threads(1)
-system.time(logw <- compute.log.weights(K,y,sa,use.backsolve = TRUE))
+```{r compute-importance-weights-1}
+# set.blas.num.threads(1)
+# system.time(logw <- compute.log.weights(K,y,sa,use.backsolve = TRUE))
 ```
 
 The "elapsed" time tells us the amount of time it took to compute the
@@ -239,25 +241,46 @@ much of an improvement this trick gives you.
 On my compute node, I have 10 CPUs available, so let's speed up the
 matrix computations by using all 10 CPUs:
 
-```{r}
-set.blas.num.threads(10)
-system.time(logw <- compute.log.weights(K,y,sa,use.backsolve = TRUE))
+```{r compute-importance-weights-2}
+# set.blas.num.threads(10)
+# system.time(logw <- compute.log.weights(K,y,sa))
 ```
 
 We've obtained a substantial improvement in computation time, but it
 is far from the "ideal" of 10x improvement. That is because there is a
 significant amount of overhead in parallelizing these computations.
 
-Experiment with different numbers of threads to compare performance
-gains.
+**Exercise:** Experiment with different numbers of threads to compare
+performance gains.
+
+Next, let's try a different parallelization scheme, in which we
+compute batches of importance weights in parallel. The last input
+argument specifies the number of threads; in my case, 10 seems ideal
+because I have 10 CPUs available to use:
+
+```{r compute-importance-weights-3}
+# set.blas.num.threads(1)
+# system.time(logw <- compute.log.weights.multicore(K,y,sa,nc = 10))
+```
+
+Computing the importance weights in parallel---with no multithreading
+for the matrix (BLAS) operations---seems to be a more efficient use of
+the computing resources.
+
+We can of course combine the two types of multithreading, e.g.:
+
+```{r compute-importance-weights-4}
+# set.blas.num.threads(2)
+# system.time(logw <- compute.log.weights.multicore(K,y,sa,nc = 5))
+```
 
 Once we have done the hard work of computing the importance weights,
 we can quickly compute a Monte Carlo estimate of the posterior mean
 PVE:
 
 ```{r compute-posterior-stats}
-w <- normalizelogweights(logw)
-sum(w * h)
+# w <- normalizelogweights(logw)
+# sum(w * h)
 ```
 
 ## Session information

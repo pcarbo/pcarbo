@@ -9,6 +9,7 @@
 # * Use Terminal, not iTerm.
 # * Change font so that commas are periods are distinguishable.
 # * Bring R Graphics book.
+# * Write outline on white/blackboard, and Keep referring to it.
 #
 # OUTLINE
 # -------
@@ -66,8 +67,8 @@ print(p)
 #   2. Remove grid lines.
 #   3. Add title.
 #   4. Add units (are these the right units?
-#   5. Add more numbers to X axis.
-#   6. Add more numbers to Y axis.
+#   5. Add more numbers to x-axis.
+#   6. Add more numbers to y-axis.
 #
 p <- p + theme_minimal()
 p <- p + theme(panel.grid.minor = element_blank(),
@@ -129,7 +130,7 @@ p3 <- p3 + geom_line()
 print(p3)
 
 # Fix the colors, change width of bars, remove the axis lines, add
-# Levels 1–10 on the X axis, and add a title to the plot.
+# Levels 1–10 on the x-axis, and add a title to the plot.
 #
 # Note: Try first without "fill".
 p4 <- ggplot(data = ceramics,aes(x = Level,y = Corrugated.ware)) +
@@ -137,5 +138,39 @@ p4 <- ggplot(data = ceramics,aes(x = Level,y = Corrugated.ware)) +
         geom_line(color = "darkorange",size = 1)
 p4 <- p4 + theme(axis.line = element_blank())
 p4 <- p4 + scale_x_continuous(breaks = seq(1,10))
-p4 <- p4 + labs(title = "")
+p4 <- p4 + labs(title = "Change in ceramic ware by level")
 print(p4)
+
+# CREATE BAR CHARTS FOR ALL CERAMIC TYPES
+# ---------------------------------------
+# Create a new data frame containing the same data, but with only 3
+# columns. Notice that the "type" column is a *factor*.
+pdat <- data.frame(Level      = rep(ceramics$Level,times = 5),
+                   delta.ware = do.call(c,ceramics[-1]),
+                   type       = rep(colnames(ceramics)[-1],each = 10))
+head(pdat)
+tail(pdat)
+nrow(pdat)
+summary(pdat)
+summary(pdat$type)
+
+# Create the five bar charts using facets. Here, the scale on the
+# y-axis is different.
+p5 <- ggplot(data = pdat,aes(x = Level,y = delta.ware)) +
+        geom_col() +
+        geom_line() +
+        facet_wrap("type",scales = "free",nrow = 1)
+print(p5)
+
+# Adjust the plotting parameters to make the plots look nicer.
+p5 <- ggplot(data = pdat,aes(x = Level,y = delta.ware)) +
+        geom_col(color = "dodgerblue",fill = "dodgerblue",width = 0.5) +
+        geom_line(color = "darkorange",size = 1) +
+        facet_wrap("type",scales = "free",nrow = 1) +
+        scale_x_continuous(breaks = 1:10) +
+        theme_cowplot(font_size = 11) +
+        theme(axis.line        = element_blank(),
+              axis.ticks.x     = element_blank(),
+              strip.background = element_blank())
+print(p5)
+

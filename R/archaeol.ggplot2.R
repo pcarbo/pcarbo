@@ -11,6 +11,7 @@
 #
 # TO DO:
 # * Demonstrate the cowplot package.
+# * Add outline of lesson, with aims.
 #
 
 # SETUP
@@ -29,7 +30,8 @@ library(ggplot2)
 # LOAD POMPEI LOOM DATA
 # ---------------------
 # Use read.csv function to read in data from CSV file. For more info,
-# type help(read.csv).
+# type help(read.csv). Note that I added a comment to the top of the
+# CSV file to help me remember what the data is.
 pompei <- read.csv(file = "pompei_loom.csv",comment = "#")
 
 # Quickly inspect the data set.
@@ -38,6 +40,8 @@ tail(pompei)
 summary(pompei)
 nrow(pompei)
 
+# CREATE POMPEII LOOM SCATTERPLOT
+# -------------------------------
 # Let's create our first plot using ggplot2.
 p <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
        geom_point()
@@ -60,12 +64,35 @@ print(p)
 p <- p + theme_minimal()
 p <- p + theme(panel.grid.minor = element_blank(),
                panel.grid.major = element_blank())
-p <- p + labs(title = "Excavated pottery from Pompeii",
+p <- p + labs(title = "Excavated looms from Pompeii",
               x = "Weight (g)",y = "Height (cm)")
 p <- p + scale_x_continuous(breaks = seq(100,700,100))
 p <- p + scale_y_continuous(breaks = seq(60,130,10))
 print(p)
 
+# Demonstrate a different theme.
+library(cowplot)
+p <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
+       geom_point(shape = 4,color = "darkblue")
+print(p)
+
+# CREATE POMPEII LOOM CONTOUR PLOT
+# --------------------------------
+# Uses kernel density estimation.
+p2 <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
+        geom_density_2d()
+print(p2)
+
+# Make a few adjustments.
+p2 <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
+        geom_density_2d(color = "black",size = 0.5,bins = 8)
+
+# Let's show both plots side-by-side.
+plot_grid(p,p2,labels = c("A","B"))
+
 # Things to mention at this stage:
 #
 #   1. Documentation: ggplot2.tidyverse.org
+#   2. Show how to save the plot as PNG and PDF using ggsave.
+#
+

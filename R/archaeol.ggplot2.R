@@ -1,5 +1,67 @@
+# Creating effective data visualizations in R with ggplot2
+# Archaeological Data Sets (26900/46900) taught by Prof. Alice Yao
+# Dept. of Anthropology
+# University of Chicago
+# November 1, 2017
+#
+# INSTRUCTOR NOTES:
+# * Use Terminal, not iTerm.
+# * Change font so that commas are periods are distinguishable.
+#
+#
 # TO DO:
-#  - Demonstrate the cowplot package.
+# * Demonstrate the cowplot package.
+#
 
-# We will use the ggplot2 package.
+# SETUP
+# -----
+# 1. Start up R or RStudio.
+#
+# 2. Download the data files if you haven't already done so, then
+# rename them to be "pompei_loom.csv" and "sw_ceramics_seriation.csv".
+#
+# 3. Set your working directory so that the data files are in the same
+# directory as your working directory.
+#
+# 4. Load the ggplot2 package.
 library(ggplot2)
+
+# LOAD POMPEI LOOM DATA
+# ---------------------
+# Use read.csv function to read in data from CSV file. For more info,
+# type help(read.csv).
+pompei <- read.csv(file = "pompei_loom.csv",comment = "#")
+
+# Quickly inspect the data set.
+head(pompei)
+tail(pompei)
+summary(pompei)
+nrow(pompei)
+
+# Let's create our first plot using ggplot2.
+p <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
+       geom_point()
+print(p)
+
+# Let's plot x's instead of circles.
+p <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
+       geom_point(shape = 4)
+print(p)
+
+# Let's make some adjustments to the plot:
+#
+#   1. Use minimal theme.
+#   2. Remove grid lines.
+#   3. Add title.
+#   4. Add units (are these the right units?
+#
+p <- p + theme_minimal()
+p <- p + theme(panel.grid.minor = element_blank(),
+               panel.grid.major = element_blank())
+p <- p + labs(title = "Excavated pottery from Pompeii",
+              x = "Weight (g)",y = "Height (cm)")
+print(p)
+
+# Things to mention at this stage:
+#
+#   1. Documentation: ggplot2.tidyverse.org

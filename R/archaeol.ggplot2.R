@@ -45,7 +45,7 @@ print(p)
 
 # Let's plot x's instead of circles.
 p <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
-       geom_point(shape = 4)
+       geom_point(shape = 4,color = "darkblue")
 print(p)
 
 # Let's make some adjustments to the plot:
@@ -54,12 +54,16 @@ print(p)
 #   2. Remove grid lines.
 #   3. Add title.
 #   4. Add units (are these the right units?
+#   5. Add more numbers to X axis.
+#   6. Add more numbers to Y axis.
 #
 p <- p + theme_minimal()
 p <- p + theme(panel.grid.minor = element_blank(),
                panel.grid.major = element_blank())
 p <- p + labs(title = "Excavated pottery from Pompeii",
               x = "Weight (g)",y = "Height (cm)")
+p <- p + scale_x_continuous(breaks = seq(100,700,100))
+p <- p + scale_y_continuous(breaks = seq(60,130,10))
 print(p)
 
 # Things to mention at this stage:

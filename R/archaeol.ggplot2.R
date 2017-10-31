@@ -1,4 +1,4 @@
-# Creating effective data visualizations in R with ggplot2
+# CREATING EFFECTIVE DATA VISUALIZATIONS IN R WITH GGPLOT2
 # Archaeological Data Sets (26900/46900) taught by Prof. Alice Yao
 # Dept. of Anthropology
 # University of Chicago
@@ -9,11 +9,27 @@
 # * Use Terminal, not iTerm.
 # * Change font so that commas are periods are distinguishable.
 # * Bring R Graphics book.
-# * Write outline on white/blackboard, and Keep referring to it.
+# * Write outline on white/blackboard, and keep referring to it.
+#
+# AIMS
+# ----
+# 1. Develop conceptual model of the ggplot2 interface
+#    ("Grammar of Graphics").
+# 2. Adjust ggplot2 parameters to make plots more effective.
+# 3. Illustrate Best Practices for data analysis in R.
 #
 # OUTLINE
 # -------
-# *Add outline here.*
+# This is what we will accomplish today:
+#
+# 1. Set up R programming environment for data analysis.
+# 2. Load a spreadsheet into R.
+# 3. Create a simple scatterplot of loom weight vs. height.
+# 4. Create a contour plot of loom weight vs. height.
+# 5. Adjust plotting parameters for more effective plots.
+# 6. Create a simple bar chart from ceramics data.
+# 7. Create a more sophisticated plot by combining "layers".
+# 8. Create an even more sophisticated multipanel plot using "facets". 
 #
 # SETUP
 # -----
@@ -102,7 +118,8 @@ plot_grid(p,p2,labels = c("A","B"))
 # Things to mention at this stage:
 #
 #   1. Documentation: ggplot2.tidyverse.org
-#   2. Show how to save the plot as PNG and PDF using ggsave.
+#   2. Show how to save the plot as PNG and PDF using ggsave,
+#      or by taking a screen shot.
 #
 
 # LOAD CERAMIC WARE DATA
@@ -115,12 +132,6 @@ ceramics
 # CREATE CORRUGATED WARE BAR CHART
 # --------------------------------
 # Create the bar chart.
-p3 <- ggplot(data = ceramics,aes(x = Level,y = Corrugated.ware)) +
-        geom_col()
-print(p3)
-
-# Fix the Level column.
-# ceramics <- transform(ceramics,Level = factor(Level))
 p3 <- ggplot(data = ceramics,aes(x = Level,y = Corrugated.ware)) +
         geom_col()
 print(p3)
@@ -166,11 +177,11 @@ print(p5)
 p5 <- ggplot(data = pdat,aes(x = Level,y = delta.ware)) +
         geom_col(color = "dodgerblue",fill = "dodgerblue",width = 0.5) +
         geom_line(color = "darkorange",size = 1) +
-        facet_wrap("type",scales = "free",nrow = 1) +
-        scale_x_continuous(breaks = 1:10) +
-        theme_cowplot(font_size = 11) +
-        theme(axis.line        = element_blank(),
-              axis.ticks.x     = element_blank(),
-              strip.background = element_blank())
+        facet_wrap("type",scales = "free",nrow = 1)
+p5 <- p5 + scale_x_continuous(breaks = 1:10)
+p5 <- p5 + theme_cowplot(font_size = 11)
+p5 <- p5 + theme(axis.line        = element_blank(),
+                axis.ticks.x     = element_blank(),
+                strip.background = element_blank())
 print(p5)
 

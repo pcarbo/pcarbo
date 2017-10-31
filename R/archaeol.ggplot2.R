@@ -4,27 +4,33 @@
 # University of Chicago
 # November 1, 2017
 #
-# INSTRUCTOR NOTES:
+# INSTRUCTOR NOTES
+# ----------------
 # * Use Terminal, not iTerm.
 # * Change font so that commas are periods are distinguishable.
+# * Bring R Graphics book.
 #
+# OUTLINE
+# -------
+# *Add outline here.*
 #
-# TO DO:
-# * Demonstrate the cowplot package.
-# * Add outline of lesson, with aims.
-#
-
 # SETUP
 # -----
+#
 # 1. Start up R or RStudio.
 #
 # 2. Download the data files if you haven't already done so, then
-# rename them to be "pompei_loom.csv" and "sw_ceramics_seriation.csv".
+#    rename them to be "pompei_loom.csv" and "sw_ceramics_seriation.csv".
 #
 # 3. Set your working directory so that the data files are in the same
-# directory as your working directory.
+#    directory as your working directory.
 #
-# 4. Load the ggplot2 package.
+# 4. Install ggplot2 and cowplot packages:
+#    install.packages("ggplot2")
+#    install.packages("cowplot")
+#
+# 5. Load the ggplot2 package.
+#
 library(ggplot2)
 
 # LOAD POMPEI LOOM DATA
@@ -47,7 +53,9 @@ p <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
        geom_point()
 print(p)
 
-# Let's plot x's instead of circles.
+# Let's plot blue x's instead of circles.
+# Use colors() to get list of all built-in colors.
+# Use pchShow() to get a list of all available shapes.
 p <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
        geom_point(shape = 4,color = "darkblue")
 print(p)
@@ -96,3 +104,38 @@ plot_grid(p,p2,labels = c("A","B"))
 #   2. Show how to save the plot as PNG and PDF using ggsave.
 #
 
+# LOAD CERAMIC WARE DATA
+# ----------------------
+# This is a slightly more complex data set.
+# Note that I changed the names of the columns slightly to avoid issues.
+ceramics <- read.csv("sw_ceramics_seriation.csv",comment = "#")
+ceramics
+
+# CREATE CORRUGATED WARE BAR CHART
+# --------------------------------
+# Create the bar chart.
+p3 <- ggplot(data = ceramics,aes(x = Level,y = Corrugated.ware)) +
+        geom_col()
+print(p3)
+
+# Fix the Level column.
+# ceramics <- transform(ceramics,Level = factor(Level))
+p3 <- ggplot(data = ceramics,aes(x = Level,y = Corrugated.ware)) +
+        geom_col()
+print(p3)
+
+# Add a line to the bar chart.
+p3 <- p3 + geom_line()
+print(p3)
+
+# Fix the colors, change width of bars, remove the axis lines, add
+# Levels 1–10 on the X axis, and add a title to the plot.
+#
+# Note: Try first without "fill".
+p4 <- ggplot(data = ceramics,aes(x = Level,y = Corrugated.ware)) +
+        geom_col(color = "dodgerblue",fill = "dodgerblue",width = 0.5) +
+        geom_line(color = "darkorange",size = 1)
+p4 <- p4 + theme(axis.line = element_blank())
+p4 <- p4 + scale_x_continuous(breaks = seq(1,10))
+p4 <- p4 + labs(title = "")
+print(p4)

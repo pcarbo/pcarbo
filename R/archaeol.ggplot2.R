@@ -2,6 +2,7 @@
 # Archaeological Data Sets (26900/46900) taught by Prof. Alice Yao
 # Dept. of Anthropology
 # University of Chicago
+# Haskell room 121
 # November 1, 2017
 #
 # INSTRUCTOR NOTES
@@ -13,15 +14,12 @@
 #
 # AIMS
 # ----
-# 1. Develop conceptual model of the ggplot2 interface
-#    ("Grammar of Graphics").
-# 2. Adjust ggplot2 parameters to make plots more effective.
-# 3. Illustrate Best Practices for data analysis in R.
+# 1. Get cofmortable with basics of the ggplot2 interface.
+# 2. Illustrate Best Practices for data analysis in R.
+# 3. Create some fun data visualizations.
 #
 # OUTLINE
 # -------
-# This is what we will accomplish today:
-#
 # 1. Set up R programming environment for data analysis.
 # 2. Load a spreadsheet into R.
 # 3. Create a simple scatterplot of loom weight vs. height.
@@ -31,10 +29,17 @@
 # 7. Create a more sophisticated plot by combining "layers".
 # 8. Create an even more sophisticated multipanel plot using "facets". 
 #
+# SOME USEFUL RESOURCES
+# ---------------------
+# * Software Carpentry: http://software-carpentry.org/lessons
+# * "R for Data Science" book: http://r4ds.had.co.nz
+# * ggplot2 website: http://ggplot2.tidyverse.org/reference
+#
 # SETUP
 # -----
 #
-# 1. Start up R or RStudio.
+# 1. Start up R or RStudio. (Make sure you have a fairly recent
+#    version of R---ideally, version 3.3.0 or greater.)
 #
 # 2. Download the data files if you haven't already done so, then
 #    rename them to be "pompei_loom.csv" and "sw_ceramics_seriation.csv".
@@ -57,7 +62,7 @@ library(ggplot2)
 # CSV file to help me remember what the data is.
 pompei <- read.csv(file = "pompei_loom.csv",comment = "#")
 
-# Quickly inspect the data set.
+# Quickly inspect the data frame.
 head(pompei)
 tail(pompei)
 summary(pompei)
@@ -73,7 +78,8 @@ print(p)
 # Let's plot blue x's instead of circles.
 # Use colors() to get list of all built-in colors.
 # Use pchShow() to get a list of all available shapes.
-p <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
+p <- ggplot(data = pompei,
+            mapping = aes(x = Weight,y = Height)) +
        geom_point(shape = 4,color = "darkblue")
 print(p)
 
@@ -97,14 +103,16 @@ print(p)
 
 # Demonstrate a different theme.
 library(cowplot)
-p <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
+p <- ggplot(data = pompei,
+            mapping = aes(x = Weight,y = Height)) +
        geom_point(shape = 4,color = "darkblue")
 print(p)
 
 # CREATE POMPEII LOOM CONTOUR PLOT
 # --------------------------------
 # Uses kernel density estimation.
-p2 <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
+p2 <- ggplot(data = pompei,
+             mapping = aes(x = Weight,y = Height)) +
         geom_density_2d()
 print(p2)
 
@@ -112,27 +120,24 @@ print(p2)
 p2 <- ggplot(data = pompei,aes(x = Weight,y = Height)) +
         geom_density_2d(color = "black",size = 0.5,bins = 8)
 
-# Let's show both plots side-by-side.
-plot_grid(p,p2,labels = c("A","B"))
+# EXERCISES: Combine the contour plot and scatterplot into a single
+# plot, then try adjusting the colors, line widths, line styles and 
 
-# Things to mention at this stage:
-#
-#   1. Documentation: ggplot2.tidyverse.org
-#   2. Show how to save the plot as PNG and PDF using ggsave,
-#      or by taking a screen shot.
-#
+# NOTE: Show how to save the plot as PNG and PDF using ggsave, or by
+# taking a screen shot, or by using the Export button in RStudio.
 
 # LOAD CERAMIC WARE DATA
 # ----------------------
-# This is a slightly more complex data set.
-# Note that I changed the names of the columns slightly to avoid issues.
+# This is a slightly more complex data set. Note that I changed the
+# names of the columns slightly to avoid possible issues.
 ceramics <- read.csv("sw_ceramics_seriation.csv",comment = "#")
 ceramics
 
 # CREATE CORRUGATED WARE BAR CHART
 # --------------------------------
 # Create the bar chart.
-p3 <- ggplot(data = ceramics,aes(x = Level,y = Corrugated.ware)) +
+p3 <- ggplot(data = ceramics,
+             mapping = aes(x = Level,y = Corrugated.ware)) +
         geom_col()
 print(p3)
 
@@ -144,7 +149,8 @@ print(p3)
 # Levels 1–10 on the x-axis, and add a title to the plot.
 #
 # Note: Try first without "fill".
-p4 <- ggplot(data = ceramics,aes(x = Level,y = Corrugated.ware)) +
+p4 <- ggplot(data = ceramics,
+             mapping = aes(x = Level,y = Corrugated.ware)) +
         geom_col(color = "dodgerblue",fill = "dodgerblue",width = 0.5) +
         geom_line(color = "darkorange",size = 1)
 p4 <- p4 + theme(axis.line = element_blank())
@@ -156,6 +162,9 @@ print(p4)
 # ---------------------------------------
 # Create a new data frame containing the same data, but with only 3
 # columns. Notice that the "type" column is a *factor*.
+#
+# Note: This is the most complex code chunk in this lesson.
+#
 pdat <- data.frame(Level      = rep(ceramics$Level,times = 5),
                    delta.ware = do.call(c,ceramics[-1]),
                    type       = rep(colnames(ceramics)[-1],each = 10))

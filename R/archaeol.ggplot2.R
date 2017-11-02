@@ -34,6 +34,8 @@
 # * Software Carpentry: http://software-carpentry.org/lessons
 # * "R for Data Science" book: http://r4ds.had.co.nz
 # * ggplot2 website: http://ggplot2.tidyverse.org/reference
+# * My "Intro to R" workshop, using Divvy data:
+#   https://rcc-uchicago.github.io/R-intro-divvy
 #
 # SETUP
 # -----

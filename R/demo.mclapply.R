@@ -7,7 +7,7 @@ n  <- 1000  # Size of symmetric matrix.
 m  <- 20    # Number of linear systems to solve.
 nc <- 2     # Number of threads to use in solving linear systems.
 
-which.method <- "mclapply1"
+which.method <- "parLapply"
 
 # SET UP ENVIRONMENT
 # ------------------
@@ -39,10 +39,22 @@ solve.lapply <- function (A, B) {
 # The first method uses the mclapply function to eventy distribute
 # the computation among nc threads. 
 solve.mclapply1 <- function (A, B, nc = 1) {
-  rows <- splitIndices(ncol(B),nc)
-  X    <- mclapply(rows,function (i) solve.lapply(A,B[,i]))
+  cols <- splitIndices(ncol(B),nc)
+  X    <- mclapply(cols,function (i) solve.lapply(A,B[,i]))
   X    <- do.call(cbind,X)
-  X[,unlist(rows)] <- X
+  X[,unlist(cols)] <- X
+  return(X)
+}
+
+# TO DO: Explain what this function does.
+solve.parLapply <- function (A, B, nc = 1) {
+  cl <- makeCluster(nc)
+  clusterExport(cl,"solve.lapply")
+  cols <- clusterSplit(cl,1:ncol(B))
+  X    <- parLapply(cl,cols,function (i, A, B) solve.lapply(A,B[,i]), A, B)
+  X    <- do.call(cbind,X)
+  X[,unlist(cols)] <- X
+  stopCluster(cl)
   return(X)
 }
 
@@ -69,8 +81,8 @@ if (which.method == "lapply") {
   timing <- system.time(X <- solve.lapply(A,B))
 } else if (which.method == "mclapply1") {
   timing <- system.time(X <- solve.mclapply1(A,B,nc = nc))
-} else if (which.method == "mclapply2") {
-  timing <- system.time(X <- solve.mclapply2(A,B,nc = nc))
+} else if (which.method == "parLapply") {
+  timing <- system.time(X <- solve.mclapply1(A,B,nc = nc))
 }
 cat("Computation took",timing["elapsed"],"seconds.\n")
 

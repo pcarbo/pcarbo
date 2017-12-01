@@ -3,8 +3,8 @@
 
 # SCRIPT PARAMETERS
 # -----------------
-n  <- 2000  # Size of symmetric matrix.
-m  <- 50    # Number of linear systems to solve.
+n  <- 1000  # Size of symmetric matrix.
+m  <- 20    # Number of linear systems to solve.
 nc <- 2     # Number of threads to use in solving linear systems.
 
 which.method <- "mclapply1"
@@ -27,11 +27,20 @@ B <- matrix(rnorm(n*m),n,m)
 
 # SOLVE SET OF LINEAR SYSTEMS
 # ---------------------------
-# The first method uses the mclapply function to evently distribute
+# The first method uses the lapply functon to solve a set of linear
+# systems. Of course, in practice you wouldn't actually do it this way
+# because a single call to solve will be much more efficient.
+solve.lapply <- function (A, B) {
+  n <- ncol(B)
+  X <- lapply(as.list(1:n),function (i) solve(A,B[,i]))
+  return(do.call(cbind,X))
+}
+
+# The first method uses the mclapply function to eventy distribute
 # the computation among nc threads. 
 solve.mclapply1 <- function (A, B, nc = 1) {
   rows <- splitIndices(ncol(B),nc)
-  X    <- mclapply(rows,function (i) solve(A,B[,i]),mc.cores = nc)
+  X    <- mclapply(rows,function (i) solve.lapply(A,B[,i]))
   X    <- do.call(cbind,X)
   X[,unlist(rows)] <- X
   return(X)
@@ -56,9 +65,11 @@ solve.mclapply2 <- function (A, B, nc = 1) {
 # Use one of the three parallelization schemes.
 cat("Solving linear systems using",nc,"threads.\n")
 cat("method =",which.method,"\n")
-if (which.method == "mclapply1") {
+if (which.method == "lapply") {
+  timing <- system.time(X <- solve.lapply(A,B))
+} else if (which.method == "mclapply1") {
   timing <- system.time(X <- solve.mclapply1(A,B,nc = nc))
-else if (which.method == "mclapply2") {
+} else if (which.method == "mclapply2") {
   timing <- system.time(X <- solve.mclapply2(A,B,nc = nc))
 }
 cat("Computation took",timing["elapsed"],"seconds.\n")

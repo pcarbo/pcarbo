@@ -20,11 +20,8 @@
 # initialized with seed=3.
 
 #SBATCH --time=00:05:00
-#SBATCH --partition=mstephens
-#SBATCH --account=pi-mstephens
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=1
-#SBATCH --mem=1000
+#SBATCH --partition=broadwl
+#SBATCH --mem=1G
 
 # Get the script parameters specified as command-line arguments.
 OUTFILE=${1}
@@ -32,7 +29,7 @@ SEED=${2}
 M=${3}
 N=${4}
 
-# Run gen.rnorm.data.R in R 3.3.2.
-module load R/3.3
+# Run gen.rnorm.data.R in R 3.4.1.
+module load R/3.4.1
 Rscript gen.rnorm.data.R ${SEED} ${M} ${N} ${OUTFILE}
 module unload R

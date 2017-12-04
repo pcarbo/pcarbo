@@ -3,14 +3,15 @@
 
 # SCRIPT PARAMETERS
 # -----------------
-n  <- 1000  # Size of symmetric matrix.
-m  <- 20    # Number of linear systems to solve.
-nc <- 2     # Number of threads to use in solving linear systems.
+n  <- 7500 # Size of symmetric matrix.
+m  <- 16   # Number of linear systems to solve.
+nc <- 1    # Number of threads to use in solving linear systems.
 
 which.method <- "parLapply"
 
 # SET UP ENVIRONMENT
 # ------------------
+library(methods)
 library(parallel)
 
 # GENERATE DATA
@@ -31,9 +32,13 @@ B <- matrix(rnorm(n*m),n,m)
 # systems. Of course, in practice you wouldn't actually do it this way
 # because a single call to solve will be much more efficient.
 solve.lapply <- function (A, B) {
-  n <- ncol(B)
-  X <- lapply(as.list(1:n),function (i) solve(A,B[,i]))
-  return(do.call(cbind,X))
+  if (is.vector(B))
+    return(solve(A,B))
+  else {
+    n <- ncol(B)
+    X <- lapply(as.list(1:n),function (i) solve(A,B[,i]))
+    return(do.call(cbind,X))
+  }
 }
 
 # The first method uses the mclapply function to eventy distribute
@@ -82,7 +87,7 @@ if (which.method == "lapply") {
 } else if (which.method == "mclapply1") {
   timing <- system.time(X <- solve.mclapply1(A,B,nc = nc))
 } else if (which.method == "parLapply") {
-  timing <- system.time(X <- solve.mclapply1(A,B,nc = nc))
+  timing <- system.time(X <- solve.parLapply(A,B,nc = nc))
 }
 cat("Computation took",timing["elapsed"],"seconds.\n")
 

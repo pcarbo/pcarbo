@@ -27,14 +27,14 @@ f$close_all()
 rm(cars,f)
 
 # Read from the HDF5 file we created. The data frame is seamlessly loaded.
-f <- H5File$new("cars.h5",mode = "r")
+f    <- H5File$new("cars.h5",mode = "r")
 cars <- f[["cars.df"]][]
 print(head(cars))
 
 # Again, recovering the matrix with the row and columns takes more
 # effort; these attributes are not loaded seamlessly.
-x     <- f[["cars.matrix"]]
-cars2 <- x[,]
+x               <- f[["cars.matrix"]]
+cars2           <- x[,]
 rownames(cars2) <- h5attr(x,"rownames")
 colnames(cars2) <- h5attr(x,"colnames")
 print(head(cars2))

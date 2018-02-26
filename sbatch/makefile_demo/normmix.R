@@ -7,12 +7,16 @@ source("mixopt.R")
 
 # SCRIPT PARAMETERS
 # -----------------
+# Read the script parameters from a small CSV file.
 args     <- commandArgs(trailingOnly = TRUE)
-n        <- as.integer(args[1])  # Number of data samples.
-k        <- as.integer(args[2])  # Number of mixture components.
-seed     <- as.integer(args[3])  # random number generator seed.
-out.file <- args[4]
+dat      <- read.csv(args[1],stringsAsFactors = FALSE,header = TRUE)
+n        <- dat$n     # Number of data samples.
+k        <- dat$k     # Number of mixture components.
+seed     <- dat$seed  # random number generator seed.
+out.file <- dat$out.file
+cat(sprintf("Setting seed to %d.\n",seed))
 set.seed(seed)
+rm(dat)
 
 # These are additional variables determining how the data set is
 # generated: the standard errors of the samples (se), and the standard
@@ -44,5 +48,7 @@ cat(sprintf("Model fitting took %d iterations and %0.2f seconds.\n",
 # SAVE RESULTS TO FILE
 # --------------------
 # Save the script parameters and results to an .RData file.
+out.file <- paste(out.file,"RData",sep = ".")
+cat(sprintf("Saving results to %s.\n",out.file))
 save(list = c("n","k","seed","w","s","se","timing","fit.em"),
-     file = paste(out.file,"RData",sep = "."))
+     file = out.file)

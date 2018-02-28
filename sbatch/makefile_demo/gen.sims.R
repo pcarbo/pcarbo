@@ -6,7 +6,7 @@
 # Generate configurations for all combinations of these parameters:
 # the data set size (n), the number of mixture components (k) and the
 # random number generator seeds (seeds).
-params <- list(n     = c(100,500,1e3,5e3,1e4),
+params <- list(n     = c(1e3,5e3,1e4,5e4,1e5),
                k     = c(4,8,12,16,20),
                seeds = 1:10)
 

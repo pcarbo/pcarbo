@@ -1,10 +1,16 @@
 #!/bin/bash
 
-# This bash script illustrates how to generate results in parallel
-# using GNU Make. To schedule these computations to SLURM, simply run
+# This bash script illustrates how to run large number of
+# heterogeneous computations in parallel using GNU Make. To submit
+# these computations to the SLURM scheduler, simply run
 # 
 #   sbatch runsims.sbatch
 #
+# With the settings I've provided, it should take a few minutes to
+# run.
+#
+# Note that GNU Make will not distribute computations across multiple
+# nodes, so it is important to set --nodes=1.
 
 #SBATCH --partition=broadwl
 #SBATCH --nodes=1

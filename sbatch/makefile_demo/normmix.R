@@ -1,9 +1,13 @@
 # Here, we assess performance of EM for optimizing the mixture weights
-# of a simple mixture model.
-source("misc.R")
-source("datasim.R")
-source("likelihood.R")
-source("mixopt.R")
+# of a simple mixture model.Thie script should be run
+# non-interactively like this:
+#
+#   Rscript normmix.R <config.csv> <out.RData>
+#
+# where <config.csv> is a CSV file containing the simulation
+# parameters, and <out.RData> is the .RData file where the results will
+# be stored.
+source("functions.R")
 
 # SCRIPT PARAMETERS
 # -----------------
@@ -13,7 +17,7 @@ dat      <- read.csv(args[1],stringsAsFactors = FALSE,header = TRUE)
 n        <- dat$n     # Number of data samples.
 k        <- dat$k     # Number of mixture components.
 seed     <- dat$seed  # random number generator seed.
-out.file <- dat$out.file
+out.file <- args[2]
 cat(sprintf("Setting seed to %d.\n",seed))
 set.seed(seed)
 rm(dat)
@@ -48,7 +52,6 @@ cat(sprintf("Model fitting took %d iterations and %0.2f seconds.\n",
 # SAVE RESULTS TO FILE
 # --------------------
 # Save the script parameters and results to an .RData file.
-out.file <- paste(out.file,"RData",sep = ".")
 cat(sprintf("Saving results to %s.\n",out.file))
 save(list = c("n","k","seed","w","s","se","timing","fit.em"),
      file = out.file)

@@ -1,2 +1,2 @@
-n,k,seed,out.file
-5000,4,1,sim.out
+n,k,seed
+5000,4,1

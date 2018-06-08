@@ -24,7 +24,7 @@ and/or Fortran code, and this compilation step failed.
 > Installing source packages which contain C/C++/Fortran code requires
 > that compilers and related tools be installed.
 
-As of R 3.4.0, the R development team decided to use a compiler that
+As of R 3.4, the R development team decided to use a compiler that
 is no longer provided by Apple. There were good reasons for making
 this change:
 
@@ -61,9 +61,11 @@ mistake, you can easily reverse the changes.
 
 I've made these instructions general enough that they should work for
 different versions of R. (I can't guarantee that they will work,
-however). I also give the specific example of my setup, which is
-R 3.4.3 on a MacBook Pro (3.5 GHz Intel Core i7 CPU,
-macOS 10.13.4).
+however.) If you are unfamiliar with the tools I recommended (e.g.,
+Homebrew), you will have to learn the basics of how to use them.
+
+I also give the specific example of my setup, which is R 3.4.3 on a
+MacBook Pro (3.5 GHz Intel Core i7 CPU, macOS 10.13.4).
 
 ### 1. Install Homebrew.
 
@@ -73,7 +75,7 @@ Follow the installation instructions [here][homebrew].
 
 Follow the installation instructions [here][macports].
 
-### 3. Install the recommended clang and gfortran
+### 3. Install the recommended versions of clang and gfortran
 
 Search Homebrew and MacPorts for the recommended version of **clang**
 and **gfortran**, and install these packages (or "ports"). (Note that
@@ -93,21 +95,35 @@ You may also find suitable packages in Homebrew.
 
 Confusingly, R 3.5 switched to clang 6.0!
 
-### 4. Edit your Makevars file to use the newly installed clang and gcc.
+### 4. Edit your Makevars file to use the newly installed clang and gfortran
 
+Edit file `~/.R/Makevars` to point to the versions of clang and
+gfortran. For example, on my computer with R 3.4.3, I have:
 
+```bash
+$ cat ~/.R/Makevars
+CC       = /opt/local/bin/clang-mp-4.0
+CXX      = /opt/local/bin/clang++-mp-4.0
+CXX11    = $CXX
+CXX17    = $CXX
+CXX98    = $CXX
+F77      = /opt/local/bin/gfortran-mp-6
+FC       = $F77
+LDFLAGS  = -L/opt/local/lib
+FLIBS    = -L/opt/local/lib/gcc6 -lgfortran -lquadmath -lm
+```
+
+Note that MacPorts packages are installed in `/opt/local`.
+
+For more advice on configuring your `Makevars` file, see
+[here][package-compilation-macos].
 
 ### 5. Test your by installing a source package that has C++ code
-
-
-
-## Links
-
-https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS-packages
 
 [homebrew]: https://brew.sh
 [macports]: http://macports.org
 [cran-macos-tools]: https://cran.r-project.org/bin/macosx/tools
 [coatless-prof]: https://thecoatlessprofessor.com/programming/openmp-in-r-on-os-x
 [package-compilation-macos]: https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS-packages
+[cran-macos-notes]: https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS
 [stackoverflow]: https://stackoverflow.com/questions/44439620/installing-r-3-4-0-on-macos-mac-os-x-10-9-5

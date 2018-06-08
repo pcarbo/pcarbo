@@ -118,10 +118,28 @@ Note that MacPorts packages are installed in `/opt/local`.
 For more advice on configuring your `Makevars` file, see
 [here][package-compilation-macos].
 
-### 5. Test your by installing a source package that has C++ code
+### 5. Test your new setup by installing a source package with C/Fortran code
+
+For example, install [glmnet][glmnet] 2.0-16 from source by running
+the following in R:
+
+```R
+install.packages("https://cran.r-project.org/src/contrib/glmnet_2.0-16.tar.gz")
+```
+
+The glmnet package has both C and Fortran source code, and indeed when
+I run this command on my computer I see that it is using gfortran and
+clang to compile and build the package:
+
+```
+/opt/local/bin/gfortran-mp-6 -fPIC -g -O2 -c glmnet5dp.f -o glmnet5dp.o
+/opt/local/bin/clang-mp-4.0 -I/Library/Frameworks/R.framework/Resources/include -DNDEBUG -I/usr/local/include -fPIC -Wall -g -O2 -c glmnet_init.c -o glmnet_init.o
+/opt/local/bin/clang-mp-4.0 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/opt/local/lib -o glmnet.so glmnet5dp.o glmnet_init.o -L/opt/local/lib/gcc6 -lgfortran -lquadmath -lm -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
+```
 
 [homebrew]: https://brew.sh
 [macports]: http://macports.org
+[glmnet]: https://CRAN.R-project.org/package=glmnet
 [cran-macos-tools]: https://cran.r-project.org/bin/macosx/tools
 [coatless-prof]: https://thecoatlessprofessor.com/programming/openmp-in-r-on-os-x
 [package-compilation-macos]: https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS-packages

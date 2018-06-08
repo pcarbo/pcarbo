@@ -61,7 +61,7 @@ mistake, you can easily reverse the changes.
 
 I've made these instructions general enough that they should work for
 different versions of R. (I can't guarantee that they will work,
-however.) If you are unfamiliar with the tools I recommended (e.g.,
+however.) If you are unfamiliar with the tools I recommend using (e.g.,
 Homebrew), you will have to learn the basics of how to use them.
 
 I also give the specific example of my setup, which is R 3.4.3 on a
@@ -78,13 +78,14 @@ Follow the installation instructions [here][macports].
 ### 3. Install the recommended versions of clang and gfortran
 
 Search Homebrew and MacPorts for the recommended version of **clang**
-and **gfortran**, and install these packages (or "ports"). (Note that
-clang may be bundled with an llvm package, and gfortran may be bundled
-with a gcc package.) For example, on my computer, I have R 3.4.3, so I
-should install clang 4.0.0 and gfortran 6.1 (according to
-[here][stackoverflow]---I can't find this information on the CRAN
-website any more). I found clang 4.0.1 and gfortran 6.4 (close enough)
-in MacPorts, so I ran these commands to install them:
+and **gfortran**, and install these packages (also called
+"ports"). (Note that clang may be bundled with an llvm package, and
+gfortran may be bundled with a gcc package.) For example, on my
+computer, I have R 3.4.3, so I should install clang 4.0.0 and
+gfortran 6.1 (according to [here][stackoverflow]—I can't find this
+information on the CRAN website any more). I found clang 4.0.1 and
+gfortran 6.4 (close enough, hopefully!) in MacPorts, so I ran these
+commands to install them:
 
 ```bash
 sudo port install clang-4.0
@@ -95,10 +96,10 @@ You may also find suitable packages in Homebrew.
 
 Confusingly, R 3.5 switched to clang 6.0!
 
-### 4. Edit your Makevars file to use the newly installed clang and gfortran
+### 4. Edit your Makevars file to tell R use the new clang and gfortran
 
-Edit file `~/.R/Makevars` to point to the versions of clang and
-gfortran. For example, on my computer with R 3.4.3, I have:
+Edit file `~/.R/Makevars` to point to the newly installed versions of
+clang and gfortran. For example, on my computer with R 3.4.3, I have:
 
 ```bash
 $ cat ~/.R/Makevars
@@ -113,9 +114,9 @@ LDFLAGS  = -L/opt/local/lib
 FLIBS    = -L/opt/local/lib/gcc6 -lgfortran -lquadmath -lm
 ```
 
-Note that MacPorts packages are installed in `/opt/local`.
+Note that all MacPorts packages are installed in `/opt/local`.
 
-For more advice on configuring your `Makevars` file, see
+For more detailed advice on configuring your `Makevars` file, see
 [here][package-compilation-macos].
 
 ### 5. Test your new setup by installing a source package with C/Fortran code
@@ -136,6 +137,10 @@ clang to compile and build the package:
 /opt/local/bin/clang-mp-4.0 -I/Library/Frameworks/R.framework/Resources/include -DNDEBUG -I/usr/local/include -fPIC -Wall -g -O2 -c glmnet_init.c -o glmnet_init.o
 /opt/local/bin/clang-mp-4.0 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -single_module -multiply_defined suppress -L/Library/Frameworks/R.framework/Resources/lib -L/opt/local/lib -o glmnet.so glmnet5dp.o glmnet_init.o -L/opt/local/lib/gcc6 -lgfortran -lquadmath -lm -F/Library/Frameworks/R.framework/.. -framework R -Wl,-framework -Wl,CoreFoundation
 ```
+
+## More info
+
++ See [here][cran-macos-notes] for more macOS-specific details on R.
 
 [homebrew]: https://brew.sh
 [macports]: http://macports.org

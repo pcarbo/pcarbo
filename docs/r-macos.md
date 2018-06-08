@@ -1,11 +1,11 @@
-# So you want to compile packages on your Mac?
+# So you want to install source packages on your Mac?
 
 Then please follow these instructions and advice. *However,* please
 note that:
 
 1. These instructions were developed with R versions 3.4 and 3.5 in
-mind. If you are using a version of R prior to 3.4, please disregard
-this document as it is not relevant to you.
+mind. If you are using a version of R prior to 3.4, please *disregard
+this document as it is not (immediately) relevant to you.*
 
 2. It is possible that these instructions will no longer be valid for
 future versions of R. So if you are using R > 3.5, *follow these
@@ -25,14 +25,14 @@ and/or Fortran code, and this compilation step failed.
 > that compilers and related tools be installed.
 
 As of R 3.4.0, the R development team decided to use a compiler that
-is no longer provided by Apple. There were good
-reasons for making this change:
+is no longer provided by Apple. There were good reasons for making
+this change:
 
 > Since R 3.4.0 release, we are now providing binaries for OS X 10.11
 > (El Capitan) and higher using non-Apple toolkit to provide support
 > for OpenMP and C++17 standard features.
 
-But, tis has unfortunately made package installation and development
+But... this has unfortunately made package installation and development
 more complicated for people with a Mac.
 
 **Key point:** If you are using R >= 3.4 on Mac, and you have not
@@ -45,8 +45,8 @@ installing R packages from source.
 
 ## What I don't recommend doing
 
-Do not download and install the
-[tools provided by CRAN][cran-macos-tools].  This will install these
+Do **not** download and install the [tools provided by
+CRAN][cran-macos-tools].  This will install these
 compilers in the system directories on your computer and could cause
 issues that will be difficult to fix.
 
@@ -57,16 +57,57 @@ to install the necessary compilers. This will allow you to install
 compilers without affecting the system directories. And if you make a
 mistake, you can easily reverse the changes.
 
-## Setup instructions
+## Barebones setup instructions
 
 I've made these instructions general enough that they should work for
-different versions of R. However, I can't guarantee that they will
-work. This advice is based on my experience.
+different versions of R. (I can't guarantee that they will work,
+however). I also give the specific example of my setup, which is
+R 3.4.3 on a MacBook Pro (3.5 GHz Intel Core i7 CPU,
+macOS 10.13.4).
+
+### 1. Install Homebrew.
+
+Follow the installation instructions [here][homebrew].
+
+### 2. Install MacPorts.
+
+Follow the installation instructions [here][macports].
+
+### 3. Install the recommended clang and gfortran
+
+Search Homebrew and MacPorts for the recommended version of **clang**
+and **gfortran**, and install these packages (or "ports"). (Note that
+clang may be bundled with an llvm package, and gfortran may be bundled
+with a gcc package.) For example, on my computer, I have R 3.4.3, so I
+should install clang 4.0.0 and gfortran 6.1 (according to
+[here][stackoverflow]---I can't find this information on the CRAN
+website any more). I found clang 4.0.1 and gfortran 6.4 (close enough)
+in MacPorts, so I ran these commands to install them:
+
+```bash
+sudo port install clang-4.0
+sudo port install gcc6
+```
+
+You may also find suitable packages in Homebrew.
+
+Confusingly, R 3.5 switched to clang 6.0!
+
+### 4. Edit your Makevars file to use the newly installed clang and gcc.
+
+
+
+### 5. Test your by installing a source package that has C++ code
+
+
 
 ## Links
 
 https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS-packages
 
+[homebrew]: https://brew.sh
+[macports]: http://macports.org
 [cran-macos-tools]: https://cran.r-project.org/bin/macosx/tools
 [coatless-prof]: https://thecoatlessprofessor.com/programming/openmp-in-r-on-os-x
 [package-compilation-macos]: https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS-packages
+[stackoverflow]: https://stackoverflow.com/questions/44439620/installing-r-3-4-0-on-macos-mac-os-x-10-9-5

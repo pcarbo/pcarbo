@@ -34,17 +34,17 @@ This has unfortunately made package installation and development more
 complicated on Mac computers.
 
 **Key point:** If you are using R >= 3.4 on Mac, and you have not
-installed the
-[C and Fortran compilers recommended for your version of R][cran-macos],
-then you will have trouble installing some packages from source. Here
-I explain how to set up your Mac for installing R packages.
+installed the [C and Fortran compilers recommended for your version of
+R][cran-macos-tools], then you will have trouble installing some packages
+from source. Here I explain how to set up your Mac for installing R packages.
 
 ## What I don't recommend doing
 
-
-
 ## General advice
 
+## Links
 
+https://cran.r-project.org/doc/manuals/r-release/R-admin.html#macOS-packages
 
-
+[cran-macos-tools]: https://cran.r-project.org/bin/macosx/tools
+[coatless-prof]: https://thecoatlessprofessor.com/programming/openmp-in-r-on-os-x

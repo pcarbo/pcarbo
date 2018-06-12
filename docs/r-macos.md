@@ -105,11 +105,11 @@ clang and gfortran. For example, on my computer with R 3.4.3, I have:
 $ cat ~/.R/Makevars
 CC       = /opt/local/bin/clang-mp-4.0
 CXX      = /opt/local/bin/clang++-mp-4.0
-CXX11    = $CXX
-CXX17    = $CXX
-CXX98    = $CXX
+CXX11    = /opt/local/bin/clang++-mp-4.0
+CXX17    = /opt/local/bin/clang++-mp-4.0
+CXX98    = /opt/local/bin/clang++-mp-4.0
 F77      = /opt/local/bin/gfortran-mp-6
-FC       = $F77
+FC       = /opt/local/bin/gfortran-mp-6
 LDFLAGS  = -L/opt/local/lib
 FLIBS    = -L/opt/local/lib/gcc6 -lgfortran -lquadmath -lm
 ```
@@ -125,7 +125,8 @@ For example, install [glmnet][glmnet] 2.0-16 from source by running
 the following in R:
 
 ```R
-install.packages("https://cran.r-project.org/src/contrib/glmnet_2.0-16.tar.gz")
+url <- "https://cran.r-project.org/src/contrib/glmnet_2.0-16.tar.gz"
+install.packages(url,repos = NULL)
 ```
 
 The glmnet package has both C and Fortran source code, and indeed when

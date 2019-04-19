@@ -7,7 +7,7 @@ set.seed(1)
 
 # The third varbvs call will not "escape" from the saddle point unless
 # this non-negative scalar is set to 0.6 or greater.
-delta <- 0.6
+delta <- 0
 
 # Generate the data set.
 n <- 100

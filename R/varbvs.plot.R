@@ -13,8 +13,17 @@ mu <- seq(-5,5,0.1)
 # FUNCTION DEFINITIONS
 # --------------------
 # Define some functions used in the analysis below.
+dot <- function (x,y)
+  sum(x*y)
+
+norm2 <- function (x)
+  sqrt(sum(x^2))
+
 sigmoid <- function (x)
   1/(1 + exp(-x))
+
+betavar <- function (p, mu, s)
+  p*(s + (1 - p)*mu^2)
 
 # Compute the posterior inclusion probabilities ("alpha") given the
 # posterior mean coefficients ("mu") and posterior variances ("s")
@@ -23,6 +32,17 @@ sigmoid <- function (x)
 # also 1.
 compute.alpha <- function (mu, s)
   sigmoid(log(s)/2 + mu^2/(2*s))  
+
+# TO DO: Explain here what this function does.
+computeKL <- function (X, a, mu, s) {
+  e <- 1e-15
+  d <- diag(crossprod(X))
+  r <- a*mu
+  v <- betavar(a,mu,s)
+  return(norm2(y - X %*% r)^2/2 + dot(d,v)/2
+         + sum(a*log(2*a + e) + (1-a)*log(2*(1-a)+e))
+         - dot(a,1 + log(s) - (s + mu^2))/2)
+}
 
 # SET UP ENVIRONMENT
 # ------------------
@@ -60,13 +80,15 @@ s <- 1/(d + 1)
 
 # Create a 2-d grid for the conditional posterior mean of the
 # coefficients ("mu").
-M  <- as.matrix(expand.grid(X1 = mu,X2 = mu))
-ns <- nrow(M)
+dat <- expand.grid(X1 = mu,X2 = mu)
+dat <- as.matrix(cbind(dat,data.frame(KL = 0)))
+ns  <- nrow(dat)
 for (i in 1:ns) {
 
   # Compute the posterior inclusion probabilities ("alpha").
-  mu    <- M[i,]
-  alpha <- compute.alpha(mu,s)
+  mu          <- dat[i,1:2]
+  a           <- compute.alpha(mu,s)
+  dat[i,"KL"] <- computeKL(X,a,mu,s)
 }
 
 # Compute the variational lower bound (ELBO) for each 

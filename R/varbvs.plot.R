@@ -8,7 +8,7 @@ beta <- c(3,0)  # Coefficients used to simulate data.
 
 # Compute the variational lower bound (ELBO) for all these candidate
 # values of the conditional posterior mean of the coefficients ("mu")
-mu <- seq(-2,4,0.025)
+mu_grid <- seq(-1,3.5,0.01)
 
 # FUNCTION DEFINITIONS
 # --------------------
@@ -80,15 +80,18 @@ s <- 1/(d + 1)
 
 # Create a 2-d grid for the conditional posterior mean of the
 # coefficients ("mu").
-dat <- expand.grid(X1 = mu,X2 = mu)
-dat <- as.matrix(cbind(dat,data.frame(KL = 0)))
+dat <- expand.grid(mu1 = mu_grid,
+                   mu2 = mu_grid)
+dat <- as.matrix(cbind(dat,data.frame(alpha1 = 0,alpha2 = 0,KL = 0)))
 ns  <- nrow(dat)
 for (i in 1:ns) {
 
   # Compute the posterior inclusion probabilities ("alpha").
   mu <- dat[i,1:2]
   a  <- compute.alpha(mu,s)
-
+  dat[i,"alpha1"] <- a[1]
+  dat[i,"alpha2"] <- a[2]
+  
   # Compute the variational lower bound (ELBO) at the given settings
   # of the variational parameters.
   dat[i,"KL"] <- computeKL(X,a,mu,s)
@@ -96,7 +99,47 @@ for (i in 1:ns) {
 
 # PLOT OBJECTIVE SURFACE
 # ======================
-dat <- as.data.frame(dat)
-p1  <- ggplot(dat,aes(X1,X2,z = log10(KL))) +
-       geom_contour(bins = 50)
+klmin <- min(dat[,"KL"])
+dat   <- as.data.frame(dat)
+dat   <- transform(dat,
+                   beta1 = alpha1*mu1,
+                   beta2 = alpha2*mu2,
+                   dist = log10(KL - klmin + 1e-8))
+p1 <- ggplot(dat,aes(beta1,beta2,z = dist)) +
+  geom_contour(color = "black",bins = 50) +
+  scale_x_continuous(breaks = seq(-10,10,0.25)) +
+  scale_y_continuous(breaks = seq(-10,10,0.25)) +
+  theme_cowplot(font_size = 10) +
+  theme(panel.grid.major = element_line(color = "gray",size = 0.25))
 print(p1)
+
+# Create a 2-d grid for the conditional posterior mean of the
+# coefficients ("mu").
+dat <- data.frame(mu1 = mu_grid)
+dat <- transform(dat,mu2 = -0.923*mu1 + 2.538)
+dat <- cbind(dat,data.frame(alpha1 = 0,alpha2 = 0,KL = 0))
+dat <- as.matrix(dat)
+ns  <- nrow(dat)
+for (i in 1:ns) {
+
+  # Compute the posterior inclusion probabilities ("alpha").
+  mu <- dat[i,1:2]
+  a  <- compute.alpha(mu,s)
+  dat[i,"alpha1"] <- a[1]
+  dat[i,"alpha2"] <- a[2]
+  
+  # Compute the variational lower bound (ELBO) at the given settings
+  # of the variational parameters.
+  dat[i,"KL"] <- computeKL(X,a,mu,s)
+}
+
+# Second plot.
+klmin <- min(dat[,"KL"])
+dat   <- as.data.frame(dat)
+dat   <- transform(dat,
+                   beta1 = alpha1*mu1,
+                   dist  = log10(KL - klmin + 1e-8))
+p2 <- ggplot(dat,aes(x = beta1,y = dist)) +
+    geom_line()
+
+    

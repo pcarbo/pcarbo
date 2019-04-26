@@ -1,4 +1,12 @@
 # TO DO: Explain here what this script is for.
+#
+# TO DO:
+#
+#  + Run varbvs with different initializations to recover local minima.
+#
+#  + Verify that my calculations of alpha and the variational lower
+#     bound are correct.
+# 
 
 # SCRIPT PARAMETERS
 # -----------------

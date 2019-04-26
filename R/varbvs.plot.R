@@ -2,13 +2,13 @@
 
 # SCRIPT PARAMETERS
 # -----------------
-n    <- 100     # Number of samples.
+n    <- 40      # Number of samples.
 xcor <- 0.99    # Correlation between X1 and X2.
 beta <- c(3,0)  # Coefficients used to simulate data.
 
 # Compute the variational lower bound (ELBO) for all these candidate
 # values of the conditional posterior mean of the coefficients ("mu")
-mu <- seq(-5,5,0.1)
+mu <- seq(-2,4,0.025)
 
 # FUNCTION DEFINITIONS
 # --------------------
@@ -86,9 +86,17 @@ ns  <- nrow(dat)
 for (i in 1:ns) {
 
   # Compute the posterior inclusion probabilities ("alpha").
-  mu          <- dat[i,1:2]
-  a           <- compute.alpha(mu,s)
+  mu <- dat[i,1:2]
+  a  <- compute.alpha(mu,s)
+
+  # Compute the variational lower bound (ELBO) at the given settings
+  # of the variational parameters.
   dat[i,"KL"] <- computeKL(X,a,mu,s)
 }
 
-# Compute the variational lower bound (ELBO) for each 
+# PLOT OBJECTIVE SURFACE
+# ======================
+dat <- as.data.frame(dat)
+p1  <- ggplot(dat,aes(X1,X2,z = log10(KL))) +
+       geom_contour(bins = 50)
+print(p1)

@@ -73,7 +73,8 @@ set.seed(1)
 Generate data set
 -----------------
 
-Simulate the $n \times 2$ matrix of predictors, $X$.
+Simulate the $n \times 2$ matrix of predictors, in which the two
+predictors are strongly correlated.
 
 ```{r sim-X}
 S <- rbind(c(1,xcor),c(xcor,1))
@@ -106,7 +107,8 @@ print(pts)
 ```
 
 The co-ordinate ascent updates should converge to three different
-stationary points of the K-L divergence
+stationary points of the K-L divergence (equivalently, the variational
+lower bound).
 
 Plot variational objective surface
 ----------------------------------
@@ -121,12 +123,20 @@ pdat <- expand.grid(mu1 = mu_grid,mu2 = mu_grid)
 pdat <- compute_kl_grid(X,y,pdat)
 ```
 
-*Add text here.*
+Create a contour plot to visualize the 2-d surface of the
+Kullback-Divergence divergence with respect to the variational
+estimates of the posterior mean coefficients.
 
-```{r create-contour-plot, fig.width=6, fig.height=6}
-p1  <- create_contour_plot(pdat,pts)
+```{r create-contour-plot, fig.width=6, fig.height=5.5}
+p1 <- create_contour_plot(pdat,pts)
 print(p1)
 ```
+
+This contour plot confirms that there are indeed three stationary
+points (local minima) of the variational objective: at two of these
+stationary points, one of the regression coefficients is zero, whereas
+both coefficients are nonzero, and nearly equal, at the third
+stationary point.
 
 Session info
 ------------

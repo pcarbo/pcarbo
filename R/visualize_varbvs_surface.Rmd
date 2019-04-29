@@ -1,5 +1,5 @@
 ---
-title: "Visualizing stationary points of the varbvs objective"
+title: "There can be three---not just two---stationary points in the varbvs objective"
 author: "Peter Carbonetto"
 date: April 29, 2019
 output:
@@ -137,6 +137,28 @@ points (local minima) of the variational objective: at two of these
 stationary points, one of the regression coefficients is zero, whereas
 both coefficients are nonzero, and nearly equal, at the third
 stationary point.
+
+A second look
+-------------
+
+To better appreciate this result, let's plot the objective along a
+"slice" that cuts through the three modes:
+
+```{r plot-objective-slice, fig.width=6, fig.height=4}
+pdat2 <- data.frame(mu1 = mu_grid)
+pdat2 <- transform(pdat2,mu2 = -0.9275*mu1 + 2.5696)
+pdat2 <- compute_kl_grid(X,y,pdat2)
+pdat2 <- transform(pdat2,beta1 = alpha1*mu1)
+p2 <- ggplot(as.data.frame(pdat2),aes(x = beta1,y = KL)) +
+      geom_line(color = "dodgerblue",size = 1) +
+	  labs(x = "posterior mean of beta1",y = "K-L divergence")
+print(p2)
+```
+
+From this plot we clearly see the three stationary points of the
+variational objective. The global mean is reached at $\mu_1 = 1.25,
+\mu_2 = 1.41$, but the local mode at $\mu_1 = 0.02, \mu_2 = 2.55$
+achieves nearly the same value.
 
 Session info
 ------------

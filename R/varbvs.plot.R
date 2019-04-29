@@ -1,24 +1,3 @@
-# PLOT OBJECTIVE SURFACE
-# ======================
-klmin <- min(dat[,"KL"])
-pdat1 <- as.data.frame(dat)
-pdat1 <- transform(pdat1,
-                   beta1 = alpha1*mu1,
-                   beta2 = alpha2*mu2,
-                   dist = log10(KL - klmin + 1e-8))
-pdat2 <- rbind(fit1$beta,
-               fit2$beta,
-               fit3$beta)
-pdat2 <- as.data.frame(pdat2)
-p1 <- ggplot(pdat1,aes(beta1,beta2,z = dist)) +
-  geom_contour(color = "dodgerblue",bins = 50) +
-  geom_point(data = pdat2,mapping = aes(x = X1,y = X2),
-             color = "black",shape = 4,inherit.aes = FALSE) +
-  scale_x_continuous(breaks = seq(-10,10,0.5)) +
-  scale_y_continuous(breaks = seq(-10,10,0.5)) +
-  theme_cowplot(font_size = 10)
-print(p1)
-
 # Create a 2-d grid for the conditional posterior mean of the
 # coefficients ("mu").
 dat <- data.frame(mu1 = mu_grid)

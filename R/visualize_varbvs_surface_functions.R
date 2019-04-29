@@ -66,10 +66,14 @@ compute_kl_grid <- function (X, y, mu) {
   return(out)
 }
 
-# TO DO: Explain here what this function does.
-create_contour_plot <- function (dat, x) {
+# Create a contour plot from matrix or data frame "dat", which is an
+# output of function "compute_kl_grid". Argument "dat" should have (at
+# least) three columns, "mu", "mu2" and "KL". Additional points to be
+# plotted are contained in matrix or data frame "pts" containing
+# columns "X1" and "X2".
+create_contour_plot <- function (dat, pts) {
   dat <- as.data.frame(dat)
-  x   <- as.data.frame(x)
+  pts <- as.data.frame(pts)
 
   # Get the global minimum of the K-L objective.
   klmin <- min(dat$KL)

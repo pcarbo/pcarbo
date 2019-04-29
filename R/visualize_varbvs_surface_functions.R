@@ -16,7 +16,7 @@ betavar <- function (p, mu, s)
 # assuming the prior inclusion probabilities are 1/2, the residual
 # variance is 1, and the prior variance on the nonzero coefficients is
 # also 1.
-compute.alpha <- function (mu, s)
+compute_alpha <- function (mu, s)
   sigmoid(log(s)/2 + mu^2/(2*s))  
 
 # Compute the Kullback-Leibler divergence for the Bayesian variable
@@ -25,7 +25,7 @@ compute.alpha <- function (mu, s)
 # approximate posterior distribution (a, mu, s). This is assuming the
 # prior inclusion probabilities are 1/2, the residual variance is 1,
 # and the prior variance of the nonzero coefficients is also 1.
-computeKL <- function (X, y, a, mu, s) {
+compute_kl <- function (X, y, a, mu, s) {
   n <- length(y)
   e <- 1e-15
   d <- diag(crossprod(X))
@@ -36,3 +36,59 @@ computeKL <- function (X, y, a, mu, s) {
          - dot(a,1 + log(s) - (s + mu^2))/2)
 }
 
+# Apply function compute_kl to each 2-d grid point of the "mu"
+# variational parameters; input argument "mu" is an n x 2 matrix or
+# data frame, where n is the number of settings of the variational
+# parameters. The output is a data frame with five columns containing
+# the input, the posterior inclusion probabilities ("alpha1",
+# "alpha2") and the value of the KL-divergence ("KL").
+compute_kl_grid <- function (X, y, mu) {
+
+  # Compute the variational estimates of standard deviations ("s")
+  # assuming the residual variance is 1 and the prior on the
+  # coefficients is normal with zero mean and s.d. 1.
+  d <- diag(crossprod(X))
+  s <- 1/(d + 1)
+
+  # Initialize the return value.  
+  out <- as.matrix(cbind(mu,data.frame(alpha1 = 0,alpha2 = 0,KL = 0)))
+
+  # Repeat for each setting of "mu".
+  n <- nrow(out)
+  for (i in 1:n) {
+    mu <- out[i,1:2]
+    a  <- compute_alpha(mu,s)
+    out[i,"alpha1"] <- a[1]
+    out[i,"alpha2"] <- a[2]
+    out[i,"KL"]     <- compute_kl(X,y,a,mu,s)
+  }
+
+  return(out)
+}
+
+# TO DO: Explain here what this function does.
+create_contour_plot <- function (dat, x) {
+  dat <- as.data.frame(dat)
+  x   <- as.data.frame(x)
+
+  # Get the global minimum of the K-L objective.
+  klmin <- min(dat$KL)
+
+  # For each setting of "mu", compute the posterior mean estimate and
+  # the distance to the global minimum.
+  dat <- transform(dat,
+                   beta1 = alpha1*mu1,
+                   beta2 = alpha2*mu2,
+                   dist  = log10(KL - klmin + 1e-8))
+
+  # Create the contour plot, and add points to the contour plot.
+  return(ggplot(dat,aes_string(x = "beta1",y = "beta2",z = "dist")) +
+         geom_contour(color = "dodgerblue",bins = 50) +
+         geom_point(data = pts,mapping = aes_string(x = "X1",y = "X2"),
+                    color = "black",shape = 4,inherit.aes = FALSE) +
+         scale_x_continuous(breaks = seq(-10,10)) +
+         scale_y_continuous(breaks = seq(-10,10)) +
+         theme_cowplot(font_size = 12) +
+         labs(x = "posterior mean of beta1",
+              y = "posterior mean of beta2"))
+}

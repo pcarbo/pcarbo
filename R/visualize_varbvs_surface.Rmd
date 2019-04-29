@@ -88,6 +88,46 @@ y <- drop(X %*% beta + rnorm(n))
 y <- y - mean(y)
 ```
 
+Fit model
+---------
+
+Run the co-ordinate ascent updates with three different initial
+estimates of the variational parameters.
+
+```{r fit-model}
+fit1 <- varbvs(X,NULL,y,sigma = 1,sa = 1,logodds = 0,tol = 0,
+               alpha = alpha0[1,],mu = mu0[1,],verbose = FALSE)
+fit2 <- varbvs(X,NULL,y,sigma = 1,sa = 1,logodds = 0,tol = 0,
+               alpha = alpha0[2,],mu = mu0[2,],verbose = FALSE)
+fit3 <- varbvs(X,NULL,y,sigma = 1,sa = 1,logodds = 0,tol = 0,
+               alpha = alpha0[3,],mu = mu0[3,],verbose = FALSE)
+pts <- as.data.frame(rbind(fit1$beta,fit2$beta,fit3$beta))
+print(pts)
+```
+
+The co-ordinate ascent updates should converge to three different
+stationary points of the K-L divergence
+
+Plot variational objective surface
+----------------------------------
+
+Compute the value of the variational objective (the K-L divergence) at
+each grid point $(\mu_1, \mu_2)$, where $\mu_j$ gives the
+(approximate) posterior mean of the jth regression coefficient given
+that the coefficient is nonzero.
+
+```{r compute-surface}
+pdat <- expand.grid(mu1 = mu_grid,mu2 = mu_grid)
+pdat <- compute_kl_grid(X,y,pdat)
+```
+
+*Add text here.*
+
+```{r create-contour-plot, fig.width=6, fig.height=6}
+p1  <- create_contour_plot(pdat,pts)
+print(p1)
+```
+
 Session info
 ------------
 

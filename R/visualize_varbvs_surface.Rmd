@@ -1,0 +1,99 @@
+---
+title: "Visualizing stationary points of the varbvs objective"
+author: "Peter Carbonetto"
+date: April 29, 2019
+output:
+  html_document:
+    theme: readable
+    include:
+      before_body: include/header.html
+      after_body: include/footer.html
+---
+
+*Add text here.*
+
+```{r knitr, echo=FALSE}
+knitr::opts_chunk$set(comment = "#",results = "hold",collapse = TRUE,
+                      fig.align = "center")
+```
+
+Analysis settings
+-----------------
+
+These variables specify the number of samples to simulate ("n"), the
+correlation between the two simulated variables, X1 and X2 ("xcor"),
+and the regression coefficients used to simulate the outcomes
+("beta").
+
+```{r analysis-settings}
+n    <- 40
+xcor <- 0.99
+beta <- c(3,0)
+```
+
+These two variables specify how the variational parameters are
+initialized in the three varbvs runs.
+
+```{r varbvs-init}
+alpha0 <- rbind(c(0,1),
+                c(1,0),
+                c(1,1))
+mu0    <- rbind(c(0,3),
+                c(2.5,0),
+                c(1,1.5))
+```
+
+For creating the surface plot of the variational objective, the
+objective is evaluated at all grid points specified by "mu_grid".
+
+```{r mu-grid}
+mu_grid <- seq(-1,3.5,0.01)
+```
+
+Set up environment
+------------------
+
+Load a few packages as well as some functions used in the analysis
+below.
+
+```{r load-pkgs, warning=FALSE, message=FALSE}
+library(MASS)
+library(varbvs)
+library(ggplot2)
+library(cowplot)
+source("visualize_varbvs_surface_functions.R")
+```
+
+Initialize the sequence of pseudorandom numbers.
+
+```{r set-seed}
+set.seed(1)
+```
+
+Generate data set
+-----------------
+
+Simulate the $n \times 2$ matrix of predictors, $X$.
+
+```{r sim-X}
+S <- rbind(c(1,xcor),c(xcor,1))
+X <- mvrnorm(n,c(0,0),S)
+X <- scale(X,center = TRUE,scale = FALSE)
+```
+
+Simulate the continuously-valued outcomes.
+
+```{r sim-y}
+y <- drop(X %*% beta + rnorm(n))
+y <- y - mean(y)
+```
+
+Session info
+------------
+
+This is the version of R and the packages that were used to generate
+these results.
+
+```{r session-info}
+sessionInfo()
+```

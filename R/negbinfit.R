@@ -1,6 +1,8 @@
 # A short script illustrating how to implement a simple co-ordinate
 # ascent algorithm to fit a negative binomial model when the samples
-# are weighted.
+# are weighted. Precisely, this computes maximum-likelihood estimates
+# of the "size" (t) and "probability of success" (p) parameters
+# specifying the negative binomial distribution.
 
 # SIMULATE DATA
 # -------------

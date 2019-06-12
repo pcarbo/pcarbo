@@ -45,6 +45,7 @@ b  <- sqrt(sb) * b
 
 # Generate the quantitative trait measurements.
 y <- drop(X %*% b + rnorm(n))
+y <- y - mean(y)
 
 # ESTIMATE PVE
 # ------------

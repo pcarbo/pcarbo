@@ -1,9 +1,13 @@
-# TO DO: Explain here what this script does, and how to use it.
+# This is a short script to demonstrate fitting a ridge regression
+# model to estimate trait "heritability" (that is, the proportion of
+# variance in the trait explained by the available genetic variants)
+# under the "polygenic" modeling assumption that all SNPs explain
+# some (small) amount of variation in the trait.
 
 # SCRIPT PARAMETERS
 # -----------------
 r <- 0.6   # Proportion of variance in trait explained by SNPs.
-n <- 400   # Number of samples.
+n <- 750   # Number of samples.
 p <- 1000  # Number of genetic markers (SNPs).
 
 # Candidate values for the PVE estimates.
@@ -60,8 +64,9 @@ ns   <- length(sa)
 logw <- rep(0,ns)
 for (i in 1:ns)
   logw[i] <- compute.log.weight(K,y,sa[i])
-    
-# Compute the posterior mean estimate of h.
+
+# Show the (approximate) posterior distribution over h.
 w <- exp(logw - max(logw))
 w <- w/sum(w)
 cat(sprintf("Mean PVE estimate is %0.3f.\n",sum(w*h)))
+plot(h,w,type = "l",col = "darkblue",lwd = 2)

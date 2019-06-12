@@ -9,7 +9,9 @@ p <- 1000  # Number of genetic markers (SNPs).
 # Candidate values for the PVE estimates.
 h <- seq(0.01,0.99,0.005)
 
-# Initialize the sequence of pseudorandom numbers.
+# SET UP ENVIRONMENT
+# ------------------
+source("pve.R")
 set.seed(1)
 
 # GENERATE DATA
@@ -30,12 +32,36 @@ X <- scale(X,center = TRUE,scale = FALSE)
 # Generate "polygenic" additive effects for the SNPs.
 b <- rnorm(p)
 
-# Adjust the QTL effects so that we control for the proportion of variance
-# explained (r). That is, we adjust beta so that r = a/(a+1), where I've
-# defined a = beta'*cov(X)*beta. Here, sb is the variance of the (nonzero)
-# QTL effects.
+# Adjust the QTL effects so that we control for the proportion of
+# variance explained (r). That is, we adjust b so that r = a/(a+1),
+# where I've defined a = b'*cov(X)*b. Here, sb is the variance of the
+# (nonzero) QTL effects.
 sb <- r/(1-r)/var(drop(X %*% b))
 b  <- sqrt(sb) * b
 
 # Generate the quantitative trait measurements.
 y <- drop(X %*% b + rnorm(n))
+
+# ESTIMATE PVE
+# ------------
+# For each setting of h, get the "sa" parameter under a "polygenic"
+# model in which all the SNP effects (the regression coefficients) are
+# normal with zero mean and variance s*sa, where "s" is the residual
+# variance parameter.
+sx <- sum(apply(X,2,sd)^2)
+sa <- p*h/(1-h)/sx
+
+# Compute the kinship matrix.
+K <- tcrossprod(X)/p
+
+# Compute the log-likelihood for each candidate setting of the prior
+# variance parameter, "sa".
+ns   <- length(sa)
+logw <- rep(0,ns)
+for (i in 1:ns)
+  logw[i] <- compute.log.weight(K,y,sa[i])
+    
+# Compute the posterior mean estimate of h.
+w <- exp(logw - max(logw))
+w <- w/sum(w)
+cat(sprintf("Mean PVE estimate is %0.3f.\n",sum(w*h)))

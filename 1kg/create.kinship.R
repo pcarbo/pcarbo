@@ -15,12 +15,17 @@ read.geno.raw <- function (geno.file) {
   return(geno)
 }
 
-# Load the 1000 Genomes population labels.
+# Load the genotype matrix into R, and fix the ids.
+geno           <- read.geno.raw("1kg_recoded.raw")
+ids            <- sapply(strsplit(rownames(geno),"_"),function (x) x[1])
+rownames(geno) <- ids
+
+# Load the population labels.
 labels <- read.table("omni_samples.20141118.panel",sep = " ",
                      header = TRUE,as.is = "id")
-
-# Load the genotype matrix into R.
-geno <- read.geno.raw("1kg_recoded.raw")
+labels <- subset(labels,is.element(labels$id,ids))
+rows   <- match(ids,labels$id)
+labels <- labels[rows,]
 
 # Fill in the missing genotypes.
 p <- ncol(geno)
@@ -29,8 +34,8 @@ for (j in 1:p) {
   geno[i,j] <- mean(geno[,j],na.rm = TRUE)
 }
 
-# Center the genotype matrix.
-geno <- scale(geno,center = TRUE,scale = FALSE)
-
 # Compute the kinship matrix.
-# TO DO.
+K <- tcrossprod(geno)/p
+
+# Save the matrix and the population labels.
+save(list = c("labels","K"),file = "1kg_kinship.RData")

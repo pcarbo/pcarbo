@@ -1,0 +1,6 @@
+*.bed
+*.bim
+*.fam
+*.vcf.gz
+*.raw
+plink

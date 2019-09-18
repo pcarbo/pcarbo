@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script to process 1000 Genomes genotype data, and compute a kinship
+# matrix from the genotype data.
+
 URL_PLINK=http://s3.amazonaws.com/plink1-assets/plink_linux_x86_64_20190617.zip
 URL_1KG=ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/supporting/hd_genotype_chip/ALL.chip.omni_broad_sanger_combined.20140818.snps.genotypes.vcf.gz
 

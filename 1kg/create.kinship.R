@@ -1,4 +1,5 @@
-# TO DO: Explain here (very briefly) what this script does.
+# Script to load the 1000 Genomes genotype data, compute a kinship
+# matrix, and save the kinship matrix in an .RData file.
 library(data.table)
 library(tools)
 

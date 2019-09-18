@@ -18,5 +18,5 @@ paste temp.txt temp.txt > samples.txt
   --out 1kg_pruned
 ./plink --bfile 1kg_pruned --recode A --out 1kg_recoded
 
-# Create the (centered) kinship matrix.
-# TO DO.
+# Create the kinship matrix from the genotype data.
+Rscript create.kinship.R

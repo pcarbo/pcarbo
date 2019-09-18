@@ -1,5 +1,6 @@
 # TO DO: Explain here (very briefly) what this script does.
 library(data.table)
+library(tools)
 
 # Read an n x p genotype matrix from a .raw file, where n is the
 # number of samples and p is the number of genetic markers (SNPs).
@@ -39,3 +40,4 @@ K <- tcrossprod(geno)/p
 
 # Save the matrix and the population labels.
 save(list = c("labels","K"),file = "1kg_kinship.RData")
+resaveRdaFiles("1kg_kinship.RData")

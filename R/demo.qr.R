@@ -1,6 +1,15 @@
 # TO DO: Explain here what this script does, and how to use it.
 set.seed(1)
 
+# Compute a low-rank factorization of X.
+qr.incomplete <- function (X, tol = 1e-8) {
+  out <- qr(X,tol = tol)
+  r   <- out$rank
+  Q   <- qr.Q(out)
+  R   <- qr.R(out)
+  return(list(Q = Q[,1:r],R = R[1:r,],rank = r))
+}
+
 # EXAMPLE WITHOUT PIVOTING
 # ------------------------
 # Generate a rank-3 20 x 10 matrix.
@@ -9,12 +18,8 @@ y <- rnorm(20)
 b <- rnorm(10)
 
 # Compute a low-rank QR factorization of X.
-out <- qr(X)
+out <- qr.incomplete(X)
 r   <- out$rank
-Q   <- qr.Q(out)
-R   <- qr.R(out)
-Q   <- Q[,1:r]
-R   <- R[1:r,]
 
 # Compute X*b in two ways.
 u1 <- drop(X %*% b)

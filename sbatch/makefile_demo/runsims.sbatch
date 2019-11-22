@@ -6,8 +6,8 @@
 # 
 #   sbatch runsims.sbatch
 #
-# With the settings I've provided, it should take a few minutes to
-# run.
+# With the experiment and SLURM settings I've provided, it should take
+# a few minutes to run on the RCC cluster.
 #
 # Note that GNU Make will not distribute computations across multiple
 # nodes, so it is important to set --nodes=1.
@@ -22,5 +22,6 @@
 # For reproducibility, add version number to "module load" call.
 module load R/3.4.3
 
-# Generate all the results using the Makefile.
+# Generate all the results using the Makefile. Here, 10 CPUs
+# ("threads") are used.
 make --jobs=10 all

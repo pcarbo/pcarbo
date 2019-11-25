@@ -47,5 +47,8 @@ cat(sprintf("Computation took %0.2f seconds.\n",t2["elapsed"]))
 # COMPARE FACTORIZATIONS
 # ----------------------
 x <- rep(1,m)
-print(max(abs(L %*% x - Q %*% (R %*% x))))
-print(max(abs(L %*% x - Q2 %*% (B %*% x))))
+cat(sprintf("Largest error in QR factorization: %0.1e\n",
+            max(abs(L %*% x - Q %*% (R %*% x)))))
+cat(sprintf("Largest error in randomized QB:    %0.1e\n",
+            max(abs(L %*% x - Q2 %*% (B %*% x)))))
+

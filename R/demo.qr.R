@@ -5,7 +5,7 @@ set.seed(1)
 
 # Compute a low-rank factorization of X, in which the "effective" rank
 # is estimated using qr().
-qr.incomplete <- function (X, tol = 1e-8) {
+qr.incomplete <- function (X, tol = 1e-7) {
   out   <- qr(X,tol = tol)
   r     <- out$rank
   p     <- out$pivot

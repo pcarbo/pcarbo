@@ -6,6 +6,10 @@ output: workflowr::wflow_html
 
 *Add text here.*
 
+```{r knitr-opts, include=FALSE}
+knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold")
+```
+
 Load packages
 -------------
 

@@ -31,13 +31,14 @@ others; the weakest correlates are between $(x1,x2)$ and $(x3,x4).
 
 ```{r simulate-data}
 set.seed(1)
+n <- 100
 b <- c(1.1,0,-0.75,0,0)
 S <- rbind(c(   1, 0.99,  0.5,  0.5, 0.8),
            c(0.99,    1,  0.5,  0.5, 0.8),
            c( 0.5,  0.5,    1, 0.99, 0.8),
            c( 0.5,  0.5, 0.99,    1, 0.8),
            c( 0.8,  0.8,  0.8,  0.8,   1))
-X <- rmvnorm(100,sigma = S)
+X <- rmvnorm(n,sigma = S)
 y <- c(X %*% b + 3*rnorm(n))
 ```
 

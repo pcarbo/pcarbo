@@ -4,6 +4,7 @@
 # ------------------
 # Load the susie and mvtnorm packages used in the toy example below.
 library(mvtnorm)
+library(varbvs)
 library(susieR)
 
 # Initialize the sequence of pseudorandom numbers.

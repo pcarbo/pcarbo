@@ -1,0 +1,210 @@
+---
+title: "Prepare GTEx data for topic modeling analysis"
+author: "Peter Carbonetto"
+output: workflowr::wflow_html
+---
+
+Here we prepare the GTEx gene expression data (read counts) for
+subsequent topic modeling analyses. We also run PCA on the read counts
+as a "sanity check" that these data can be used to identify different
+tissue types.
+
+```{r knitr-opts, include=FALSE}
+knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
+                      fig.align = "center")
+```
+
+Before running these steps on your computer, you need to retrieve the
+following two files from the [GTEx Portal][gtex], and save these files
+to the "data" folder in your local copy of the git repository:
+
+```
+GTEx_v7_Annotations_SampleAttributesDS.txt
+GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_reads.gct.gz
+```
+
+I ran this analysis interactively on the RCC cluster (midway2) by
+running these commands:
+
+```
+sinteractive --partition=broadwl --exclusive --time=24:00:00
+module load R/3.5.1
+module load pandoc/1.13
+R --no-save
+```
+
+And then I ran the following lines of code once inside the R
+environment:
+
+```{r wflow-build, eval=FALSE}
+library(workflowr)
+wflow_build("prepare_gtex.Rmd",local = TRUE,view = FALSE,verbose = TRUE)
+```
+
+After I am satisfied with the results, I run the following to commit
+the analysis:
+
+```{r wflow-publish, eval=FALSE}
+wflow_publish("prepare_gtex.Rmd",view = FALSE,verbose = TRUE)
+```
+
+Analysis settings
+-----------------
+
+These three variables specify the locations of the GTEx data files. It
+is assumed that the data files are all found inside the `data.dir`
+directory. Variable `sample.file` specifies the name of the sample
+attributes file, and `counts.file` specifies the name of the read
+count file.
+
+```{r set-input-file-names}
+data.dir     <- file.path("..","data")
+samples.file <- "GTEx_v7_Annotations_SampleAttributesDS.txt"
+counts.file  <- "GTEx_Analysis_2016-01-15_v7_RNASeQCv1.1.8_gene_reads.gct.gz"
+```
+
+These three variables specify the names of the outputted CSV files:
+the processed read count data, and the "rough" estimates of the
+non-negative factors and loadings.
+
+```{r set-output-file-names}
+out.dir         <- file.path("..","output")
+counts.out.file <- "gtex.csv"
+factors.file    <- "gtex_factors_rough.csv"
+loadings.file   <- "gtex_loadings_rough.csv"
+```
+
+The number of factors ("topics") in the non-negative matrix
+factorization. K = 20 is the number that Kushal *et al* used in their
+*PLoS Genetics* paper.
+
+```{r set-k}
+K <- 20
+```
+
+Set up environment
+------------------
+
+Load several packages and functions used in analysis of the GTEx
+data. The NNLM package is used to compute rough estimates of the
+non-negative factors. The readr package is used because it is much
+faster than the "read.csv" base function for reading the read count
+data from the CSV file. The rsvd package is used to quickly compute
+PCs from the read count data.
+
+```{r load-pkgs, warning=FALSE, message=FALSE}
+library(readr)
+library(rsvd)
+library(ggplot2)
+library(cowplot)
+library(NNLM)
+source(file.path("..","code","gtex.R"))
+```
+
+Load and prepare data
+---------------------
+
+The read count data are imported as a matrix, with one row per tissue
+sample and one column per gene. See the comments accompanying the
+`read.gtex.data` function for more details about the steps taken to
+prepare the GTEx data.
+
+```{r read-data}
+samples.file <- file.path(data.dir,samples.file)
+counts.file  <- file.path(data.dir,counts.file)
+out          <- read.gtex.data(samples.file,counts.file)
+samples      <- out$samples
+counts       <- out$counts
+rm(out)
+```
+
+Get overview of gene expression data
+------------------------------------
+
+Unlike single-cell RNA-seq data, these read counts are not sparse;
+over half the read counts are non-zero.
+
+```{r summarize-data}
+cat(sprintf("Number of genes: %d\n",ncol(counts)))
+cat(sprintf("Number of samples: %d\n",nrow(counts)))
+cat(sprintf("Proportion of counts that are non-zero: %0.1f%%.\n",
+            100*mean(counts > 0)))
+cat(sprintf("Number of tissue types (general, specific): %d, %d\n",
+            nlevels(samples$general),nlevels(samples$specific)))
+```
+			
+Compute principal components
+----------------------------
+
+Compute the top 20 PCs from the read counts matrix.
+
+```{r run-pca}
+set.seed(1)
+timing <- system.time(
+  out <- rpca(counts,k = 20,center = TRUE,scale = FALSE,retx = TRUE))
+cat(sprintf("Computation took %0.2f seconds.\n",timing["elapsed"]))
+pcs        <- as.data.frame(out$x)
+names(pcs) <- paste0("PC",1:20)
+rm(out)
+```
+
+Plot the top PCs
+----------------
+
+The second PC separates out blood cells, suggesting that gene
+expression in blood cells is very different from other tissues.
+
+```{r plot-pcs-1-2, fig.height=5, fig.width=9}
+tissues <- samples$general
+plot.gtex.pcs(tissues,pcs)
+```
+
+Other tissues, such as skin, breast and muscle, also cluster in top
+PCs, but in many cases the clustering is not as strong.
+
+```{r plot-pcs-3-10, fig.height=7.5, fig.width=7.5}
+plot_grid(plot.gtex.pcs(tissues,pcs,"PC3","PC4",guide = "none"),
+          plot.gtex.pcs(tissues,pcs,"PC5","PC6",guide = "none"),
+          plot.gtex.pcs(tissues,pcs,"PC7","PC8",guide = "none"),
+          plot.gtex.pcs(tissues,pcs,"PC9","PC10",guide = "none"),
+          nrow = 2,ncol = 2)
+```
+
+Compute rough estimates of non-negative factors
+-----------------------------------------------
+
+Fit the non-negative matrix factorization using the sequential
+coordinate descent ("scd") algorithm. The fitting is prematurely
+terminated to provide only very rough estimates of the factors.
+
+```{r run-nnmf}
+timing <- system.time(
+  fit <- nnmf(counts,K,method = "scd",loss = "mkl",rel.tol = 1e-8,
+              n.threads = 0,max.iter = 10,inner.max.iter = 4,trace = 1,
+			  verbose = 2))
+cat(sprintf("Computation took %0.2f seconds.\n",timing["elapsed"]))
+```
+
+Write results to file
+---------------------
+
+Write the post-processed read count data to a CSV file.
+
+```{r write-read-counts}
+counts.out.file <- file.path(out.dir,counts.out.file)
+counts          <- as.data.frame(counts)
+write_csv(counts,counts.out.file,col_names = FALSE)
+```
+
+Write the non-negative factors to CSV files.
+
+```{r write-factors}
+factors.file  <- file.path(out.dir,factors.file)
+loadings.file <- file.path(out.dir,loadings.file)
+F <- as.data.frame(round(t(fit$H),digits = 4))
+L <- as.data.frame(round(fit$W,digits = 4))
+write_csv(F,factors.file,col_names = FALSE)
+write_csv(L,loadings.file,col_names = FALSE)
+```
+
+[gtex]: https://www.gtexportal.org

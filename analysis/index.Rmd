@@ -5,4 +5,17 @@ site: workflowr::wflow_site
 output: workflowr::wflow_html
 ---
 
+Analyses
+--------
+
 + [Illustration of SuSiE in a "difficult" situation](susie_jrssb_example.html)
+
++ [There are three—not two—stationary points in the varbvs
+   objective](visualize_varbvs_surface.html)
+
+Other things
+------------
+
++ [So you want to install source packages on your Mac?](r-macos.html)
+
++ [Multicore matrix computation in R](demo.matrix.multicore.html)

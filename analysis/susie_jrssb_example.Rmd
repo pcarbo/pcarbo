@@ -25,13 +25,15 @@ Simulate data
 -------------
 
 One of the referees was interested in understanding the behaviour of
-SuSiE in the following scenario.
+SuSiE in the following scenario in which the correlation structure is
+slightly more complex that the motivating example provided in the
+paper.
 
-There are 5 predictors, and they are all somewhat correlated with each
-other. The first two predictors are very correlated with each other,
-and the third and fourth predictors are also very strongly
-correlated. The fifth predictor is also more correlated with the
-others; the weakest correlates are between $(x1,x2)$ and $(x3,x4).
+Consider 5 correlated predictors, $x_1, \ldots, x_5$. The first two
+predictors are very correlated with each other, and the third and
+fourth predictors are also very strongly correlated. The fifth
+predictor is also more correlated with the others; the weakest
+correlates are between $(x1,x2)$ and $(x3,x4)$.
 
 ```{r simulate-data}
 set.seed(1)

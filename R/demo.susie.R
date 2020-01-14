@@ -1,5 +1,3 @@
-# TO DO: Explain here what this script does.
-
 # SET UP ENVIRONMENT
 # ------------------
 # Load the susie and mvtnorm packages used in the toy example below.
@@ -47,10 +45,6 @@ print(summary(fit1)$top.vars)
 
 # FIT SUSIE MODEL
 # ---------------
-fit2 <- susie(X,y,L = 2,standardize = FALSE,estimate_prior_variance = FALSE,
-              scaled_prior_variance = 1,min_abs_corr = 0,tol = 1e-8)
-print(susie_get_cs(fit2,X,min_abs_corr = 0))
-
 fit3 <- susie(X[,c(1:2,5)],y,L = 1,standardize = FALSE,
               estimate_prior_variance = FALSE,
               scaled_prior_variance = 1,
@@ -62,3 +56,8 @@ fit4 <- susie(X[,3:5],y,L = 1,standardize = FALSE,
               scaled_prior_variance = 1,
               min_abs_corr = 0,tol = 1e-8)
 print(susie_get_cs(fit4,X,min_abs_corr = 0))
+
+fit2 <- susie(X,y,L = 2,standardize = FALSE,estimate_prior_variance = FALSE,
+              scaled_prior_variance = 1,min_abs_corr = 0,tol = 1e-8)
+print(susie_get_cs(fit2,X,min_abs_corr = 0))
+

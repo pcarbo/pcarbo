@@ -1,11 +1,8 @@
 ---
-title: "Home"
+title: Various analyses I have done
+author: Peter Carbonetto"
 site: workflowr::wflow_site
-output:
-  workflowr::wflow_html:
-    toc: false
-editor_options:
-  chunk_output_type: console
+output: workflowr::wflow_html
 ---
 
-Welcome to my research website.
++ [Illustration of SuSiE in a "difficult" situation](susie_jrssb_example.html)

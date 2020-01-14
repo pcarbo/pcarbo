@@ -1,17 +1,21 @@
-name: "pcarbo"
+name: Various analyses I have done
 output_dir: ../docs
+exclude: include
 navbar:
-  title: "pcarbo"
+  title: pcarbo
   left:
-  - text: Home
-    href: index.html
-  - text: About
-    href: about.html
-  - text: License
-    href: license.html
+    - text: Overview
+      href: index.html
+  right:
+    - text: source
+      href: https://github.com/pcarbo/pcarbo
 output:
   workflowr::wflow_html:
-    toc: yes
-    toc_float: yes
-    theme: cosmo
+    toc: no
+    theme: readable
     highlight: textmate
+    lib_dir: site_libs
+    self_contained: no
+    include:
+      before_body: include/header.html
+      after_body: include/footer.html

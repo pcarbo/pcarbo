@@ -113,7 +113,7 @@ uncertainty in the selected variables.
 
 ```{r fit-varbvs}
 fit1 <- varbvs(X,NULL,y,logodds = log10(0.5),sa = 1,verbose = FALSE)
-print(summary(fit1)$top.vars)
+summary(fit1)$top.vars
 ```
 
 varbvs has correctly determined that two variables are useful for

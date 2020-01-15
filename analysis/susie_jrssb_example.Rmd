@@ -4,7 +4,10 @@ author: Peter Carbonetto
 output: workflowr::wflow_html
 ---
 
-*Add text here.*
+Here we explore the behaviour of SuSiE in a toy example where the
+correlations between the predictors are not so straightforward. We
+will see that SuSiE still achieves the goal of correctly inferring
+Credible Sets in this slightly more complicated example.
 
 ```{r knitr-opts, include=FALSE}
 knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold")
@@ -21,43 +24,98 @@ library(varbvs)
 library(susieR)
 ```
 
-Simulate data
--------------
+Overview
+--------
 
 One of the referees was interested in understanding the behaviour of
 SuSiE in the following scenario in which the correlation structure is
-slightly more complex that the motivating example provided in the
+slightly more complex than the motivating example provided in the
 paper.
 
-Consider 5 correlated predictors, $x_1, \ldots, x_5$. The first two
-predictors are very correlated with each other, and the third and
-fourth predictors are also very strongly correlated. The fifth
-predictor is also more correlated with the others; the weakest
-correlates are between $(x1,x2)$ and $(x3,x4)$.
+Consider 5 correlated predictors in a linear regression, $x_1, \ldots,
+x_5$, in which only two variables, $x1$ and $x3$, have an effect on
+the outcome, $y$; that is, their regression coefficients $b_1$ and
+$b_3$ are not zero. The first two predictors are very strongly
+correlated with each other, and the third and fourth predictors are
+also very strongly correlated. Therefore, it will be difficult to
+distinguish between $x1$ and $x2$, and the same for $x3$ and
+$x4$. This correlation structure is the same as the simple motivating
+example given in the paper.
 
-```{r simulate-data}
-set.seed(1)
-n <- 100
-b <- c(1.1,0,-0.75,0,0)
+To complicate the example, there is a fifth predictor that has no
+effect on the outcome, and is also strongly correlated with the other
+variables. This is the correlation matrix for the 5 predictors:
+
+```{r correlation-matrix}
 S <- rbind(c(   1, 0.99,  0.5,  0.5, 0.8),
            c(0.99,    1,  0.5,  0.5, 0.8),
            c( 0.5,  0.5,    1, 0.99, 0.8),
            c( 0.5,  0.5, 0.99,    1, 0.8),
            c( 0.8,  0.8,  0.8,  0.8,   1))
+```
+
+Therefore, without an abundance of data, it will be difficult to
+distinguish between $(x_1, x_2, x_3)$ and $(x_3, x_4, x_5)$. The
+inferential statement that would best capture our uncertainty about
+which variables affect the outcome would look something like this:
+
+$$\mbox{Among coefficients $\beta_1, \ldots, \beta_5$, two (or more)
+are not zero}$$
+
+Since SuSiE is not designed to produce such inferential statements,
+the best we can do is instead to state:
+
+$$(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0 \mbox{ or } \beta_5 \neq
+0) \mbox{ and } (\beta_3 \neq 0 \mbox{ or } \beta_4 \neq 0)$$
+
+Another equally valid statement could be:
+
+$$(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0) \mbox{ and } (\beta_3
+\neq 0 \mbox{ or } \beta_4 \neq 0 \mbox{ or } \beta_5 \neq 0)$$
+
+Although neither of these statements completely capture our
+uncertainty about which variables affect the outcome, it does satisfy
+the following aim, which was given in the introduction to the paper:
+
+*A key feature of our method, which distinguishes it from most
+existing BVSR methods, is that it produces "Credible Sets" of
+variables that quantify uncertainty in which variable should be
+selected when multiple, highly correlated variables compete with one
+another. These Credible Sets are designed to be as small as possible
+while still each capturing a relevant variable.
+
+The key point here is that the Credible Sets are not necessarily
+intended to capture the full uncertainty in which variables should be
+selected, but does at least capture *all relevant variables*.
+
+Below, we investigate these claims empirically.
+
+Simulate data
+-------------
+
+We simulate 150 samples in this scenario.
+
+```{r simulate-data}
+set.seed(1)
+n <- 200
+b <- c(1, 0, -1, 0, 0)
 X <- rmvnorm(n,sigma = S)
-y <- c(X %*% b + 3*rnorm(n))
+y <- c(X %*% b + rnorm(n)/0.3)
 ```
 
-Single-variable regression analysis
------------------------------------
+Multiple regression using varbvs
+--------------------------------
 
-*Add text here.*
+First, to provide a counterexample, we fit the "varbvs" model, and
+show that model, although very similar to SuSiE in many ways, does not
+properly capture uncertainty in the selected variables.
 
-```{r lm} 
-for (i in 1:5) {
-  dat        <- data.frame(cbind(X[,i],y))
-  names(dat) <- c("x","y")
-  cat(sprintf("x%d: %0.2e\n",i,
-              summary(lm(y ~ x,dat))$coefficients["x","Pr(>|t|)"]))
-}
+```{r fit-varbvs}
+fit1 <- varbvs(X,NULL,y,logodds = log10(0.5),sa = 1)
+print(summary(fit1)$top.vars)
 ```
+
+Multiple regression using SuSiE
+-------------------------------
+
+*TO DO.*

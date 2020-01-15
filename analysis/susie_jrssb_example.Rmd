@@ -93,7 +93,7 @@ Below, we investigate these claims empirically.
 Simulate data
 -------------
 
-We simulate 150 samples in this scenario.
+We simulate 200 samples in this scenario.
 
 ```{r simulate-data}
 set.seed(1)
@@ -132,7 +132,7 @@ $L = 2$, but SuSiE will give similar results for $L > 2$.)
 ```{r fit-susie}
 fit2 <- susie(X,y,L = 2,standardize = FALSE,estimate_prior_variance = FALSE,
               scaled_prior_variance = 1,min_abs_corr = 0)
-print(susie_get_cs(fit2,X,min_abs_corr = 0)$cs)
+susie_get_cs(fit2,X,min_abs_corr = 0)$cs
 ```
 
 SuSiE identified two Credible Sets:

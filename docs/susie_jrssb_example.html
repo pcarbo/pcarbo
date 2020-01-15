@@ -423,16 +423,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotreee69de40341bcea33853c5ab4748d2d818fed7856targetblanke69de40a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/e69de40341bcea33853c5ab4748d2d818fed7856" target="_blank">e69de40</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree63a0e77acd96c952f735ba24261ff50010a3f5a6targetblank63a0e77a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/63a0e77acd96c952f735ba24261ff50010a3f5a6" target="_blank">63a0e77</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotreee69de40341bcea33853c5ab4748d2d818fed7856targetblanke69de40a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree63a0e77acd96c952f735ba24261ff50010a3f5a6targetblank63a0e77a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/e69de40341bcea33853c5ab4748d2d818fed7856" target="_blank">e69de40</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/63a0e77acd96c952f735ba24261ff50010a3f5a6" target="_blank">63a0e77</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -739,6 +739,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/pcarbo/pcarbo/blob/63a0e77acd96c952f735ba24261ff50010a3f5a6/analysis/susie_jrssb_example.Rmd" target="_blank">63a0e77</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-01-15
+</td>
+<td>
+wflow_publish(“susie_jrssb_example.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/pcarbo/81df87b9210d1fa51ed1e4f3c22c66394ae8ee1b/docs/susie_jrssb_example.html" target="_blank">81df87b</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-01-15
+</td>
+<td>
+Added more to susie example.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/pcarbo/pcarbo/blob/e69de40341bcea33853c5ab4748d2d818fed7856/analysis/susie_jrssb_example.Rmd" target="_blank">e69de40</a>
 </td>
 <td>
@@ -890,15 +924,15 @@ library(susieR)</code></pre>
 <p>One of the referees was interested in understanding the behaviour of SuSiE in the following scenario in which the correlation structure is slightly more complex than the motivating example provided in the paper.</p>
 <p>Consider 5 correlated predictors in a linear regression, <span class="math inline">\(x_1, \ldots, x_5\)</span>, in which only two variables, <span class="math inline">\(x1\)</span> and <span class="math inline">\(x3\)</span>, have an effect on the outcome, <span class="math inline">\(y\)</span>; that is, their regression coefficients <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_3\)</span> are not zero. The first two predictors are very strongly correlated with each other, and the third and fourth predictors are also very strongly correlated. Therefore, it will be difficult to distinguish between <span class="math inline">\(x1\)</span> and <span class="math inline">\(x2\)</span>, and the same for <span class="math inline">\(x3\)</span> and <span class="math inline">\(x4\)</span>. This correlation structure is the same as the simple motivating example given in the paper.</p>
 <p>To complicate the example, there is a fifth predictor that has no effect on the outcome, and is also strongly correlated with the other variables. This is the correlation matrix for the 5 predictors:</p>
-<pre class="r"><code>S &lt;- rbind(c(   1, 0.99,  0.5,  0.5, 0.8),
-           c(0.99,    1,  0.5,  0.5, 0.8),
-           c( 0.5,  0.5,    1, 0.99, 0.8),
-           c( 0.5,  0.5, 0.99,    1, 0.8),
-           c( 0.8,  0.8,  0.8,  0.8,   1))</code></pre>
+<pre class="r"><code>S &lt;- rbind(c(   1, 0.99,  0.8,  0.8, 0.9),
+           c(0.99,    1,  0.8,  0.8, 0.9),
+           c( 0.8,  0.8,    1, 0.99, 0.9),
+           c( 0.8,  0.8, 0.99,    1, 0.9),
+           c( 0.9,  0.9,  0.9,  0.9,   1))</code></pre>
 <p>Therefore, without an abundance of data, it will be difficult to distinguish between <span class="math inline">\((x_1, x_2, x_3)\)</span> and <span class="math inline">\((x_3, x_4, x_5)\)</span>. The inferential statement that would best capture our uncertainty about which variables affect the outcome would look something like this:</p>
 <p><span class="math display">\[\mbox{Among coefficients $\beta_1, \ldots, \beta_5$, two (or more)
 are not zero}\]</span></p>
-<p>Since SuSiE is not designed to produce such inferential statements, the best we can do is instead to state:</p>
+<p>SuSiE is not designed to produce such inferential statements, but it could state instead:</p>
 <p><span class="math display">\[(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0 \mbox{ or } \beta_5 \neq
 0) \mbox{ and } (\beta_3 \neq 0 \mbox{ or } \beta_4 \neq 0)\]</span></p>
 <p>Another equally valid statement could be:</p>
@@ -916,47 +950,42 @@ are not zero}\]</span></p>
 n &lt;- 200
 b &lt;- c(1, 0, -1, 0, 0)
 X &lt;- rmvnorm(n,sigma = S)
-y &lt;- c(X %*% b + rnorm(n)/0.3)</code></pre>
+y &lt;- drop(X %*% b + rnorm(n)/0.3)</code></pre>
 </div>
 <div id="multiple-regression-using-varbvs" class="section level2">
 <h2>Multiple regression using varbvs</h2>
-<p>First, to provide a counterexample, we fit the “varbvs” model, and show that model, although very similar to SuSiE in many ways, does not properly capture uncertainty in the selected variables.</p>
-<pre class="r"><code>fit1 &lt;- varbvs(X,NULL,y,logodds = log10(0.5),sa = 1)
+<p>First, to provide a counterexample that does not accomplish what we set out to achieve, we fit the “varbvs” model, and show that model, although very similar to SuSiE in many ways, does not adequately capture uncertainty in the selected variables.</p>
+<pre class="r"><code>fit1 &lt;- varbvs(X,NULL,y,logodds = log10(0.5),sa = 1,verbose = FALSE)
 print(summary(fit1)$top.vars)
-# Welcome to           --       *                              *               
-# VARBVS version 2.6-5 --       |              |               |               
-# large-scale Bayesian --       ||           | |    |          || |     |   |  
-# variable selection   -- |     || | |    |  | ||  ||        |||| ||    |   || 
-# ****************************************************************************
-# Copyright (C) 2012-2019 Peter Carbonetto.
-# See http://www.gnu.org/licenses/gpl.html for the full license.
-# Fitting variational approximation for Bayesian variable selection model.
-# family:     gaussian   num. hyperparameter settings: 1 
-# samples:    200        convergence tolerance         1.0e-04
-# variables:  5          iid variable selection prior: yes 
-# covariates: 0          fit prior var. of coefs (sa): no 
-# intercept:  yes        fit residual var. (sigma):    yes 
-#         variational    max.   incl variance params
-#  iter   lower bound  change   vars   sigma      sa
-# 00001 -5.356108e+02 5.5e-01 0001.9 1.2e+01 1.0e+00 
-# 00002 -5.333116e+02 3.9e-01 0002.1 1.1e+01 1.0e+00 
-# 00003 -5.331771e+02 1.3e-02 0002.1 1.1e+01 1.0e+00 
-# 00004 -5.331695e+02 6.6e-03 0002.1 1.1e+01 1.0e+00 
-# 00005 -5.331692e+02 1.9e-03 0002.1 1.1e+01 1.0e+00 
-# 00006 -5.331692e+02 3.3e-04 0002.1 1.1e+01 1.0e+00 
-# 00007 -5.331692e+02 5.0e-05 0002.1 1.1e+01 1.0e+00 
-# 
-# Estimating proportion of variance in Y explained by model.
 #   index variable       prob         PVE          coef  Pr(coef.&gt;0.95)
-# 1     3       X3 0.99996835 0.123298810 -1.3131491450 [-1.806,-0.820]
-# 2     1       X1 0.97533345 0.065627231  0.8614275793 [+0.421,+1.345]
-# 3     4       X4 0.03648400 0.004372519  0.0004970112 [-0.481,+0.508]
-# 4     5       X5 0.03619460 0.004588351 -0.0020164184 [-0.534,+0.423]
-# 5     2       X2 0.03479185 0.004470761  0.0013014624 [-0.428,+0.503]</code></pre>
+# 1     3       X3 0.99995825 0.128995948 -1.3311483474 [-1.836,-0.826]
+# 2     1       X1 0.98264586 0.073088751  0.9266196082 [+0.460,+1.425]
+# 3     4       X4 0.03756227 0.004674475  0.0005357177 [-0.495,+0.524]
+# 4     5       X5 0.03643073 0.004849222 -0.0017998663 [-0.534,+0.435]
+# 5     2       X2 0.03618984 0.004751830  0.0012398904 [-0.452,+0.521]</code></pre>
+<p>From this summary, we see that varbvs correctly determines that two variables are useful for predicting the outcome, but it incorrectly places all the weight on the first and third variables. This is expected behaviour due to the particular variational approximation used in varbvs, but it is undesirable when we want to better quantify uncertainty in the correlated variables.</p>
 </div>
 <div id="multiple-regression-using-susie" class="section level2">
 <h2>Multiple regression using SuSiE</h2>
-<p><em>TO DO.</em></p>
+<p>Next, we fit a SuSiE model. (For simplicity, we fit a SuSiE model with <span class="math inline">\(L = 2\)</span>, but SuSiE will obtain similar results for <span class="math inline">\(L &gt; 2\)</span>.)</p>
+<pre class="r"><code>fit2 &lt;- susie(X,y,L = 2,standardize = FALSE,estimate_prior_variance = FALSE,
+              scaled_prior_variance = 1,min_abs_corr = 0,tol = 1e-8)
+print(susie_get_cs(fit2,X,min_abs_corr = 0)$cs)
+# $L2
+# [1] 1 2 5
+# 
+# $L1
+# [1] 3 4 5</code></pre>
+<p>SuSiE identified two Credible Sets, in which <span class="math inline">\(x_5\)</span> is included in both, so we have:</p>
+<p><span class="math display">\[(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0 \mbox{ or } \beta_5 \neq
+0) \mbox{ and } (\beta_3 \neq 0 \mbox{ or } \beta_4 \neq 0 \mbox{ or }
+\beta_5 \neq 0) )\]</span></p>
+<p>Looking more closely at the posterior inclusion probabilities, most of the weight is assigned to <span class="math inline">\(x_3\)</span> and <span class="math inline">\(x_4\)</span> in the first Credible Set, and to <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> in the second Credible Set, but, in light of the strong correlations with <span class="math inline">\(x_5\)</span>, <em>each Credible Set also allows for the possibility that <span class="math inline">\(x_5\)</span> affects the outcome.</em></p>
+<pre class="r"><code>round(fit2$alpha,digits = 3)
+#       [,1]  [,2]  [,3]  [,4]  [,5]
+# [1,] 0.001 0.001 0.629 0.318 0.052
+# [2,] 0.466 0.478 0.010 0.012 0.035</code></pre>
+<p>Therefore, although this statement is not the same as, “among coefficients <span class="math inline">\(\beta_1, \ldots, \beta_5\)</span>, two (or more) are not zero”—for example, it allows for only selecting one variable, <span class="math inline">\(x_5\)</span>—it is does achieve the aim of capturing all relevant variables.</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

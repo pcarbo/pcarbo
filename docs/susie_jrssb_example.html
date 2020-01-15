@@ -423,16 +423,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree0e08193f0ac4a4668f1ff17a33ce501e98195ffdtargetblank0e08193a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/0e08193f0ac4a4668f1ff17a33ce501e98195ffd" target="_blank">0e08193</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree5bfb0a23f12347d96b4419fb3f82b8cdd7cf5022targetblank5bfb0a2a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/5bfb0a23f12347d96b4419fb3f82b8cdd7cf5022" target="_blank">5bfb0a2</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree0e08193f0ac4a4668f1ff17a33ce501e98195ffdtargetblank0e08193a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree5bfb0a23f12347d96b4419fb3f82b8cdd7cf5022targetblank5bfb0a2a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/0e08193f0ac4a4668f1ff17a33ce501e98195ffd" target="_blank">0e08193</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/5bfb0a23f12347d96b4419fb3f82b8cdd7cf5022" target="_blank">5bfb0a2</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -736,6 +736,57 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/pcarbo/pcarbo/blob/5bfb0a23f12347d96b4419fb3f82b8cdd7cf5022/analysis/susie_jrssb_example.Rmd" target="_blank">5bfb0a2</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-01-15
+</td>
+<td>
+wflow_publish(“susie_jrssb_example.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/2b5482bbc0307bd9057baf67d453a472b9a74ef2/analysis/susie_jrssb_example.Rmd" target="_blank">2b5482b</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-01-15
+</td>
+<td>
+Minor edit to susie example.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/pcarbo/e0c7ea6b603bdd7a02fee1541d3aa7a25eb0b308/docs/susie_jrssb_example.html" target="_blank">e0c7ea6</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-01-15
+</td>
+<td>
+Made a few small revisions to the susie example.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/pcarbo/pcarbo/blob/0e08193f0ac4a4668f1ff17a33ce501e98195ffd/analysis/susie_jrssb_example.Rmd" target="_blank">0e08193</a>
 </td>
 <td>
@@ -976,7 +1027,7 @@ are not zero}\]</span></p>
 </div>
 <div id="simulate-data" class="section level2">
 <h2>Simulate data</h2>
-<p>We simulate 150 samples in this scenario.</p>
+<p>We simulate 200 samples in this scenario.</p>
 <pre class="r"><code>set.seed(1)
 n &lt;- 200
 b &lt;- c(1, 0, -1, 0, 0)
@@ -1000,8 +1051,8 @@ print(summary(fit1)$top.vars)
 <h2>Multiple regression using SuSiE</h2>
 <p>Next, we fit a SuSiE model. (For simplicity, we fit a SuSiE model with <span class="math inline">\(L = 2\)</span>, but SuSiE will give similar results for <span class="math inline">\(L &gt; 2\)</span>.)</p>
 <pre class="r"><code>fit2 &lt;- susie(X,y,L = 2,standardize = FALSE,estimate_prior_variance = FALSE,
-  scaled_prior_variance = 1,min_abs_corr = 0)
-print(susie_get_cs(fit2,X,min_abs_corr = 0)$cs)
+              scaled_prior_variance = 1,min_abs_corr = 0)
+susie_get_cs(fit2,X,min_abs_corr = 0)$cs
 # $L2
 # [1] 1 2 5
 # 

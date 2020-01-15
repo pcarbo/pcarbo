@@ -423,16 +423,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree63a0e77acd96c952f735ba24261ff50010a3f5a6targetblank63a0e77a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/63a0e77acd96c952f735ba24261ff50010a3f5a6" target="_blank">63a0e77</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree0e08193f0ac4a4668f1ff17a33ce501e98195ffdtargetblank0e08193a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/0e08193f0ac4a4668f1ff17a33ce501e98195ffd" target="_blank">0e08193</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree63a0e77acd96c952f735ba24261ff50010a3f5a6targetblank63a0e77a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree0e08193f0ac4a4668f1ff17a33ce501e98195ffdtargetblank0e08193a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/63a0e77acd96c952f735ba24261ff50010a3f5a6" target="_blank">63a0e77</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/0e08193f0ac4a4668f1ff17a33ce501e98195ffd" target="_blank">0e08193</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -694,9 +694,6 @@ Untracked files:
     Untracked:  R/demo.nmf.R
     Untracked:  R/nmfmu.R
 
-Unstaged changes:
-    Modified:   R/demo.susie.R
-
 </code></pre>
 <p>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
@@ -734,6 +731,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/0e08193f0ac4a4668f1ff17a33ce501e98195ffd/analysis/susie_jrssb_example.Rmd" target="_blank">0e08193</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-01-15
+</td>
+<td>
+wflow_publish(“susie_jrssb_example.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/pcarbo/72fe4c09d4764b52f9a8fbe38f545cd8ebcf766d/docs/susie_jrssb_example.html" target="_blank">72fe4c0</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-01-15
+</td>
+<td>
+I have a complete first draft of the susie example.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -911,7 +942,7 @@ Added workflowr files.
 </div>
 </div>
 </div>
-<p>Here we explore the behaviour of SuSiE in a toy example where the correlations between the predictors are not so straightforward. We will see that SuSiE still achieves the goal of correctly inferring Credible Sets in this slightly more complicated example.</p>
+<p>Here we explore the behaviour of SuSiE in a toy example where the correlations between the predictors are not so straightforward. Despite being more complicated, SuSiE still correctly infers Credible Sets.</p>
 <div id="load-packages" class="section level2">
 <h2>Load packages</h2>
 <p>The mvtnorm package is used to simulate the data.</p>
@@ -921,26 +952,26 @@ library(susieR)</code></pre>
 </div>
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<p>One of the referees was interested in understanding the behaviour of SuSiE in the following scenario in which the correlation structure is slightly more complex than the motivating example provided in the paper.</p>
-<p>Consider 5 correlated predictors in a linear regression, <span class="math inline">\(x_1, \ldots, x_5\)</span>, in which only two variables, <span class="math inline">\(x1\)</span> and <span class="math inline">\(x3\)</span>, have an effect on the outcome, <span class="math inline">\(y\)</span>; that is, their regression coefficients <span class="math inline">\(b_1\)</span> and <span class="math inline">\(b_3\)</span> are not zero. The first two predictors are very strongly correlated with each other, and the third and fourth predictors are also very strongly correlated. Therefore, it will be difficult to distinguish between <span class="math inline">\(x1\)</span> and <span class="math inline">\(x2\)</span>, and the same for <span class="math inline">\(x3\)</span> and <span class="math inline">\(x4\)</span>. This correlation structure is the same as the simple motivating example given in the paper.</p>
-<p>To complicate the example, there is a fifth predictor that has no effect on the outcome, and is also strongly correlated with the other variables. This is the correlation matrix for the 5 predictors:</p>
+<p>One of the referees was interested in understanding the behaviour of SuSiE in an example in which the correlation structure is slightly more complex than the motivating example provided in the paper.</p>
+<p>Consider five correlated predictors in a simple linear regression, <span class="math inline">\(y = x_1\beta_1, \ldots, x_5\beta_5\)</span>, in which only two variables, <span class="math inline">\(x1\)</span> and <span class="math inline">\(x3\)</span>, have an effect on the outcome, <span class="math inline">\(y\)</span>; that is, the coefficients <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\beta_3\)</span> are both nonzero. The first two predictors are very strongly correlated with each other, and the third and fourth predictors are also very strongly correlated. Therefore, it will be difficult to distinguish between <span class="math inline">\(x1\)</span> and <span class="math inline">\(x2\)</span>, and likewise for <span class="math inline">\(x3\)</span> and <span class="math inline">\(x4\)</span>. This correlation structure is the same as the simple motivating example given in the paper.</p>
+<p>To complicate the example, there is a fifth predictor that has no effect on the outcome, and is also strongly correlated with the other variables. This is the correlation matrix for the five predictors:</p>
 <pre class="r"><code>S &lt;- rbind(c(   1, 0.99,  0.8,  0.8, 0.9),
            c(0.99,    1,  0.8,  0.8, 0.9),
            c( 0.8,  0.8,    1, 0.99, 0.9),
            c( 0.8,  0.8, 0.99,    1, 0.9),
            c( 0.9,  0.9,  0.9,  0.9,   1))</code></pre>
-<p>Therefore, without an abundance of data, it will be difficult to distinguish between <span class="math inline">\((x_1, x_2, x_3)\)</span> and <span class="math inline">\((x_3, x_4, x_5)\)</span>. The inferential statement that would best capture our uncertainty about which variables affect the outcome would look something like this:</p>
+<p>Therefore, without an abundance of data, it will be difficult to distinguish between variables 1, 2 and 5, and likewise for variables 3, 4 and 5. The inferential statement that would best capture our uncertainty about which variables affect the outcome would look something like this:</p>
 <p><span class="math display">\[\mbox{Among coefficients $\beta_1, \ldots, \beta_5$, two (or more)
 are not zero}\]</span></p>
-<p>SuSiE is not designed to produce such inferential statements, but it could state instead:</p>
+<p>SuSiE is not designed to produce such inferential statements, but could state instead:</p>
 <p><span class="math display">\[(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0 \mbox{ or } \beta_5 \neq
 0) \mbox{ and } (\beta_3 \neq 0 \mbox{ or } \beta_4 \neq 0)\]</span></p>
-<p>Another equally valid statement could be:</p>
+<p>Another valid statement could be:</p>
 <p><span class="math display">\[(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0) \mbox{ and } (\beta_3
 \neq 0 \mbox{ or } \beta_4 \neq 0 \mbox{ or } \beta_5 \neq 0)\]</span></p>
-<p>Although neither of these statements completely capture our uncertainty about which variables affect the outcome, it does satisfy the following aim, which was given in the introduction to the paper:</p>
-<p>*A key feature of our method, which distinguishes it from most existing BVSR methods, is that it produces “Credible Sets” of variables that quantify uncertainty in which variable should be selected when multiple, highly correlated variables compete with one another. These Credible Sets are designed to be as small as possible while still each capturing a relevant variable.</p>
-<p>The key point here is that the Credible Sets are not necessarily intended to capture the full uncertainty in which variables should be selected, but does at least capture <em>all relevant variables</em>.</p>
+<p>Although neither of these statements completely capture our uncertainty about which variables affect the outcome, it does satisfy our aim as it is stated in the paper:</p>
+<p>"A key feature of our method, which distinguishes it from most existing BVSR methods, is that it produces <em>Credible Sets</em> of variables that quantify uncertainty in which variable should be selected when multiple, highly correlated variables compete with one another. These Credible Sets are designed to be as small as possible while still each capturing a relevant variable.</p>
+<p>The key point here is that the Credible Sets are not intended to capture full uncertainty in which variables should be selected. But they are intended to capture <em>all relevant variables</em>.</p>
 <p>Below, we investigate these claims empirically.</p>
 </div>
 <div id="simulate-data" class="section level2">
@@ -954,7 +985,7 @@ y &lt;- drop(X %*% b + rnorm(n)/0.3)</code></pre>
 </div>
 <div id="multiple-regression-using-varbvs" class="section level2">
 <h2>Multiple regression using varbvs</h2>
-<p>First, to provide a counterexample that does not accomplish what we set out to achieve, we fit the “varbvs” model, and show that model, although very similar to SuSiE in many ways, does not adequately capture uncertainty in the selected variables.</p>
+<p>First, to provide a counterexample that does not accomplish what we set out to achieve, we fit the “varbvs” model, and show that varbvs, although similar to SuSiE in many ways, does not adequately capture uncertainty in the selected variables.</p>
 <pre class="r"><code>fit1 &lt;- varbvs(X,NULL,y,logodds = log10(0.5),sa = 1,verbose = FALSE)
 print(summary(fit1)$top.vars)
 #   index variable       prob         PVE          coef  Pr(coef.&gt;0.95)
@@ -963,29 +994,29 @@ print(summary(fit1)$top.vars)
 # 3     4       X4 0.03756227 0.004674475  0.0005357177 [-0.495,+0.524]
 # 4     5       X5 0.03643073 0.004849222 -0.0017998663 [-0.534,+0.435]
 # 5     2       X2 0.03618984 0.004751830  0.0012398904 [-0.452,+0.521]</code></pre>
-<p>From this summary, we see that varbvs correctly determines that two variables are useful for predicting the outcome, but it incorrectly places all the weight on the first and third variables. This is expected behaviour due to the particular variational approximation used in varbvs, but it is undesirable when we want to better quantify uncertainty in the correlated variables.</p>
+<p>varbvs has correctly determined that two variables are useful for predicting the outcome. However, it incorrectly placed all the weight on the first and third variables. This is expected behaviour—it is due to the particular variational approximation used in varbvs—but it is undesirable when we want to better quantify uncertainty in the correlated variables.</p>
 </div>
 <div id="multiple-regression-using-susie" class="section level2">
 <h2>Multiple regression using SuSiE</h2>
-<p>Next, we fit a SuSiE model. (For simplicity, we fit a SuSiE model with <span class="math inline">\(L = 2\)</span>, but SuSiE will obtain similar results for <span class="math inline">\(L &gt; 2\)</span>.)</p>
+<p>Next, we fit a SuSiE model. (For simplicity, we fit a SuSiE model with <span class="math inline">\(L = 2\)</span>, but SuSiE will give similar results for <span class="math inline">\(L &gt; 2\)</span>.)</p>
 <pre class="r"><code>fit2 &lt;- susie(X,y,L = 2,standardize = FALSE,estimate_prior_variance = FALSE,
-              scaled_prior_variance = 1,min_abs_corr = 0,tol = 1e-8)
+  scaled_prior_variance = 1,min_abs_corr = 0)
 print(susie_get_cs(fit2,X,min_abs_corr = 0)$cs)
 # $L2
 # [1] 1 2 5
 # 
 # $L1
 # [1] 3 4 5</code></pre>
-<p>SuSiE identified two Credible Sets, in which <span class="math inline">\(x_5\)</span> is included in both, so we have:</p>
+<p>SuSiE identified two Credible Sets:</p>
 <p><span class="math display">\[(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0 \mbox{ or } \beta_5 \neq
 0) \mbox{ and } (\beta_3 \neq 0 \mbox{ or } \beta_4 \neq 0 \mbox{ or }
-\beta_5 \neq 0) )\]</span></p>
-<p>Looking more closely at the posterior inclusion probabilities, most of the weight is assigned to <span class="math inline">\(x_3\)</span> and <span class="math inline">\(x_4\)</span> in the first Credible Set, and to <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> in the second Credible Set, but, in light of the strong correlations with <span class="math inline">\(x_5\)</span>, <em>each Credible Set also allows for the possibility that <span class="math inline">\(x_5\)</span> affects the outcome.</em></p>
+\beta_5 \neq 0)\]</span></p>
+<p>Looking more closely at the posterior inclusion probabilities, most of the weight is assigned to <span class="math inline">\(x_3\)</span> and <span class="math inline">\(x_4\)</span> in the first Credible Set, and to <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> in the second Credible Set, and, in light of the strong correlations with <span class="math inline">\(x_5\)</span>, <em>each Credible Set also allows for the possibility that <span class="math inline">\(x_5\)</span> affects the outcome:</em></p>
 <pre class="r"><code>round(fit2$alpha,digits = 3)
 #       [,1]  [,2]  [,3]  [,4]  [,5]
-# [1,] 0.001 0.001 0.629 0.318 0.052
-# [2,] 0.466 0.478 0.010 0.012 0.035</code></pre>
-<p>Therefore, although this statement is not the same as, “among coefficients <span class="math inline">\(\beta_1, \ldots, \beta_5\)</span>, two (or more) are not zero”—for example, it allows for only selecting one variable, <span class="math inline">\(x_5\)</span>—it is does achieve the aim of capturing all relevant variables.</p>
+# [1,] 0.001 0.001 0.628 0.319 0.051
+# [2,] 0.466 0.477 0.010 0.012 0.035</code></pre>
+<p>Therefore, although this statement is not the same as, “among coefficients <span class="math inline">\(\beta_1, \ldots, \beta_5\)</span>, two (or more) are not zero”, SuSiE still has correctly achieves the useful aim of identifying “Credible Sets” that capture all relevant variables.</p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

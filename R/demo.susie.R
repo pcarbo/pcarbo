@@ -1,3 +1,5 @@
+# TO DO: Explain here what this script does.
+
 # SET UP ENVIRONMENT
 # ------------------
 # Load the susie and mvtnorm packages used in the toy example below.
@@ -11,7 +13,7 @@ set.seed(1)
 # SIMULATE DATA
 # -------------
 cat("Generating data set.\n")
-n <- 100
+n <- 150
 b <- c(1.1,0,-0.75,0,0)
 S <- rbind(c(   1, 0.99,  0.5,  0.5, 0.8),
            c(0.99,    1,  0.5,  0.5, 0.8),
@@ -34,7 +36,7 @@ cat("Computing single-regression p-values.\n")
 for (i in 1:5) {
   dat        <- data.frame(cbind(X[,i],y))
   names(dat) <- c("x","y")
-  cat(sprintf("x%d: %0.2e\n",i,
+  cat(sprintf("x%d: %0.3f\n",i,
               summary(lm(y ~ x,dat))$coefficients["x","Pr(>|t|)"]))
 }
 

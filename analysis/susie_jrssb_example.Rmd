@@ -5,9 +5,9 @@ output: workflowr::wflow_html
 ---
 
 Here we explore the behaviour of SuSiE in a toy example where the
-correlations between the predictors are not so straightforward. We
-will see that SuSiE still achieves the goal of correctly inferring
-Credible Sets in this slightly more complicated example.
+correlations between the predictors are not so straightforward.
+Despite being more complicated, SuSiE still correctly infers Credible
+Sets.
 
 ```{r knitr-opts, include=FALSE}
 knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold")
@@ -28,23 +28,22 @@ Overview
 --------
 
 One of the referees was interested in understanding the behaviour of
-SuSiE in the following scenario in which the correlation structure is
-slightly more complex than the motivating example provided in the
-paper.
+SuSiE in an example in which the correlation structure is slightly
+more complex than the motivating example provided in the paper.
 
-Consider 5 correlated predictors in a linear regression, $x_1, \ldots,
-x_5$, in which only two variables, $x1$ and $x3$, have an effect on
-the outcome, $y$; that is, their regression coefficients $b_1$ and
-$b_3$ are not zero. The first two predictors are very strongly
-correlated with each other, and the third and fourth predictors are
-also very strongly correlated. Therefore, it will be difficult to
-distinguish between $x1$ and $x2$, and the same for $x3$ and
-$x4$. This correlation structure is the same as the simple motivating
-example given in the paper.
+Consider five correlated predictors in a simple linear regression, $y =
+x_1\beta_1, \ldots, x_5\beta_5$, in which only two variables, $x1$ and
+$x3$, have an effect on the outcome, $y$; that is, the coefficients
+$\beta_1$ and $\beta_3$ are both nonzero. The first two predictors are
+very strongly correlated with each other, and the third and fourth
+predictors are also very strongly correlated. Therefore, it will be
+difficult to distinguish between $x1$ and $x2$, and likewise for $x3$
+and $x4$. This correlation structure is the same as the simple
+motivating example given in the paper.
 
 To complicate the example, there is a fifth predictor that has no
 effect on the outcome, and is also strongly correlated with the other
-variables. This is the correlation matrix for the 5 predictors:
+variables. This is the correlation matrix for the five predictors:
 
 ```{r correlation-matrix}
 S <- rbind(c(   1, 0.99,  0.8,  0.8, 0.9),
@@ -55,38 +54,39 @@ S <- rbind(c(   1, 0.99,  0.8,  0.8, 0.9),
 ```
 
 Therefore, without an abundance of data, it will be difficult to
-distinguish between $(x_1, x_2, x_3)$ and $(x_3, x_4, x_5)$. The
-inferential statement that would best capture our uncertainty about
-which variables affect the outcome would look something like this:
+distinguish between variables 1, 2 and 5, and likewise for variables
+3, 4 and 5. The inferential statement that would best capture our
+uncertainty about which variables affect the outcome would look
+something like this:
 
 $$\mbox{Among coefficients $\beta_1, \ldots, \beta_5$, two (or more)
 are not zero}$$
 
 SuSiE is not designed to produce such inferential statements,
-but it could state instead:
+but could state instead:
 
 $$(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0 \mbox{ or } \beta_5 \neq
 0) \mbox{ and } (\beta_3 \neq 0 \mbox{ or } \beta_4 \neq 0)$$
 
-Another equally valid statement could be:
+Another valid statement could be:
 
 $$(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0) \mbox{ and } (\beta_3
 \neq 0 \mbox{ or } \beta_4 \neq 0 \mbox{ or } \beta_5 \neq 0)$$
 
 Although neither of these statements completely capture our
 uncertainty about which variables affect the outcome, it does satisfy
-the following aim, which was given in the introduction to the paper:
+our aim as it is stated in the paper:
 
-*A key feature of our method, which distinguishes it from most
-existing BVSR methods, is that it produces "Credible Sets" of
+"A key feature of our method, which distinguishes it from most
+existing BVSR methods, is that it produces *Credible Sets* of
 variables that quantify uncertainty in which variable should be
 selected when multiple, highly correlated variables compete with one
 another. These Credible Sets are designed to be as small as possible
 while still each capturing a relevant variable.
 
-The key point here is that the Credible Sets are not necessarily
-intended to capture the full uncertainty in which variables should be
-selected, but does at least capture *all relevant variables*.
+The key point here is that the Credible Sets are not intended to
+capture full uncertainty in which variables should be selected. But
+they are intended to capture *all relevant variables*.
 
 Below, we investigate these claims empirically.
 
@@ -107,53 +107,51 @@ Multiple regression using varbvs
 --------------------------------
 
 First, to provide a counterexample that does not accomplish what we
-set out to achieve, we fit the "varbvs" model, and show that model,
-although very similar to SuSiE in many ways, does not adequately
-capture uncertainty in the selected variables.
+set out to achieve, we fit the "varbvs" model, and show that varbvs,
+although similar to SuSiE in many ways, does not adequately capture
+uncertainty in the selected variables.
 
 ```{r fit-varbvs}
 fit1 <- varbvs(X,NULL,y,logodds = log10(0.5),sa = 1,verbose = FALSE)
 print(summary(fit1)$top.vars)
 ```
 
-From this summary, we see that varbvs correctly determines that two
-variables are useful for predicting the outcome, but it incorrectly
-places all the weight on the first and third variables. This is
-expected behaviour due to the particular variational approximation
-used in varbvs, but it is undesirable when we want to better quantify
-uncertainty in the correlated variables.
+varbvs has correctly determined that two variables are useful for
+predicting the outcome. However, it incorrectly placed all the weight
+on the first and third variables. This is expected behaviour---it is
+due to the particular variational approximation used in varbvs---but
+it is undesirable when we want to better quantify uncertainty in the
+correlated variables.
 
 Multiple regression using SuSiE
 -------------------------------
 
 Next, we fit a SuSiE model. (For simplicity, we fit a SuSiE model with
-$L = 2$, but SuSiE will obtain similar results for $L > 2$.)
+$L = 2$, but SuSiE will give similar results for $L > 2$.)
 
 ```{r fit-susie}
 fit2 <- susie(X,y,L = 2,standardize = FALSE,estimate_prior_variance = FALSE,
-              scaled_prior_variance = 1,min_abs_corr = 0,tol = 1e-8)
+  scaled_prior_variance = 1,min_abs_corr = 0)
 print(susie_get_cs(fit2,X,min_abs_corr = 0)$cs)
 ```
 
-SuSiE identified two Credible Sets, in which $x_5$ is included in
-both, so we have:
+SuSiE identified two Credible Sets:
 
 $$(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0 \mbox{ or } \beta_5 \neq
 0) \mbox{ and } (\beta_3 \neq 0 \mbox{ or } \beta_4 \neq 0 \mbox{ or }
-\beta_5 \neq 0) )$$
+\beta_5 \neq 0)$$
 
 Looking more closely at the posterior inclusion probabilities, most of
 the weight is assigned to $x_3$ and $x_4$ in the first Credible Set,
-and to $x_1$ and $x_2$ in the second Credible Set, but, in light of
+and to $x_1$ and $x_2$ in the second Credible Set, and, in light of
 the strong correlations with $x_5$, *each Credible Set also allows for
-the possibility that $x_5$ affects the outcome.*
+the possibility that $x_5$ affects the outcome:*
 
 ```{r susie-inclusion-probabilities}
 round(fit2$alpha,digits = 3)
 ```
 
 Therefore, although this statement is not the same as, "among
-coefficients $\beta_1, \ldots, \beta_5$, two (or more) are not
-zero"---for example, it allows for only selecting one variable,
-$x_5$---it is does achieve the aim of capturing all relevant
-variables.
+coefficients $\beta_1, \ldots, \beta_5$, two (or more) are not zero",
+SuSiE still has correctly achieves the useful aim of identifying
+"Credible Sets" that capture all relevant variables.

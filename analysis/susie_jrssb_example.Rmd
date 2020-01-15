@@ -47,11 +47,11 @@ effect on the outcome, and is also strongly correlated with the other
 variables. This is the correlation matrix for the 5 predictors:
 
 ```{r correlation-matrix}
-S <- rbind(c(   1, 0.99,  0.5,  0.5, 0.8),
-           c(0.99,    1,  0.5,  0.5, 0.8),
-           c( 0.5,  0.5,    1, 0.99, 0.8),
-           c( 0.5,  0.5, 0.99,    1, 0.8),
-           c( 0.8,  0.8,  0.8,  0.8,   1))
+S <- rbind(c(   1, 0.99,  0.8,  0.8, 0.9),
+           c(0.99,    1,  0.8,  0.8, 0.9),
+           c( 0.8,  0.8,    1, 0.99, 0.9),
+           c( 0.8,  0.8, 0.99,    1, 0.9),
+           c( 0.9,  0.9,  0.9,  0.9,   1))
 ```
 
 Therefore, without an abundance of data, it will be difficult to
@@ -62,8 +62,8 @@ which variables affect the outcome would look something like this:
 $$\mbox{Among coefficients $\beta_1, \ldots, \beta_5$, two (or more)
 are not zero}$$
 
-Since SuSiE is not designed to produce such inferential statements,
-the best we can do is instead to state:
+SuSiE is not designed to produce such inferential statements,
+but it could state instead:
 
 $$(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0 \mbox{ or } \beta_5 \neq
 0) \mbox{ and } (\beta_3 \neq 0 \mbox{ or } \beta_4 \neq 0)$$
@@ -100,22 +100,60 @@ set.seed(1)
 n <- 200
 b <- c(1, 0, -1, 0, 0)
 X <- rmvnorm(n,sigma = S)
-y <- c(X %*% b + rnorm(n)/0.3)
+y <- drop(X %*% b + rnorm(n)/0.3)
 ```
 
 Multiple regression using varbvs
 --------------------------------
 
-First, to provide a counterexample, we fit the "varbvs" model, and
-show that model, although very similar to SuSiE in many ways, does not
-properly capture uncertainty in the selected variables.
+First, to provide a counterexample that does not accomplish what we
+set out to achieve, we fit the "varbvs" model, and show that model,
+although very similar to SuSiE in many ways, does not adequately
+capture uncertainty in the selected variables.
 
 ```{r fit-varbvs}
-fit1 <- varbvs(X,NULL,y,logodds = log10(0.5),sa = 1)
+fit1 <- varbvs(X,NULL,y,logodds = log10(0.5),sa = 1,verbose = FALSE)
 print(summary(fit1)$top.vars)
 ```
+
+From this summary, we see that varbvs correctly determines that two
+variables are useful for predicting the outcome, but it incorrectly
+places all the weight on the first and third variables. This is
+expected behaviour due to the particular variational approximation
+used in varbvs, but it is undesirable when we want to better quantify
+uncertainty in the correlated variables.
 
 Multiple regression using SuSiE
 -------------------------------
 
-*TO DO.*
+Next, we fit a SuSiE model. (For simplicity, we fit a SuSiE model with
+$L = 2$, but SuSiE will obtain similar results for $L > 2$.)
+
+```{r fit-susie}
+fit2 <- susie(X,y,L = 2,standardize = FALSE,estimate_prior_variance = FALSE,
+              scaled_prior_variance = 1,min_abs_corr = 0,tol = 1e-8)
+print(susie_get_cs(fit2,X,min_abs_corr = 0)$cs)
+```
+
+SuSiE identified two Credible Sets, in which $x_5$ is included in
+both, so we have:
+
+$$(\beta_1 \neq 0 \mbox{ or } \beta_2 \neq 0 \mbox{ or } \beta_5 \neq
+0) \mbox{ and } (\beta_3 \neq 0 \mbox{ or } \beta_4 \neq 0 \mbox{ or }
+\beta_5 \neq 0) )$$
+
+Looking more closely at the posterior inclusion probabilities, most of
+the weight is assigned to $x_3$ and $x_4$ in the first Credible Set,
+and to $x_1$ and $x_2$ in the second Credible Set, but, in light of
+the strong correlations with $x_5$, *each Credible Set also allows for
+the possibility that $x_5$ affects the outcome.*
+
+```{r susie-inclusion-probabilities}
+round(fit2$alpha,digits = 3)
+```
+
+Therefore, although this statement is not the same as, "among
+coefficients $\beta_1, \ldots, \beta_5$, two (or more) are not
+zero"---for example, it allows for only selecting one variable,
+$x_5$---it is does achieve the aim of capturing all relevant
+variables.

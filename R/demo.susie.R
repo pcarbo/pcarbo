@@ -4,7 +4,7 @@ library(susieR)
 
 # SCRIPT PARAMETERS
 ns <- 1000          # Number of simulations.
-n  <- 1000          # Number of samples.
+n  <- 600           # Number of samples.
 b  <- c(0,1,1,0,0)  # True effects.
 se <- 3             # residual s.d.
 

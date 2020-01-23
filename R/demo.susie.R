@@ -1,8 +1,7 @@
 library(mvtnorm)
 library(susieR)
 
-# SCRIPT PARAMETERS
-# -----------------
+# Script parameters.
 ns <- 1000
 n  <- 500
 b  <- c(0,1,1,0,0)

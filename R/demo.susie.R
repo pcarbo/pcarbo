@@ -1,25 +1,34 @@
+library(Matrix)
 library(mvtnorm)
 library(susieR)
 
-# Script parameters.
-ns <- 1000
-n  <- 500
-b  <- c(0,1,1,0,0)
-S  <- rbind(c(   1, 0.99,  0.7,  0.7, 0.9),
-            c(0.99,    1,  0.7,  0.7, 0.9),
-            c( 0.7,  0.7,    1, 0.99, 0.8),
-            c( 0.7,  0.7, 0.99,    1, 0.8),
-            c( 0.9,  0.9,  0.8,  0.8,   1))
+# SCRIPT PARAMETERS
+ns <- 1000          # Number of simulations.
+n  <- 1000          # Number of samples.
+b  <- c(0,1,1,0,0)  # True effects.
+se <- 3             # residual s.d.
+
+# S  <- rbind(c(   1, 0.99,  0.7,  0.7, 0.9),
+#             c(0.99,    1,  0.7,  0.7, 0.9),
+#             c( 0.7,  0.7,    1, 0.99, 0.8),
+#             c( 0.7,  0.7, 0.99,    1, 0.8),
+#             c( 0.9,  0.9,  0.8,  0.8,   1))
+S <- rbind(c(1.0,  0.92, 0.7,  0.7,  0.9),
+           c(0.92, 1.0,  0.7,  0.7,  0.7),
+           c(0.7,  0.7,  1.0,  0.92, 0.8),
+           c(0.7,  0.7,  0.92, 1.0,  0.8),
+           c(0.9,  0.7,  0.8,  0.8,  1.0))
+S <- as.matrix(nearPD(S)$mat)
 set.seed(1)
 
 # Repeat for each simulation.
 res <- vector("list",ns)
 for (i in 1:ns) {
-  cat(i,"")
+  cat("*")
   
   # Simulate data.
-  X   <- rmvnorm(n,sigma = S)
-  y   <- drop(X %*% b + 3*rnorm(n))
+  X <- rmvnorm(n,sigma = S)
+  y <- drop(X %*% b + se*rnorm(n))
 
   # Fit the susie model, and store the inferred CS's.
   fit <- susie(X,y,L = 2,

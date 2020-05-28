@@ -50,16 +50,34 @@ fit.glmnet <- glmnet::cv.glmnet(Xtrain,ytrain,alpha = 0.95)
 # strength is estimated by k-fold cross-validation.
 fit.ridge <- glmnet::cv.glmnet(Xtrain,ytrain,alpha = 0)
 
-# Fit a ridge 
+# Fit a ridge regression model in which the penalty strength is
+# estimated by maximum-likelihood.
+# TO DO.
 
-# Use the fitted Elastic Net model to predict the outcomes in the test
-# examples.
-y.glmnet <- predict(fit.glmnet,Xtest,s = "lambda.min")
-plot(ytest,y.glmnet,pch = 20,col = "dodgerblue")
-abline(a = 0,b = 1,col = "magenta",lty = "dotted")
+# PREDICT RESPONSES IN TEST CASES
+# -------------------------------
+# Use the fitted regression models to predict the responses in the
+# text examples.
+y1 <- drop(predict(fit.glmnet,Xtest,s = "lambda.min"))
+y2 <- drop(predict(fit.ridge,Xtest,s = "lambda.min"))
+y3 <- drop(predict(fit.ridge,Xtest,s = "lambda.1se"))
 
-# Use the fitted ridge regression model to predict the outcomes in the
+# PLOT TRUE VS. ESTIMATED RESPONSES
+# ---------------------------------
+create_scatterplot <- function (x, y)
+  qplot(x,y,size = I(1)) +
+    geom_abline(slope = 1,intercept = 0,color = "magenta",
+                linetype = "dotted") +
+    xlim(c(-12,12)) + 
+    ylim(c(-12,12)) + 
+    labs(x = "true",y = "estimated",title = "elastic net") +
+    theme(plot.title = element_text(face = "plain",size = 10))
+theme_set(theme_cowplot(10))
+p1 <- create_scatterplot(ytest,y1)
+p2 <- create_scatterplot(ytest,y2)
+p3 <- create_scatterplot(ytest,y3)
+print(plot_grid(p1,p2,p3))
+
+# Use the fitted ridge regression model to predict the responses in the
 # test examples.
-y.ridge <- predict(fit.ridge,Xtest,s = "lambda.1se")
-plot(ytest,y.ridge,pch = 20,col = "indianred")
-abline(a = 0,b = 1,col = "magenta",lty = "dotted")
+

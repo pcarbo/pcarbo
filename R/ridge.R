@@ -1,12 +1,14 @@
 # TO DO: Explain here what this script is for.
 library(glmnet)
+library(ridge)
+library(varbvs)
 library(ggplot2)
 library(cowplot)
 
 # SCRIPT PARAMETERS
 # -----------------
 r    <- 0.9        # Proportion of variance explained by X.
-n    <- 400        # Number of samples.
+n    <- 800        # Number of samples.
 p    <- 1000       # Number of candidate predictors.
 i    <- c(127,354) # Indices of predictors affecting outcome.
 b    <- rep(0,p)   # Coefficients used to simulate data.
@@ -39,20 +41,27 @@ Xtrain <- X[i,]
 Xtest  <- X[j,]
 ytrain <- y[i]
 ytest  <- y[j]
+colnames(Xtrain) <- paste0("x",1:p)
+colnames(Xtest)  <- paste0("x",1:p)
 
 # FIT REGRESSION MODELS
 # ---------------------
 # Fit an Elastic Net model, in which the penalty strength is estimated
 # by k-fold cross-validation.
-fit.glmnet <- glmnet::cv.glmnet(Xtrain,ytrain,alpha = 0.95)
+fit.glmnet <- cv.glmnet(Xtrain,ytrain,alpha = 0.95)
 
 # Fit a ridge regression model using glmnet, in which the penalty
 # strength is estimated by k-fold cross-validation.
-fit.ridge <- glmnet::cv.glmnet(Xtrain,ytrain,alpha = 0)
+fit.ridge <- cv.glmnet(Xtrain,ytrain,alpha = 0)
 
 # Fit a ridge regression model in which the penalty strength is
 # estimated by maximum-likelihood.
-# TO DO.
+dat        <- as.data.frame(cbind(y,X))
+names(dat) <- c("y",paste0("x",1:p))
+fit.ridge2 <- linearRidge(y ~ .,dat)
+
+# Fit the varbvs model.
+fit.varbvs <- varbvs(Xtrain,NULL,ytrain,verbose = FALSE)
 
 # PREDICT RESPONSES IN TEST CASES
 # -------------------------------
@@ -61,22 +70,26 @@ fit.ridge <- glmnet::cv.glmnet(Xtrain,ytrain,alpha = 0)
 y1 <- drop(predict(fit.glmnet,Xtest,s = "lambda.min"))
 y2 <- drop(predict(fit.ridge,Xtest,s = "lambda.min"))
 y3 <- drop(predict(fit.ridge,Xtest,s = "lambda.1se"))
+y4 <- predict(fit.ridge2,as.data.frame(Xtest))
+y5 <- predict(fit.varbvs,Xtest)
 
 # PLOT TRUE VS. ESTIMATED RESPONSES
 # ---------------------------------
-create_scatterplot <- function (x, y)
+create_scatterplot <- function (x, y, title)
   qplot(x,y,size = I(1)) +
     geom_abline(slope = 1,intercept = 0,color = "magenta",
                 linetype = "dotted") +
     xlim(c(-12,12)) + 
     ylim(c(-12,12)) + 
-    labs(x = "true",y = "estimated",title = "elastic net") +
+    labs(x = "true",y = "estimated",title = title) +
     theme(plot.title = element_text(face = "plain",size = 10))
 theme_set(theme_cowplot(10))
-p1 <- create_scatterplot(ytest,y1)
-p2 <- create_scatterplot(ytest,y2)
-p3 <- create_scatterplot(ytest,y3)
-print(plot_grid(p1,p2,p3))
+p1 <- create_scatterplot(ytest,y1,"elastic net (lambda.min)")
+p2 <- create_scatterplot(ytest,y2,"ridge (lambda.min)")
+p3 <- create_scatterplot(ytest,y3,"ridge (lambda.1se)")
+p4 <- create_scatterplot(ytest,y4,"ridge (MLE)")
+p5 <- create_scatterplot(ytest,y5,"varbvs")
+print(plot_grid(p1,p2,p3,p4,p5))
 
 # Use the fitted ridge regression model to predict the responses in the
 # test examples.

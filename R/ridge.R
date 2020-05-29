@@ -28,10 +28,6 @@ b  <- sqrt(sb) * b
 # Generate the quantitative trait measurements.
 y <- drop(X %*% b + rnorm(n))
 
-# Check that the data are roughly simulated in the way we requested.
-cat(sprintf("Proportion of variance in Y explained by X = %0.3f\n",
-            var(drop(X %*% b))/var(y)))
-
 # Split the data into training and test sets.
 i <- 1:200
 j <- 201:400

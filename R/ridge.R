@@ -1,7 +1,5 @@
 # TO DO: Explain here what this script is for.
 library(glmnet)
-library(ridge)
-library(varbvs)
 library(ggplot2)
 library(cowplot)
 
@@ -48,49 +46,55 @@ colnames(Xtest)  <- paste0("x",1:p)
 # ---------------------
 # Fit an Elastic Net model, in which the penalty strength is estimated
 # by k-fold cross-validation.
-fit.glmnet <- cv.glmnet(Xtrain,ytrain,alpha = 0.95)
+fit.glmnet <- cv.glmnet(Xtrain,ytrain,alpha = 0.95,standardize = FALSE)
 
 # Fit a ridge regression model using glmnet, in which the penalty
-# strength is estimated by k-fold cross-validation.
-fit.ridge <- cv.glmnet(Xtrain,ytrain,alpha = 0)
+# strength is estimated using k-fold cross-validation with the default
+# settings.
+fit.ridge <- cv.glmnet(Xtrain,ytrain,alpha = 0,standardize = FALSE)
 
-# Fit a ridge regression model in which the penalty strength is
-# estimated by maximum-likelihood.
-dat        <- as.data.frame(cbind(y,X))
-names(dat) <- c("y",paste0("x",1:p))
-fit.ridge2 <- linearRidge(y ~ .,dat)
+# Fit a ridge regression model using glmnet, in which the penalty
+# strength is estimated using k-fold cross-validation, with a
+# customized setting of "lambda".
+fit.ridge2 <- cv.glmnet(Xtrain,ytrain,alpha = 0,standardize = FALSE,
+                        lambda = 10^seq(4,-2,length.out = 1000))
 
-# Fit the varbvs model.
-fit.varbvs <- varbvs(Xtrain,NULL,ytrain,verbose = FALSE)
-
+# Show lambda vs. cross-validation error.
+i <- which(with(fit.ridge2,lambda == lambda.min))
+j <- which(with(fit.ridge2,lambda == lambda.1se))
+with(fit.ridge2,plot(lambda,cvm,log = "x",type = "l",col = "darkorange",
+                     lwd = 2))
+with(fit.ridge,lines(lambda,cvm,col = "dodgerblue",lty = "dashed",lwd = 2))
+with(fit.ridge2,points(lambda[i],cvm[i],pch = 20,col = "darkorange"))
+with(fit.ridge2,points(lambda[j],cvm[j],pch = 18,col = "darkorange"))
+     
 # PREDICT RESPONSES IN TEST CASES
 # -------------------------------
 # Use the fitted regression models to predict the responses in the
 # text examples.
 y1 <- drop(predict(fit.glmnet,Xtest,s = "lambda.min"))
-y2 <- drop(predict(fit.ridge,Xtest,s = "lambda.min"))
-y3 <- drop(predict(fit.ridge,Xtest,s = "lambda.1se"))
-y4 <- predict(fit.ridge2,as.data.frame(Xtest))
-y5 <- predict(fit.varbvs,Xtest)
+y2 <- drop(predict(fit.ridge,Xtest,s  = "lambda.1se"))
+y3 <- drop(predict(fit.ridge,Xtest,s = "lambda.min"))
+y4 <- drop(predict(fit.ridge2,Xtest,s = "lambda.min"))
+cat(sprintf("elastic net MSE        = %0.3f\n",mean((ytest - y1)^2)))
+cat(sprintf("ridge (lambda.1se) MSE = %0.3f\n",mean((ytest - y2)^2)))
+cat(sprintf("ridge (lambda.min) MSE = %0.3f\n",mean((ytest - y3)^2)))
+cat(sprintf("ridge (custom) MSE     = %0.3f\n",mean((ytest - y4)^2)))
 
-# PLOT TRUE VS. ESTIMATED RESPONSES
-# ---------------------------------
+# EVALUATE PREDICTIONS
+# --------------------
 create_scatterplot <- function (x, y, title)
   qplot(x,y,size = I(1)) +
     geom_abline(slope = 1,intercept = 0,color = "magenta",
                 linetype = "dotted") +
-    xlim(c(-12,12)) + 
-    ylim(c(-12,12)) + 
+    xlim(c(-5,5)) + 
+    ylim(c(-5,5)) + 
     labs(x = "true",y = "estimated",title = title) +
     theme(plot.title = element_text(face = "plain",size = 10))
 theme_set(theme_cowplot(10))
 p1 <- create_scatterplot(ytest,y1,"elastic net (lambda.min)")
-p2 <- create_scatterplot(ytest,y2,"ridge (lambda.min)")
-p3 <- create_scatterplot(ytest,y3,"ridge (lambda.1se)")
-p4 <- create_scatterplot(ytest,y4,"ridge (MLE)")
-p5 <- create_scatterplot(ytest,y5,"varbvs")
-print(plot_grid(p1,p2,p3,p4,p5))
-
-# Use the fitted ridge regression model to predict the responses in the
-# test examples.
-
+p2 <- create_scatterplot(ytest,y2,"ridge (lambda.1se)")
+p3 <- create_scatterplot(ytest,y3,"ridge (lambda.min)")
+p4 <- create_scatterplot(ytest,y4,"ridge (custom)")
+dev.new()
+print(plot_grid(p1,p2,p3,p4))

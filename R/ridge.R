@@ -83,8 +83,8 @@ create_scatterplot <- function (x, y, title)
   qplot(x,y,size = I(1)) +
     geom_abline(slope = 1,intercept = 0,color = "magenta",
                 linetype = "dotted") +
-    xlim(c(-5,5)) + 
-    ylim(c(-5,5)) + 
+    xlim(c(-8,8)) + 
+    ylim(c(-8,8)) + 
     labs(x = "true",y = "estimated",title = title) +
     theme(plot.title = element_text(face = "plain",size = 10))
 theme_set(theme_cowplot(10))

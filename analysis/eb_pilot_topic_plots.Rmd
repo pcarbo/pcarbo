@@ -9,6 +9,8 @@ knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
                       fig.align = "center",dpi = 120)
 ```
 
+Load packages used in the analysis below, and set the seed.
+
 ```{r load-pkgs, message=FALSE}
 library(Matrix)
 library(dplyr)
@@ -18,11 +20,11 @@ library(cowplot)
 set.seed(1)
 ```
 
-Create a "hex plot" showing the density of the data points
-(specifically, the topic proportions) as they are projected onto two
-principal ccomponents (PCs).
+This function creates a "hex plot" showing the density of the data
+points (topic proportions) as projected onto two principal ccomponents
+(PCs).
 
-```{r chunk-2}
+```{r pca-hex-plot}
 pca_hex_plot <-
   function (fit, pcs = c("PC1","PC2"), n = 40, bins = c(0,1,10,100,1000,Inf),
             colors = c("gainsboro","lightskyblue","gold","orange","magenta")) {
@@ -36,9 +38,10 @@ pca_hex_plot <-
 }
 ```
 
-Load $k = 10$ multinomial topic model fit.
+Load the $k = 10$ multinomial topic model fit, and compute PCs from
+the topic proportions.
 
-```{r chunk-3}
+```{r load-data}
 fit <- readRDS("fit-scd-ex-k=10.rds")$fit
 fit <- poisson2multinom(fit)
 pca <- prcomp(fit$L)$x
@@ -46,16 +49,16 @@ pca <- prcomp(fit$L)$x
 
 TO DO: Describe here what these plots show.
 
-```{r chunk-4, fig.height=3, fig.width=8}
-p1 <- pca_plot(fit,pcs = c("PC1","PC2"),k = 4)
-p2 <- pca_plot(fit,pcs = c("PC1","PC2"),k = 6)
+```{r pca-plot-1, fig.height=2, fig.width=8}
+p1 <- pca_plot(fit,pcs = c("PC1","PC2"),k = 4) + guides(color = "none")
+p2 <- pca_plot(fit,pcs = c("PC1","PC2"),k = 6) + guides(color = "none")
 p3 <- pca_hex_plot(fit,pcs = c("PC1","PC2"),bins = c(0,1,10,50,100,Inf))
 plot_grid(p1,p2,p3,nrow = 1)
 ```
 
-TO DO: Describe here what this code does.
+*TO DO: Describe here what this code chunk does.*
 
-```{r chunk-5}
+```{r clustering-1}
 n   <- nrow(pca)
 x   <- rep("B",n)
 pc1 <- pca[,"PC1"]
@@ -64,15 +67,15 @@ x[pc1 < -0.05] <- "A"
 
 TO DO: Describe here what these plots show.
 
-```{r chunk-6, fig.width=7, fig.height=3}
-p4 <- pca_plot(fit,pcs = c("PC3","PC4"),k = 8)
+```{r pca-plot-2, fig.width=7, fig.height=3}
+p4 <- pca_plot(fit,pcs = c("PC3","PC4"),k = 8) + guides(color = "none")
 p5 <- pca_hex_plot(fit,pcs = c("PC3","PC4"),bins = c(0,1,5,10,100,Inf))
-plot_grid(p4,p5,nrow = 1)
+plot_grid(p4,p5,nrow = 1,rel_widths = c(2,3))
 ```
 
 TO DO: Describe here what this code does.
 
-```{r chunk-7}
+```{r clustering-2}
 pc3 <- pca[,"PC3"]
 pc4 <- pca[,"PC4"]
 x[pc3 > 2*pc4 + 0.58] <- "C"
@@ -81,33 +84,34 @@ clusters <- factor(x)
 
 TO DO: Describe here what these plots show.
 
-```{r chunk-8, fig.width=7, fig.height=3}
+```{r pca-plot-3, fig.width=7, fig.height=3}
 p6 <- pca_plot(fit,pcs = c("PC5","PC6"),k = 1)
 p7 <- pca_hex_plot(fit,pcs = c("PC5","PC6"),bins = c(0,1,10,20,100,Inf))
-plot_grid(p6,p7,nrow = 1)
+plot_grid(p6,p7,nrow = 1,rel_widths = c(2,3))
 ```
 
 TO DO: Describe here what these plots show.
 
-```{r chunk-9, fig.width=7, fig.height=3}
-p8 <- pca_plot(fit,pcs = c("PC7","PC9"),k = 2)
+```{r pca-plot-4, fig.width=7, fig.height=3}
+p8 <- pca_plot(fit,pcs = c("PC7","PC9"),k = 2) + guides(color = "none")
 p9 <- pca_hex_plot(fit,pcs = c("PC7","PC9"))
-plot_grid(p8,p9,nrow = 1)
+plot_grid(p8,p9,nrow = 1,rel_widths = c(2,3))
 ```
 
 TO DO: Explain here what these numbers show.
 
-```{r chunk-10}
+```{r clustering-summary}
 table(clusters)
 ```
 
 TO DO: Describe here what these plots show.
 
-```{r chunk-11, fig.width=7.5, fig.height=2}
+```{r structure-plot, fig.width=7.5, fig.height=2}
 rows <- sort(c(sample(which(clusters == "A"),800),
                sample(which(clusters == "B"),800),
                sample(which(clusters == "C"),300)))
 p10 <- structure_plot(select(fit,loadings = rows),grouping = clusters[rows],
-                      n = Inf,gap = 40,num_threads = 4)
+                      n = Inf,perplexity = 80,gap = 40,num_threads = 4,
+                      verbose = FALSE)
 print(p10)
 ```

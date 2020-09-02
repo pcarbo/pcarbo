@@ -420,22 +420,24 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree3dc63e7ac8c3cca8b309a26b1d630d24dc6483c6targetblank3dc63e7a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/3dc63e7ac8c3cca8b309a26b1d630d24dc6483c6" target="_blank">3dc63e7</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree7468b44ebce6cde6d6c1a70d0b3ceb1528dcba77targetblank7468b44a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/7468b44ebce6cde6d6c1a70d0b3ceb1528dcba77" target="_blank">7468b44</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree3dc63e7ac8c3cca8b309a26b1d630d24dc6483c6targetblank3dc63e7a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree7468b44ebce6cde6d6c1a70d0b3ceb1528dcba77targetblank7468b44a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/3dc63e7ac8c3cca8b309a26b1d630d24dc6483c6" target="_blank">3dc63e7</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/7468b44ebce6cde6d6c1a70d0b3ceb1528dcba77" target="_blank">7468b44</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 </p>
 <pre><code>
 Ignored files:
+    Ignored:    analysis/figure/
+    Ignored:    analysis/fit-scd-ex-k=10.rds
     Ignored:    sbatch/makefile_demo/sims/sim0001.csv
     Ignored:    sbatch/makefile_demo/sims/sim0002.csv
     Ignored:    sbatch/makefile_demo/sims/sim0003.csv
@@ -691,7 +693,6 @@ Untracked files:
     Untracked:  R/demo.nmf.R
     Untracked:  R/nmfmu.R
     Untracked:  R/scd.R
-    Untracked:  analysis/fit-scd-ex-k=10.rds
 
 </code></pre>
 <p>
@@ -735,6 +736,57 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/pcarbo/pcarbo/blob/7468b44ebce6cde6d6c1a70d0b3ceb1528dcba77/analysis/eb_pilot_topic_plots.Rmd" target="_blank">7468b44</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-09-01
+</td>
+<td>
+workflowr::wflow_publish(“eb_pilot_topic_plots.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/9c45d1bfa02a1e3ede823b1c9e9ab2fe0d37727c/analysis/eb_pilot_topic_plots.Rmd" target="_blank">9c45d1b</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-09-01
+</td>
+<td>
+Updated .gitignore.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/pcarbo/052dc3ca3034b42da4edc4e50a5f2c7018beeed7/docs/eb_pilot_topic_plots.html" target="_blank">052dc3c</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-09-01
+</td>
+<td>
+Sucessfully built eb_pilot_topic_plots page.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/pcarbo/pcarbo/blob/3dc63e7ac8c3cca8b309a26b1d630d24dc6483c6/analysis/eb_pilot_topic_plots.Rmd" target="_blank">3dc63e7</a>
 </td>
 <td>
@@ -771,28 +823,14 @@ Implemented first rough draft of eb_pilot_topic_plots.Rmd.
 </div>
 </div>
 </div>
+<p>Load packages used in the analysis below, and set the seed.</p>
 <pre class="r"><code>library(Matrix)
 library(dplyr)
-# 
-# Attaching package: &#39;dplyr&#39;
-# The following objects are masked from &#39;package:stats&#39;:
-# 
-#     filter, lag
-# The following objects are masked from &#39;package:base&#39;:
-# 
-#     intersect, setdiff, setequal, union
 library(fastTopics)
 library(ggplot2)
 library(cowplot)
-# 
-# ********************************************************
-# Note: As of version 1.0.0, cowplot does not change the
-#   default ggplot2 theme anymore. To recover the previous
-#   behavior, execute:
-#   theme_set(theme_cowplot())
-# ********************************************************
 set.seed(1)</code></pre>
-<p>Create a “hex plot” showing the density of the data points (specifically, the topic proportions) as they are projected onto two principal ccomponents (PCs).</p>
+<p>This function creates a “hex plot” showing the density of the data points (topic proportions) as projected onto two principal ccomponents (PCs).</p>
 <pre class="r"><code>pca_hex_plot &lt;-
   function (fit, pcs = c(&quot;PC1&quot;,&quot;PC2&quot;), n = 40, bins = c(0,1,10,100,1000,Inf),
             colors = c(&quot;gainsboro&quot;,&quot;lightskyblue&quot;,&quot;gold&quot;,&quot;orange&quot;,&quot;magenta&quot;)) {
@@ -804,26 +842,26 @@ set.seed(1)</code></pre>
          labs(fill = &quot;count&quot;) +
          theme_cowplot(font_size = 10))
 }</code></pre>
-<p>Load <span class="math inline">\(k = 10\)</span> multinomial topic model fit.</p>
+<p>Load the <span class="math inline">\(k = 10\)</span> multinomial topic model fit, and compute PCs from the topic proportions.</p>
 <pre class="r"><code>fit &lt;- readRDS(&quot;fit-scd-ex-k=10.rds&quot;)$fit
 fit &lt;- poisson2multinom(fit)
 pca &lt;- prcomp(fit$L)$x</code></pre>
 <p>TO DO: Describe here what these plots show.</p>
-<pre class="r"><code>p1 &lt;- pca_plot(fit,pcs = c(&quot;PC1&quot;,&quot;PC2&quot;),k = 4)
-p2 &lt;- pca_plot(fit,pcs = c(&quot;PC1&quot;,&quot;PC2&quot;),k = 6)
+<pre class="r"><code>p1 &lt;- pca_plot(fit,pcs = c(&quot;PC1&quot;,&quot;PC2&quot;),k = 4) + guides(color = &quot;none&quot;)
+p2 &lt;- pca_plot(fit,pcs = c(&quot;PC1&quot;,&quot;PC2&quot;),k = 6) + guides(color = &quot;none&quot;)
 p3 &lt;- pca_hex_plot(fit,pcs = c(&quot;PC1&quot;,&quot;PC2&quot;),bins = c(0,1,10,50,100,Inf))
 plot_grid(p1,p2,p3,nrow = 1)</code></pre>
-<p><img src="figure/eb_pilot_topic_plots.Rmd/chunk-4-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>TO DO: Describe here what this code does.</p>
+<p><img src="figure/eb_pilot_topic_plots.Rmd/pca-plot-1-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><em>TO DO: Describe here what this code chunk does.</em></p>
 <pre class="r"><code>n   &lt;- nrow(pca)
 x   &lt;- rep(&quot;B&quot;,n)
 pc1 &lt;- pca[,&quot;PC1&quot;]
 x[pc1 &lt; -0.05] &lt;- &quot;A&quot;</code></pre>
 <p>TO DO: Describe here what these plots show.</p>
-<pre class="r"><code>p4 &lt;- pca_plot(fit,pcs = c(&quot;PC3&quot;,&quot;PC4&quot;),k = 8)
+<pre class="r"><code>p4 &lt;- pca_plot(fit,pcs = c(&quot;PC3&quot;,&quot;PC4&quot;),k = 8) + guides(color = &quot;none&quot;)
 p5 &lt;- pca_hex_plot(fit,pcs = c(&quot;PC3&quot;,&quot;PC4&quot;),bins = c(0,1,5,10,100,Inf))
-plot_grid(p4,p5,nrow = 1)</code></pre>
-<p><img src="figure/eb_pilot_topic_plots.Rmd/chunk-6-1.png" width="840" style="display: block; margin: auto;" /></p>
+plot_grid(p4,p5,nrow = 1,rel_widths = c(2,3))</code></pre>
+<p><img src="figure/eb_pilot_topic_plots.Rmd/pca-plot-2-1.png" width="840" style="display: block; margin: auto;" /></p>
 <p>TO DO: Describe here what this code does.</p>
 <pre class="r"><code>pc3 &lt;- pca[,&quot;PC3&quot;]
 pc4 &lt;- pca[,&quot;PC4&quot;]
@@ -832,13 +870,13 @@ clusters &lt;- factor(x)</code></pre>
 <p>TO DO: Describe here what these plots show.</p>
 <pre class="r"><code>p6 &lt;- pca_plot(fit,pcs = c(&quot;PC5&quot;,&quot;PC6&quot;),k = 1)
 p7 &lt;- pca_hex_plot(fit,pcs = c(&quot;PC5&quot;,&quot;PC6&quot;),bins = c(0,1,10,20,100,Inf))
-plot_grid(p6,p7,nrow = 1)</code></pre>
-<p><img src="figure/eb_pilot_topic_plots.Rmd/chunk-8-1.png" width="840" style="display: block; margin: auto;" /></p>
+plot_grid(p6,p7,nrow = 1,rel_widths = c(2,3))</code></pre>
+<p><img src="figure/eb_pilot_topic_plots.Rmd/pca-plot-3-1.png" width="840" style="display: block; margin: auto;" /></p>
 <p>TO DO: Describe here what these plots show.</p>
-<pre class="r"><code>p8 &lt;- pca_plot(fit,pcs = c(&quot;PC7&quot;,&quot;PC9&quot;),k = 2)
+<pre class="r"><code>p8 &lt;- pca_plot(fit,pcs = c(&quot;PC7&quot;,&quot;PC9&quot;),k = 2) + guides(color = &quot;none&quot;)
 p9 &lt;- pca_hex_plot(fit,pcs = c(&quot;PC7&quot;,&quot;PC9&quot;))
-plot_grid(p8,p9,nrow = 1)</code></pre>
-<p><img src="figure/eb_pilot_topic_plots.Rmd/chunk-9-1.png" width="840" style="display: block; margin: auto;" /></p>
+plot_grid(p8,p9,nrow = 1,rel_widths = c(2,3))</code></pre>
+<p><img src="figure/eb_pilot_topic_plots.Rmd/pca-plot-4-1.png" width="840" style="display: block; margin: auto;" /></p>
 <p>TO DO: Explain here what these numbers show.</p>
 <pre class="r"><code>table(clusters)
 # clusters
@@ -849,94 +887,10 @@ plot_grid(p8,p9,nrow = 1)</code></pre>
                sample(which(clusters == &quot;B&quot;),800),
                sample(which(clusters == &quot;C&quot;),300)))
 p10 &lt;- structure_plot(select(fit,loadings = rows),grouping = clusters[rows],
-                      n = Inf,gap = 40,num_threads = 4)
-# Perplexity automatically changed to 98 because original setting of 100 was too large for the number of samples (300)
+                      n = Inf,perplexity = 80,gap = 40,num_threads = 4,
+                      verbose = FALSE)
 print(p10)</code></pre>
-<p><img src="figure/eb_pilot_topic_plots.Rmd/chunk-11-1.png" width="900" style="display: block; margin: auto;" /></p>
-<pre><code># Read the 800 x 10 data matrix successfully!
-# OpenMP is working. 4 threads.
-# Using no_dims = 1, perplexity = 100.000000, and theta = 0.100000
-# Computing input similarities...
-# Building tree...
-# Done in 0.73 seconds (sparsity = 0.486822)!
-# Learning embedding...
-# Iteration 50: error is 53.281119 (50 iterations in 0.24 seconds)
-# Iteration 100: error is 53.276182 (50 iterations in 0.23 seconds)
-# Iteration 150: error is 52.010622 (50 iterations in 0.23 seconds)
-# Iteration 200: error is 52.008147 (50 iterations in 0.23 seconds)
-# Iteration 250: error is 52.008146 (50 iterations in 0.22 seconds)
-# Iteration 300: error is 0.861327 (50 iterations in 0.23 seconds)
-# Iteration 350: error is 0.834719 (50 iterations in 0.22 seconds)
-# Iteration 400: error is 0.831728 (50 iterations in 0.22 seconds)
-# Iteration 450: error is 0.831592 (50 iterations in 0.22 seconds)
-# Iteration 500: error is 0.831592 (50 iterations in 0.22 seconds)
-# Iteration 550: error is 0.831591 (50 iterations in 0.22 seconds)
-# Iteration 600: error is 0.831588 (50 iterations in 0.22 seconds)
-# Iteration 650: error is 0.831586 (50 iterations in 0.22 seconds)
-# Iteration 700: error is 0.831586 (50 iterations in 0.22 seconds)
-# Iteration 750: error is 0.831586 (50 iterations in 0.23 seconds)
-# Iteration 800: error is 0.831586 (50 iterations in 0.22 seconds)
-# Iteration 850: error is 0.831586 (50 iterations in 0.22 seconds)
-# Iteration 900: error is 0.831586 (50 iterations in 0.22 seconds)
-# Iteration 950: error is 0.831586 (50 iterations in 0.23 seconds)
-# Iteration 1000: error is 0.831586 (50 iterations in 0.22 seconds)
-# Fitting performed in 4.51 seconds.
-# Read the 800 x 10 data matrix successfully!
-# OpenMP is working. 4 threads.
-# Using no_dims = 1, perplexity = 100.000000, and theta = 0.100000
-# Computing input similarities...
-# Building tree...
-# Done in 0.74 seconds (sparsity = 0.487431)!
-# Learning embedding...
-# Iteration 50: error is 53.480056 (50 iterations in 0.25 seconds)
-# Iteration 100: error is 53.480056 (50 iterations in 0.23 seconds)
-# Iteration 150: error is 53.480056 (50 iterations in 0.28 seconds)
-# Iteration 200: error is 53.480056 (50 iterations in 0.30 seconds)
-# Iteration 250: error is 53.480056 (50 iterations in 0.27 seconds)
-# Iteration 300: error is 0.888917 (50 iterations in 0.25 seconds)
-# Iteration 350: error is 0.862765 (50 iterations in 0.23 seconds)
-# Iteration 400: error is 0.859358 (50 iterations in 0.23 seconds)
-# Iteration 450: error is 0.859177 (50 iterations in 0.23 seconds)
-# Iteration 500: error is 0.859170 (50 iterations in 0.22 seconds)
-# Iteration 550: error is 0.859169 (50 iterations in 0.22 seconds)
-# Iteration 600: error is 0.859171 (50 iterations in 0.23 seconds)
-# Iteration 650: error is 0.859169 (50 iterations in 0.23 seconds)
-# Iteration 700: error is 0.859169 (50 iterations in 0.22 seconds)
-# Iteration 750: error is 0.859169 (50 iterations in 0.22 seconds)
-# Iteration 800: error is 0.859169 (50 iterations in 0.22 seconds)
-# Iteration 850: error is 0.859169 (50 iterations in 0.22 seconds)
-# Iteration 900: error is 0.859169 (50 iterations in 0.23 seconds)
-# Iteration 950: error is 0.859169 (50 iterations in 0.23 seconds)
-# Iteration 1000: error is 0.859169 (50 iterations in 0.22 seconds)
-# Fitting performed in 4.72 seconds.
-# Read the 300 x 10 data matrix successfully!
-# OpenMP is working. 4 threads.
-# Using no_dims = 1, perplexity = 98.000000, and theta = 0.100000
-# Computing input similarities...
-# Building tree...
-# Done in 0.26 seconds (sparsity = 0.995756)!
-# Learning embedding...
-# Iteration 50: error is 42.353521 (50 iterations in 0.08 seconds)
-# Iteration 100: error is 42.359946 (50 iterations in 0.08 seconds)
-# Iteration 150: error is 42.352661 (50 iterations in 0.08 seconds)
-# Iteration 200: error is 42.353250 (50 iterations in 0.08 seconds)
-# Iteration 250: error is 42.357140 (50 iterations in 0.08 seconds)
-# Iteration 300: error is 0.486093 (50 iterations in 0.08 seconds)
-# Iteration 350: error is 0.484773 (50 iterations in 0.07 seconds)
-# Iteration 400: error is 0.484776 (50 iterations in 0.07 seconds)
-# Iteration 450: error is 0.484776 (50 iterations in 0.07 seconds)
-# Iteration 500: error is 0.484776 (50 iterations in 0.08 seconds)
-# Iteration 550: error is 0.484776 (50 iterations in 0.07 seconds)
-# Iteration 600: error is 0.484776 (50 iterations in 0.07 seconds)
-# Iteration 650: error is 0.484776 (50 iterations in 0.07 seconds)
-# Iteration 700: error is 0.484776 (50 iterations in 0.07 seconds)
-# Iteration 750: error is 0.484776 (50 iterations in 0.07 seconds)
-# Iteration 800: error is 0.484776 (50 iterations in 0.07 seconds)
-# Iteration 850: error is 0.484776 (50 iterations in 0.07 seconds)
-# Iteration 900: error is 0.484776 (50 iterations in 0.07 seconds)
-# Iteration 950: error is 0.484776 (50 iterations in 0.08 seconds)
-# Iteration 1000: error is 0.484776 (50 iterations in 0.08 seconds)
-# Fitting performed in 1.52 seconds.</code></pre>
+<p><img src="figure/eb_pilot_topic_plots.Rmd/structure-plot-1.png" width="900" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

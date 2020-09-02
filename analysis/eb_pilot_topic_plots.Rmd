@@ -52,7 +52,7 @@ pca <- prcomp(fit$L)$x
 
 Project the cells onto the first two PCs of the topic proportions.
 
-```{r pca-plot-1, fig.height=2, fig.width=8}
+```{r pca-plot-1, fig.height=2, fig.width=7.5}
 p1 <- pca_plot(fit,pcs = c("PC1","PC2"),k = 4) + guides(fill = "none")
 p2 <- pca_plot(fit,pcs = c("PC1","PC2"),k = 6) + guides(fill = "none")
 p3 <- pca_hex_plot(fit,pcs = c("PC1","PC2"),bins = c(0,1,10,50,100,Inf))
@@ -72,7 +72,7 @@ x[pc1 < -0.05] <- "A"
 In PCs 3 and 4, we see evidence for an additional---but much
 smaller---cluster.
 
-```{r pca-plot-2, fig.width=7, fig.height=3}
+```{r pca-plot-2, fig.width=7, fig.height=2.75}
 p4 <- pca_plot(fit,pcs = c("PC3","PC4"),k = 8) + guides(fill = "none")
 p5 <- pca_hex_plot(fit,pcs = c("PC3","PC4"),bins = c(0,1,5,10,100,Inf))
 plot_grid(p4,p5,nrow = 1,rel_widths = c(8,11))
@@ -83,7 +83,7 @@ x[pc3 > 2*pc4 + 0.58] <- "C"
 
 Additional clusters are apparent in the projection onto other PCs.
 
-```{r pca-plot-3, fig.width=6, fig.height=5}
+```{r pca-plot-3, fig.width=6, fig.height=4.75}
 p6 <- pca_plot(fit,pcs = c("PC5","PC6"),k = 1) + guides(fill = "none")
 p7 <- pca_hex_plot(fit,pcs = c("PC5","PC6"),bins = c(0,1,10,20,100,Inf))
 p8 <- pca_plot(fit,pcs = c("PC7","PC9"),k = 2) + guides(fill = "none")
@@ -98,7 +98,7 @@ Using PCA, we can also dig down into individual clusters and look for
 subclusters within the clusters. For example, in cluster B, PCs 5 and
 6 show interesting substructure:
 
-```{r pca-plot-4, fig.width=5, fig.height=5}
+```{r pca-plot-4, fig.width=6, fig.height=5}
 rows <- which(x == "B")
 fit2 <- select(fit,loadings = rows)
 pca  <- prcomp(fit2$L)$x
@@ -132,8 +132,8 @@ rows <- sort(c(sample(which(clusters == "A"),800),
                which(clusters == "B2"),
                sample(which(clusters == "C"),300)))
 p11 <- structure_plot(select(fit,loadings = rows),grouping = clusters[rows],
-                      n = Inf,perplexity = 80,gap = 40,num_threads = 4,
-                      verbose = FALSE)
+                      n = Inf,perplexity = c(100,100,50,50),gap = 40,
+                      num_threads = 4,verbose = FALSE)
 print(p11)
 ```
 

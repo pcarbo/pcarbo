@@ -4,6 +4,9 @@ author: Peter Carbonetto
 output: workflowr::wflow_html
 ---
 
+The goal of this analysis is to explore the structure in EB pilot data as
+inferred by the multinomial topic model.
+
 ```{r knitr-opts, include=FALSE}
 knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
                       fig.align = "center",dpi = 120)
@@ -20,7 +23,7 @@ library(cowplot)
 set.seed(1)
 ```
 
-This function creates a "hex plot" showing the density of the data
+This function creates a "hex plot", showing the density of the data
 points (topic proportions) as projected onto two principal ccomponents
 (PCs).
 
@@ -47,71 +50,89 @@ fit <- poisson2multinom(fit)
 pca <- prcomp(fit$L)$x
 ```
 
-TO DO: Describe here what these plots show.
+Project the cells onto the first two PCs of the topic proportions.
 
 ```{r pca-plot-1, fig.height=2, fig.width=8}
-p1 <- pca_plot(fit,pcs = c("PC1","PC2"),k = 4) + guides(color = "none")
-p2 <- pca_plot(fit,pcs = c("PC1","PC2"),k = 6) + guides(color = "none")
+p1 <- pca_plot(fit,pcs = c("PC1","PC2"),k = 4) + guides(fill = "none")
+p2 <- pca_plot(fit,pcs = c("PC1","PC2"),k = 6) + guides(fill = "none")
 p3 <- pca_hex_plot(fit,pcs = c("PC1","PC2"),bins = c(0,1,10,50,100,Inf))
-plot_grid(p1,p2,p3,nrow = 1)
+plot_grid(p1,p2,p3,nrow = 1,rel_widths = c(2,2,3))
 ```
 
-*TO DO: Describe here what this code chunk does.*
+Judging by this PC projection, the cells can be subdivided, roughly,
+into two clusters (noting that there might be other clusters).
 
 ```{r clustering-1}
-n   <- nrow(pca)
-x   <- rep("B",n)
+n <- nrow(pca)
+x <- rep("B",n)
 pc1 <- pca[,"PC1"]
 x[pc1 < -0.05] <- "A"
 ```
 
-TO DO: Describe here what these plots show.
+In PCs 3 and 4, we see evidence for an additional---but much
+smaller---cluster.
 
 ```{r pca-plot-2, fig.width=7, fig.height=3}
-p4 <- pca_plot(fit,pcs = c("PC3","PC4"),k = 8) + guides(color = "none")
+p4 <- pca_plot(fit,pcs = c("PC3","PC4"),k = 8) + guides(fill = "none")
 p5 <- pca_hex_plot(fit,pcs = c("PC3","PC4"),bins = c(0,1,5,10,100,Inf))
-plot_grid(p4,p5,nrow = 1,rel_widths = c(2,3))
-```
-
-TO DO: Describe here what this code does.
-
-```{r clustering-2}
+plot_grid(p4,p5,nrow = 1,rel_widths = c(2,2.75))
 pc3 <- pca[,"PC3"]
 pc4 <- pca[,"PC4"]
 x[pc3 > 2*pc4 + 0.58] <- "C"
-clusters <- factor(x)
 ```
 
-TO DO: Describe here what these plots show.
+Additional clusters are evident in the projection onto other
+PCs.
 
-```{r pca-plot-3, fig.width=7, fig.height=3}
-p6 <- pca_plot(fit,pcs = c("PC5","PC6"),k = 1)
+```{r pca-plot-3, fig.width=7, fig.height=5}
+p6 <- pca_plot(fit,pcs = c("PC5","PC6"),k = 1) + guides(fill = "none")
 p7 <- pca_hex_plot(fit,pcs = c("PC5","PC6"),bins = c(0,1,10,20,100,Inf))
-plot_grid(p6,p7,nrow = 1,rel_widths = c(2,3))
-```
-
-TO DO: Describe here what these plots show.
-
-```{r pca-plot-4, fig.width=7, fig.height=3}
-p8 <- pca_plot(fit,pcs = c("PC7","PC9"),k = 2) + guides(color = "none")
+p8 <- pca_plot(fit,pcs = c("PC7","PC9"),k = 2) + guides(fill = "none")
 p9 <- pca_hex_plot(fit,pcs = c("PC7","PC9"))
-plot_grid(p8,p9,nrow = 1,rel_widths = c(2,3))
+plot_grid(p6,p7,p8,p9,nrow = 2,rel_widths = c(2,2.9))
 ```
 
-TO DO: Explain here what these numbers show.
+The cluster that shows up in PCs 7 and 9---corresponding closely to
+topic 2---may be picking up some sort of rare cell type.
+
+Using PCA, we can also dig down into individual clusters and look for
+subclusters within the clusters. For example, in cluster B, PCs 5 and
+6 show interesting substructure:
+
+```{r clustering-2}
+rows <- which(x == "B")
+fit2 <- select(fit,loadings = rows)
+pca  <- prcomp(fit2$L)$x
+n    <- nrow(pca)
+y    <- rep("B1",n)
+pc3  <- pca[,"PC6"]
+y[pc3 > 0.2] <- "B2"
+x[rows] <- y
+p10 <- pca_plot(fit2,pcs = c("PC5","PC6"),k = c(1,2,8))
+print(p10)
+```
+
+For example, we can define a cluster, labeled "B1", that corresponds
+closely to topic 2. The substructure here does not suggest clusters
+that are as distinct as what we saw above, but because topic 2 is
+picking up a very small subset of cells, it may be useful to define a
+cluster so we can analyze it separately.
 
 ```{r clustering-summary}
+clusters <- factor(x)
 table(clusters)
 ```
 
-TO DO: Describe here what these plots show.
+The structure plot summarizes the topic proportions in each of these 4
+subsets:
 
 ```{r structure-plot, fig.width=7.5, fig.height=2}
 rows <- sort(c(sample(which(clusters == "A"),800),
-               sample(which(clusters == "B"),800),
+               sample(which(clusters == "B1"),800),
+               which(clusters == "B2"),
                sample(which(clusters == "C"),300)))
-p10 <- structure_plot(select(fit,loadings = rows),grouping = clusters[rows],
+p11 <- structure_plot(select(fit,loadings = rows),grouping = clusters[rows],
                       n = Inf,perplexity = 80,gap = 40,num_threads = 4,
                       verbose = FALSE)
-print(p10)
+print(p11)
 ```

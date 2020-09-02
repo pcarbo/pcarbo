@@ -9,7 +9,7 @@ knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
                       fig.align = "center",dpi = 120)
 ```
 
-```{r chunk-1}
+```{r load-pkgs, message=FALSE}
 library(Matrix)
 library(dplyr)
 library(fastTopics)

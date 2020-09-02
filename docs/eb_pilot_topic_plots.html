@@ -329,7 +329,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-09-01
+<strong>Last updated:</strong> 2020-09-02
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -420,23 +420,22 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree7468b44ebce6cde6d6c1a70d0b3ceb1528dcba77targetblank7468b44a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/7468b44ebce6cde6d6c1a70d0b3ceb1528dcba77" target="_blank">7468b44</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree05fd2b580edc567f5960215ae66dc7403c783ba9targetblank05fd2b5a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/05fd2b580edc567f5960215ae66dc7403c783ba9" target="_blank">05fd2b5</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree7468b44ebce6cde6d6c1a70d0b3ceb1528dcba77targetblank7468b44a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree05fd2b580edc567f5960215ae66dc7403c783ba9targetblank05fd2b5a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/7468b44ebce6cde6d6c1a70d0b3ceb1528dcba77" target="_blank">7468b44</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/05fd2b580edc567f5960215ae66dc7403c783ba9" target="_blank">05fd2b5</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 </p>
 <pre><code>
 Ignored files:
-    Ignored:    analysis/figure/
     Ignored:    analysis/fit-scd-ex-k=10.rds
     Ignored:    sbatch/makefile_demo/sims/sim0001.csv
     Ignored:    sbatch/makefile_demo/sims/sim0002.csv
@@ -736,6 +735,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/pcarbo/pcarbo/blob/05fd2b580edc567f5960215ae66dc7403c783ba9/analysis/eb_pilot_topic_plots.Rmd" target="_blank">05fd2b5</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-09-02
+</td>
+<td>
+workflowr::wflow_publish(“eb_pilot_topic_plots.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/pcarbo/1d0179612a294d9d416ed9852f576c8ab77a284f/docs/eb_pilot_topic_plots.html" target="_blank">1d01796</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-09-01
+</td>
+<td>
+Made several minor improvements to the eb_pilot_topic_plots analysis.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/pcarbo/pcarbo/blob/7468b44ebce6cde6d6c1a70d0b3ceb1528dcba77/analysis/eb_pilot_topic_plots.Rmd" target="_blank">7468b44</a>
 </td>
 <td>
@@ -823,6 +856,7 @@ Implemented first rough draft of eb_pilot_topic_plots.Rmd.
 </div>
 </div>
 </div>
+<p>The goal of this analysis is to explore the structure in EB pilot data as inferred by the multinomial topic model.</p>
 <p>Load packages used in the analysis below, and set the seed.</p>
 <pre class="r"><code>library(Matrix)
 library(dplyr)
@@ -830,7 +864,7 @@ library(fastTopics)
 library(ggplot2)
 library(cowplot)
 set.seed(1)</code></pre>
-<p>This function creates a “hex plot” showing the density of the data points (topic proportions) as projected onto two principal ccomponents (PCs).</p>
+<p>This function creates a “hex plot”, showing the density of the data points (topic proportions) as projected onto two principal ccomponents (PCs).</p>
 <pre class="r"><code>pca_hex_plot &lt;-
   function (fit, pcs = c(&quot;PC1&quot;,&quot;PC2&quot;), n = 40, bins = c(0,1,10,100,1000,Inf),
             colors = c(&quot;gainsboro&quot;,&quot;lightskyblue&quot;,&quot;gold&quot;,&quot;orange&quot;,&quot;magenta&quot;)) {
@@ -846,51 +880,209 @@ set.seed(1)</code></pre>
 <pre class="r"><code>fit &lt;- readRDS(&quot;fit-scd-ex-k=10.rds&quot;)$fit
 fit &lt;- poisson2multinom(fit)
 pca &lt;- prcomp(fit$L)$x</code></pre>
-<p>TO DO: Describe here what these plots show.</p>
-<pre class="r"><code>p1 &lt;- pca_plot(fit,pcs = c(&quot;PC1&quot;,&quot;PC2&quot;),k = 4) + guides(color = &quot;none&quot;)
-p2 &lt;- pca_plot(fit,pcs = c(&quot;PC1&quot;,&quot;PC2&quot;),k = 6) + guides(color = &quot;none&quot;)
+<p>Project the cells onto the first two PCs of the topic proportions.</p>
+<pre class="r"><code>p1 &lt;- pca_plot(fit,pcs = c(&quot;PC1&quot;,&quot;PC2&quot;),k = 4) + guides(fill = &quot;none&quot;)
+p2 &lt;- pca_plot(fit,pcs = c(&quot;PC1&quot;,&quot;PC2&quot;),k = 6) + guides(fill = &quot;none&quot;)
 p3 &lt;- pca_hex_plot(fit,pcs = c(&quot;PC1&quot;,&quot;PC2&quot;),bins = c(0,1,10,50,100,Inf))
-plot_grid(p1,p2,p3,nrow = 1)</code></pre>
+plot_grid(p1,p2,p3,nrow = 1,rel_widths = c(2,2,3))</code></pre>
 <p><img src="figure/eb_pilot_topic_plots.Rmd/pca-plot-1-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p><em>TO DO: Describe here what this code chunk does.</em></p>
-<pre class="r"><code>n   &lt;- nrow(pca)
-x   &lt;- rep(&quot;B&quot;,n)
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pca-plot-1-1">
+Past versions of pca-plot-1-1.png
+</button>
+</p>
+<div id="fig-pca-plot-1-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/1d0179612a294d9d416ed9852f576c8ab77a284f/docs/figure/eb_pilot_topic_plots.Rmd/pca-plot-1-1.png" target="_blank">1d01796</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-09-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Judging by this PC projection, the cells can be subdivided, roughly, into two clusters (noting that there might be other clusters).</p>
+<pre class="r"><code>n &lt;- nrow(pca)
+x &lt;- rep(&quot;B&quot;,n)
 pc1 &lt;- pca[,&quot;PC1&quot;]
 x[pc1 &lt; -0.05] &lt;- &quot;A&quot;</code></pre>
-<p>TO DO: Describe here what these plots show.</p>
-<pre class="r"><code>p4 &lt;- pca_plot(fit,pcs = c(&quot;PC3&quot;,&quot;PC4&quot;),k = 8) + guides(color = &quot;none&quot;)
+<p>In PCs 3 and 4, we see evidence for an additional—but much smaller—cluster.</p>
+<pre class="r"><code>p4 &lt;- pca_plot(fit,pcs = c(&quot;PC3&quot;,&quot;PC4&quot;),k = 8) + guides(fill = &quot;none&quot;)
 p5 &lt;- pca_hex_plot(fit,pcs = c(&quot;PC3&quot;,&quot;PC4&quot;),bins = c(0,1,5,10,100,Inf))
-plot_grid(p4,p5,nrow = 1,rel_widths = c(2,3))</code></pre>
+plot_grid(p4,p5,nrow = 1,rel_widths = c(2,2.75))</code></pre>
 <p><img src="figure/eb_pilot_topic_plots.Rmd/pca-plot-2-1.png" width="840" style="display: block; margin: auto;" /></p>
-<p>TO DO: Describe here what this code does.</p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pca-plot-2-1">
+Past versions of pca-plot-2-1.png
+</button>
+</p>
+<div id="fig-pca-plot-2-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/1d0179612a294d9d416ed9852f576c8ab77a284f/docs/figure/eb_pilot_topic_plots.Rmd/pca-plot-2-1.png" target="_blank">1d01796</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-09-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>pc3 &lt;- pca[,&quot;PC3&quot;]
 pc4 &lt;- pca[,&quot;PC4&quot;]
-x[pc3 &gt; 2*pc4 + 0.58] &lt;- &quot;C&quot;
-clusters &lt;- factor(x)</code></pre>
-<p>TO DO: Describe here what these plots show.</p>
-<pre class="r"><code>p6 &lt;- pca_plot(fit,pcs = c(&quot;PC5&quot;,&quot;PC6&quot;),k = 1)
+x[pc3 &gt; 2*pc4 + 0.58] &lt;- &quot;C&quot;</code></pre>
+<p>Additional clusters are evident in the projection onto other PCs.</p>
+<pre class="r"><code>p6 &lt;- pca_plot(fit,pcs = c(&quot;PC5&quot;,&quot;PC6&quot;),k = 1) + guides(fill = &quot;none&quot;)
 p7 &lt;- pca_hex_plot(fit,pcs = c(&quot;PC5&quot;,&quot;PC6&quot;),bins = c(0,1,10,20,100,Inf))
-plot_grid(p6,p7,nrow = 1,rel_widths = c(2,3))</code></pre>
-<p><img src="figure/eb_pilot_topic_plots.Rmd/pca-plot-3-1.png" width="840" style="display: block; margin: auto;" /></p>
-<p>TO DO: Describe here what these plots show.</p>
-<pre class="r"><code>p8 &lt;- pca_plot(fit,pcs = c(&quot;PC7&quot;,&quot;PC9&quot;),k = 2) + guides(color = &quot;none&quot;)
+p8 &lt;- pca_plot(fit,pcs = c(&quot;PC7&quot;,&quot;PC9&quot;),k = 2) + guides(fill = &quot;none&quot;)
 p9 &lt;- pca_hex_plot(fit,pcs = c(&quot;PC7&quot;,&quot;PC9&quot;))
-plot_grid(p8,p9,nrow = 1,rel_widths = c(2,3))</code></pre>
-<p><img src="figure/eb_pilot_topic_plots.Rmd/pca-plot-4-1.png" width="840" style="display: block; margin: auto;" /></p>
-<p>TO DO: Explain here what these numbers show.</p>
-<pre class="r"><code>table(clusters)
+plot_grid(p6,p7,p8,p9,nrow = 2,rel_widths = c(2,2.9))</code></pre>
+<p><img src="figure/eb_pilot_topic_plots.Rmd/pca-plot-3-1.png" width="840" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-pca-plot-3-1">
+Past versions of pca-plot-3-1.png
+</button>
+</p>
+<div id="fig-pca-plot-3-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/1d0179612a294d9d416ed9852f576c8ab77a284f/docs/figure/eb_pilot_topic_plots.Rmd/pca-plot-3-1.png" target="_blank">1d01796</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-09-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The cluster that shows up in PCs 7 and 9—corresponding closely to topic 2—may be picking up some sort of rare cell type.</p>
+<p>Using PCA, we can also dig down into individual clusters and look for subclusters within the clusters. For example, in cluster B, PCs 5 and 6 show interesting substructure:</p>
+<pre class="r"><code>rows &lt;- which(x == &quot;B&quot;)
+fit2 &lt;- select(fit,loadings = rows)
+pca  &lt;- prcomp(fit2$L)$x
+n    &lt;- nrow(pca)
+y    &lt;- rep(&quot;B1&quot;,n)
+pc3  &lt;- pca[,&quot;PC6&quot;]
+y[pc3 &gt; 0.2] &lt;- &quot;B2&quot;
+x[rows] &lt;- y
+p10 &lt;- pca_plot(fit2,pcs = c(&quot;PC5&quot;,&quot;PC6&quot;),k = c(1,2,8))
+print(p10)</code></pre>
+<p><img src="figure/eb_pilot_topic_plots.Rmd/clustering-2-1.png" width="840" style="display: block; margin: auto;" /></p>
+<p>For example, we can define a cluster, labeled “B1”, that corresponds closely to topic 2. The substructure here does not suggest clusters that are as distinct as what we saw above, but because topic 2 is picking up a very small subset of cells, it may be useful to define a cluster so we can analyze it separately.</p>
+<pre class="r"><code>clusters &lt;- factor(x)
+table(clusters)
 # clusters
-#     A     B     C 
-# 18071 22844  1573</code></pre>
-<p>TO DO: Describe here what these plots show.</p>
+#     A    B1    B2     C 
+# 18071 22591   253  1573</code></pre>
+<p>The structure plot summarizes the topic proportions in each of these 4 subsets:</p>
 <pre class="r"><code>rows &lt;- sort(c(sample(which(clusters == &quot;A&quot;),800),
-               sample(which(clusters == &quot;B&quot;),800),
+               sample(which(clusters == &quot;B1&quot;),800),
+               which(clusters == &quot;B2&quot;),
                sample(which(clusters == &quot;C&quot;),300)))
-p10 &lt;- structure_plot(select(fit,loadings = rows),grouping = clusters[rows],
+p11 &lt;- structure_plot(select(fit,loadings = rows),grouping = clusters[rows],
                       n = Inf,perplexity = 80,gap = 40,num_threads = 4,
                       verbose = FALSE)
-print(p10)</code></pre>
+print(p11)</code></pre>
 <p><img src="figure/eb_pilot_topic_plots.Rmd/structure-plot-1.png" width="900" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-structure-plot-1">
+Past versions of structure-plot-1.png
+</button>
+</p>
+<div id="fig-structure-plot-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/1d0179612a294d9d416ed9852f576c8ab77a284f/docs/figure/eb_pilot_topic_plots.Rmd/structure-plot-1.png" target="_blank">1d01796</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-09-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

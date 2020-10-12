@@ -1,7 +1,5 @@
-set.seed(1)
 library(mvtnorm)
 library(Rtsne)
-library(uwot)
 library(ggplot2)
 library(cowplot)
 set.seed(1)
@@ -27,7 +25,7 @@ p2 <- ggplot(pdat,aes(x = cluster,y = pca)) +
   theme_cowplot(font_size = 12)
 print(p2)
 
-# Comptue 1-d using t-SNE.
+# Compute 1-d embedding using t-SNE.
 tsne <- drop(Rtsne(X,dims = 1,perplexity = 30,theta = 0.1,max_iter = 1000,
                    eta = 200,normalize = FALSE,pca = FALSE,verbose = TRUE)$Y)
 pdat <- data.frame(cluster,tsne)
@@ -35,3 +33,12 @@ p3 <- ggplot(pdat,aes(x = cluster,y = tsne)) +
   geom_boxplot(width = 0.25) +
   theme_cowplot(font_size = 12)
 print(p3)
+
+# Compute 1-d embedding using flash.
+fl <- flash(X,greedy.Kmax = 1,nullcheck = FALSE)
+fl <- drop(fl$loadings.pm[[1]])
+pdat <- data.frame(cluster,flash = fl)
+p4 <- ggplot(pdat,aes(x = cluster,y = flash)) +
+  geom_boxplot(width = 0.25) +
+  theme_cowplot(font_size = 12)
+print(p4)

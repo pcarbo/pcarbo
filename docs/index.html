@@ -15,7 +15,6 @@
 <title>Various analyses I have done</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
-<script src="site_libs/elevate-section-attrs-2.0/elevate-section-attrs.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/readable.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
@@ -24,6 +23,14 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -292,22 +299,12 @@ div.section {
 }
 </style>
 
-
-<!-- Add a small amount of space between sections. -->
-<style type="text/css">
-div.section {
-  padding-top: 12px;
-}
-</style>
-
-
-
 <div class="fluid-row" id="header">
 
 
 
 <h1 class="title toc-ignore">Various analyses I have done</h1>
-<h4 class="author">Peter Carbonetto"</h4>
+<h4 class="author">Peter Carbonetto&quot;</h4>
 
 </div>
 
@@ -332,7 +329,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-01-14
+<strong>Last updated:</strong> 2020-10-12
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -342,7 +339,7 @@ div.section {
 </p>
 <p>
 This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
-  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.0). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2.9000). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
 </p>
 <hr>
 </div>
@@ -363,16 +360,23 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree0289f5004a23be5001e11b76cded18288a69909dtargetblank0289f50a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/0289f5004a23be5001e11b76cded18288a69909d" target="_blank">0289f50</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree7a4bd96121ac8df05861b595ad8d3fe63d7c6e08targetblank7a4bd96a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/7a4bd96121ac8df05861b595ad8d3fe63d7c6e08" target="_blank">7a4bd96</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree0289f5004a23be5001e11b76cded18288a69909dtargetblank0289f50a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree7a4bd96121ac8df05861b595ad8d3fe63d7c6e08targetblank7a4bd96a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
-Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility. The version displayed above was the version of the Git repository at the time these results were generated. <br><br> Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/7a4bd96121ac8df05861b595ad8d3fe63d7c6e08" target="_blank">7a4bd96</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
 </p>
 <pre><code>
 Ignored files:
+    Ignored:    analysis/fit-scd-ex-k=10.rds
     Ignored:    sbatch/makefile_demo/sims/sim0001.csv
     Ignored:    sbatch/makefile_demo/sims/sim0002.csv
     Ignored:    sbatch/makefile_demo/sims/sim0003.csv
@@ -627,9 +631,10 @@ Ignored files:
 Untracked files:
     Untracked:  R/demo.nmf.R
     Untracked:  R/nmfmu.R
+    Untracked:  R/scd.R
 
 Unstaged changes:
-    Modified:   analysis/susie_jrssb_example.Rmd
+    Modified:   analysis/tsne_vs_factors.Rmd
 
 </code></pre>
 <p>
@@ -644,7 +649,7 @@ Note that any generated files, e.g. HTML, png, CSS, etc., are not included in t
 <div id="versions" class="tab-pane fade">
 
 <p>
-These are the previous versions of the R Markdown and HTML files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view them.
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/index.Rmd</code>) and HTML (<code>docs/index.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
 </p>
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
@@ -668,6 +673,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/7a4bd96121ac8df05861b595ad8d3fe63d7c6e08/analysis/index.Rmd" target="_blank">7a4bd96</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-10-12
+</td>
+<td>
+workflowr::wflow_publish(“index.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/pcarbo/debdc6f3098d8bf91f38f12ce15aea6014c2a3c6/docs/index.html" target="_blank">debdc6f</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-01-14
+</td>
+<td>
+Added more links to home page.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -748,6 +787,7 @@ Added workflowr files.
 <ul>
 <li><p><a href="susie_jrssb_example.html">Illustration of SuSiE in a “difficult” situation</a></p></li>
 <li><p><a href="visualize_varbvs_surface.html">There are three—not two—stationary points in the varbvs objective</a></p></li>
+<li><p><a href="tsne_vs_factors.html">Linear vs. nonlinear embeddings: a thought experiment</a></p></li>
 </ul>
 </div>
 <div id="other-things" class="section level2">
@@ -775,8 +815,6 @@ footer is added to webpages before the MathJax javascript. -->
     "HTML-CSS": { availableFonts: ["TeX"] }
   });
 </script>
-
-
 
 
 

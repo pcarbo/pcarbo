@@ -45,7 +45,7 @@ into the two clusters?
 Unsurprisingly, PCA doesn't work---the first PC picks up variation in
 the second cluster.
 
-```{r pca, fig.width=3, fig.height=2.5}
+```{r pca, fig.width=3, fig.height=2}
 pca <- drop(prcomp(X)$x[,1])
 pdat <- data.frame(cluster,pca)
 p2 <- ggplot(pdat,aes(x = cluster,y = pca)) +

@@ -13,6 +13,8 @@ Analyses
 + [There are three—not two—stationary points in the varbvs
    objective](visualize_varbvs_surface.html)
 
++ [Linear vs. nonlinear embeddings: a thought experiment](tsne_vs_factors.html)
+
 Other things
 ------------
 

@@ -24,10 +24,6 @@ Consider the following data set. The 2-d data vectors are simulated so
 that they cluster into two sets. The second cluster varies much more
 along the second data dimension.
 
-Question: Is there a (linear) matrix factorization method that will
-produce a 1-d representation that correctly subdivides the points into
-the two clusters?
-
 ```{r sim-data, fig.width=3.5, fig.height=2.5}
 X <- rbind(rmvnorm(100,c(-1,0),diag(2)/30),
            rmvnorm(900,c(+1,0),diag(c(0.1,3))))
@@ -41,6 +37,10 @@ p1 <- qplot(X[,1],X[,2],shape = I(21),color = I("white"),fill = cluster) +
   theme_cowplot(font_size = 12)
 print(p1)
 ```
+
+*Question:* Is there a (linear) matrix factorization method that
+will produce a 1-d representation that correctly subdivides the points
+into the two clusters?
 
 Unsurprisingly, PCA doesn't work---the first PC picks up variation in
 the second cluster.

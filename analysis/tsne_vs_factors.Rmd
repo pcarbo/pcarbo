@@ -4,8 +4,6 @@ author: Peter Carbonetto
 output: workflowr::wflow_html
 ---
 
-*Add text here.*
-
 ```{r knitr-opts, include=FALSE}
 knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
                       fig.align = "center",dpi = 120)
@@ -22,10 +20,15 @@ library(cowplot)
 set.seed(1)
 ```
 
-Simulate two clusters of 2-d data points. The second cluster varies
-much more along the second dimension.
+Consider the following data set. The 2-d data vectors are simulated so
+that they cluster into two sets. The second cluster varies much more
+along the second data dimension.
 
-```{r sim-data, fig.width=3, fig.height=3}
+Question: Is there a (linear) matrix factorization method that will
+produce a 1-d representation that correctly subdivides the points into
+the two clusters?
+
+```{r sim-data, fig.width=3.5, fig.height=2.5}
 X <- rbind(rmvnorm(100,c(-1,0),diag(2)/30),
            rmvnorm(900,c(+1,0),diag(c(0.1,3))))
 cluster <- factor(c(rep(1,100),rep(2,900)))
@@ -39,8 +42,8 @@ p1 <- qplot(X[,1],X[,2],shape = I(21),color = I("white"),fill = cluster) +
 print(p1)
 ```
 
-Unsurprisingly, PCA doesn't work---he first principal component picks
-up variation in the second cluster.
+Unsurprisingly, PCA doesn't work---the first PC picks up variation in
+the second cluster.
 
 ```{r pca, fig.width=3, fig.height=2.5}
 pca <- drop(prcomp(X)$x[,1])
@@ -68,7 +71,7 @@ FLASH with one factor does no better than PCA in separating the two
 clusters.
 
 ```{r flash, fig.width=3, fig.height=2.5}
-fl <- flash(X,greedy.Kmax = 1,nullcheck = FALSE)
+fl <- flash(X,greedy.Kmax = 1,nullcheck = FALSE,verbose.lvl = 0)
 fl <- drop(fl$loadings.pm[[1]])
 pdat <- data.frame(cluster,flash = fl)
 p4 <- ggplot(pdat,aes(x = cluster,y = flash)) +

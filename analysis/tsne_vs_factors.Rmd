@@ -72,9 +72,9 @@ FLASH with the default prior choices does no better than PCA in
 separating the two clusters.
 
 ```{r flash-1, fig.width=3, fig.height=2.5}
-fl1 <- flash(X,greedy.Kmax = 1,nullcheck = FALSE,verbose.lvl = 0)
-fl1 <- drop(fl1$loadings.pm[[1]])
-pdat <- data.frame(cluster,flash = fl1)
+fl1  <- flash(X,greedy.Kmax = 1,nullcheck = FALSE,verbose.lvl = 0)
+y    <- drop(fl1$loadings.pm[[1]])
+pdat <- data.frame(cluster,flash = y)
 p4 <- ggplot(pdat,aes(x = cluster,y = flash)) +
   geom_boxplot(width = 0.25) +
   theme_cowplot(font_size = 12)
@@ -89,9 +89,9 @@ fl2 <- flash.init(X)
 fl2 <- flash.init.factors(fl2,list(matrix(rnorm(nrow(X))),
                                    matrix(rnorm(ncol(X)))),
                           prior.family = c(prior.unimodal(),prior.normal()))
-fl2 <- flash.backfit(fl2,verbose.lvl = 0)
-fl2 <- drop(fl2$loadings.pm[[1]])
-pdat <- data.frame(cluster,flash = fl2)
+fl2 <- flash.backfit(fl2)
+y   <- drop(fl2$loadings.pm[[1]])
+pdat <- data.frame(cluster,flash = y)
 p5 <- ggplot(pdat,aes(x = cluster,y = flash)) +
   geom_boxplot(width = 0.25) +
   theme_cowplot(font_size = 12)

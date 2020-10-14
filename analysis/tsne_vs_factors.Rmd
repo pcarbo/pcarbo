@@ -17,7 +17,7 @@ library(Rtsne)
 library(flashier)
 library(ggplot2)
 library(cowplot)
-set.seed(1)
+set.seed(2)
 ```
 
 Consider the following data set. The 2-d data vectors are simulated so
@@ -32,8 +32,8 @@ cluster <- factor(c(rep(1,300),rep(2,1000)))
 colnames(X) <- c("x1","x2")
 p1 <- qplot(X[,1],X[,2],shape = I(21),color = I("white"),fill = cluster) +
   scale_fill_manual(values = c("tomato","dodgerblue")) +
-  xlim(-6,6) +
-  ylim(-6,6) +
+  xlim(-7,7) +
+  ylim(-7,7) +
   labs(x = "x1",y = "x2") +
   theme_cowplot(font_size = 12)
 print(p1)
@@ -68,15 +68,32 @@ p3 <- ggplot(pdat,aes(x = cluster,y = tsne)) +
 print(p3)
 ```
 
-FLASH with one factor does no better than PCA in separating the two
-clusters, at least with the default prior choices.
+FLASH with the default prior choices does no better than PCA in
+separating the two clusters.
 
-```{r flash, fig.width=3, fig.height=2.5}
-fl <- flash(X,greedy.Kmax = 1,var.type = 2,nullcheck = FALSE,verbose.lvl = 0)
-fl <- drop(fl$loadings.pm[[1]])
-pdat <- data.frame(cluster,flash = fl)
+```{r flash-1, fig.width=3, fig.height=2.5}
+fl1 <- flash(X,greedy.Kmax = 1,nullcheck = FALSE,verbose.lvl = 0)
+fl1 <- drop(fl1$loadings.pm[[1]])
+pdat <- data.frame(cluster,flash = fl1)
 p4 <- ggplot(pdat,aes(x = cluster,y = flash)) +
   geom_boxplot(width = 0.25) +
   theme_cowplot(font_size = 12)
 print(p4)
+```
+
+By contrast, FLASH with a unimodal prior on the loadings *can*
+separate the two clusters so long as a random initialization is used.
+
+```{r flash-2, fig.width=3, fig.height=2.5}
+fl2 <- flash.init(X)
+fl2 <- flash.init.factors(fl2,list(matrix(rnorm(nrow(X))),
+                                   matrix(rnorm(ncol(X)))),
+                          prior.family = c(prior.unimodal(),prior.normal()))
+fl2 <- flash.backfit(fl2)
+fl2 <- drop(fl2$loadings.pm[[1]])
+pdat <- data.frame(cluster,flash = fl2)
+p5 <- ggplot(pdat,aes(x = cluster,y = flash)) +
+  geom_boxplot(width = 0.25) +
+  theme_cowplot(font_size = 12)
+print(p5)
 ```

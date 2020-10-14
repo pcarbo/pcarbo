@@ -89,7 +89,7 @@ fl2 <- flash.init(X)
 fl2 <- flash.init.factors(fl2,list(matrix(rnorm(nrow(X))),
                                    matrix(rnorm(ncol(X)))),
                           prior.family = c(prior.unimodal(),prior.normal()))
-fl2 <- flash.backfit(fl2)
+fl2 <- flash.backfit(fl2,verbose.lvl = 0)
 fl2 <- drop(fl2$loadings.pm[[1]])
 pdat <- data.frame(cluster,flash = fl2)
 p5 <- ggplot(pdat,aes(x = cluster,y = flash)) +

@@ -329,7 +329,7 @@ div.section {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2020-10-13
+<strong>Last updated:</strong> 2020-10-14
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -420,16 +420,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree23c00813f535adb13ef5bec9736aebe13bbbd688targetblank23c0081a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/23c00813f535adb13ef5bec9736aebe13bbbd688" target="_blank">23c0081</a> </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree3a07bb962636a2bbd59907cf85760333250c9af1targetblank3a07bb9a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/pcarbo/pcarbo/tree/3a07bb962636a2bbd59907cf85760333250c9af1" target="_blank">3a07bb9</a> </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree23c00813f535adb13ef5bec9736aebe13bbbd688targetblank23c0081a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree3a07bb962636a2bbd59907cf85760333250c9af1targetblank3a07bb9a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/23c00813f535adb13ef5bec9736aebe13bbbd688" target="_blank">23c0081</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version <a href="https://github.com/pcarbo/pcarbo/tree/3a07bb962636a2bbd59907cf85760333250c9af1" target="_blank">3a07bb9</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -736,6 +736,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/pcarbo/pcarbo/blob/3a07bb962636a2bbd59907cf85760333250c9af1/analysis/tsne_vs_factors.Rmd" target="_blank">3a07bb9</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-10-14
+</td>
+<td>
+workflowr::wflow_publish(“tsne_vs_factors.Rmd”)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/pcarbo/8320e440be41cf0ea8cca9a9c7496941d3d705ff/docs/tsne_vs_factors.html" target="_blank">8320e44</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-10-13
+</td>
+<td>
+Modified clustering example in tsne_vs_factors demo.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/pcarbo/pcarbo/blob/23c00813f535adb13ef5bec9736aebe13bbbd688/analysis/tsne_vs_factors.Rmd" target="_blank">23c0081</a>
 </td>
 <td>
@@ -897,7 +931,7 @@ library(Rtsne)
 library(flashier)
 library(ggplot2)
 library(cowplot)
-set.seed(1)</code></pre>
+set.seed(2)</code></pre>
 <p>Consider the following data set. The 2-d data vectors are simulated so that they cluster into two sets. The second cluster varies much more along the first and second dimensions.</p>
 <pre class="r"><code>X &lt;- rbind(rmvnorm(300,c(-2,+2),diag(2)/30),
            rmvnorm(1000,c(0,0),rbind(c(3,2.9),
@@ -906,8 +940,8 @@ cluster &lt;- factor(c(rep(1,300),rep(2,1000)))
 colnames(X) &lt;- c(&quot;x1&quot;,&quot;x2&quot;)
 p1 &lt;- qplot(X[,1],X[,2],shape = I(21),color = I(&quot;white&quot;),fill = cluster) +
   scale_fill_manual(values = c(&quot;tomato&quot;,&quot;dodgerblue&quot;)) +
-  xlim(-6,6) +
-  ylim(-6,6) +
+  xlim(-7,7) +
+  ylim(-7,7) +
   labs(x = &quot;x1&quot;,y = &quot;x2&quot;) +
   theme_cowplot(font_size = 12)
 print(p1)</code></pre>
@@ -934,6 +968,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/8320e440be41cf0ea8cca9a9c7496941d3d705ff/docs/figure/tsne_vs_factors.Rmd/sim-data-1.png" target="_blank">8320e44</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-10-13
+</td>
+</tr>
 <tr>
 <td>
 <a href="https://github.com/pcarbo/pcarbo/blob/2953d4410ecd16498e043435a24f524ea069ca9e/docs/figure/tsne_vs_factors.Rmd/sim-data-1.png" target="_blank">2953d44</a>
@@ -993,6 +1038,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/pcarbo/pcarbo/blob/8320e440be41cf0ea8cca9a9c7496941d3d705ff/docs/figure/tsne_vs_factors.Rmd/pca-1.png" target="_blank">8320e44</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-10-13
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/pcarbo/pcarbo/blob/f7b5c9d08c273bd4965a306edc2a5745fb4c0ef1/docs/figure/tsne_vs_factors.Rmd/pca-1.png" target="_blank">f7b5c9d</a>
 </td>
 <td>
@@ -1050,6 +1106,17 @@ Date
 <tbody>
 <tr>
 <td>
+<a href="https://github.com/pcarbo/pcarbo/blob/8320e440be41cf0ea8cca9a9c7496941d3d705ff/docs/figure/tsne_vs_factors.Rmd/tsne-1.png" target="_blank">8320e44</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2020-10-13
+</td>
+</tr>
+<tr>
+<td>
 <a href="https://github.com/pcarbo/pcarbo/blob/5426424a214560699cfb3091143ffcfc7c6a8689/docs/figure/tsne_vs_factors.Rmd/tsne-1.png" target="_blank">5426424</a>
 </td>
 <td>
@@ -1063,52 +1130,33 @@ Peter Carbonetto
 </table>
 </div>
 </div>
-<p>FLASH with one factor does no better than PCA in separating the two clusters, at least with the default prior choices.</p>
-<pre class="r"><code>fl &lt;- flash(X,greedy.Kmax = 1,var.type = 2,nullcheck = FALSE,verbose.lvl = 0)
-fl &lt;- drop(fl$loadings.pm[[1]])
-pdat &lt;- data.frame(cluster,flash = fl)
+<p>FLASH with the default prior choices does no better than PCA in separating the two clusters.</p>
+<pre class="r"><code>fl1 &lt;- flash(X,greedy.Kmax = 1,nullcheck = FALSE,verbose.lvl = 0)
+fl1 &lt;- drop(fl1$loadings.pm[[1]])
+pdat &lt;- data.frame(cluster,flash = fl1)
 p4 &lt;- ggplot(pdat,aes(x = cluster,y = flash)) +
   geom_boxplot(width = 0.25) +
   theme_cowplot(font_size = 12)
 print(p4)</code></pre>
-<p><img src="figure/tsne_vs_factors.Rmd/flash-1.png" width="360" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-flash-1">
-Past versions of flash-1.png
-</button>
-</p>
-<div id="fig-flash-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/pcarbo/pcarbo/blob/5426424a214560699cfb3091143ffcfc7c6a8689/docs/figure/tsne_vs_factors.Rmd/flash-1.png" target="_blank">5426424</a>
-</td>
-<td>
-Peter Carbonetto
-</td>
-<td>
-2020-10-12
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/tsne_vs_factors.Rmd/flash-1-1.png" width="360" style="display: block; margin: auto;" /></p>
+<p>By contrast, FLASH with a unimodal prior on the loadings <em>can</em> separate the two clusters so long as a random initialization is used.</p>
+<pre class="r"><code>fl2 &lt;- flash.init(X)
+fl2 &lt;- flash.init.factors(fl2,list(matrix(rnorm(nrow(X))),
+                                   matrix(rnorm(ncol(X)))),
+                          prior.family = c(prior.unimodal(),prior.normal()))
+fl2 &lt;- flash.backfit(fl2)
+fl2 &lt;- drop(fl2$loadings.pm[[1]])
+pdat &lt;- data.frame(cluster,flash = fl2)
+p5 &lt;- ggplot(pdat,aes(x = cluster,y = flash)) +
+  geom_boxplot(width = 0.25) +
+  theme_cowplot(font_size = 12)
+print(p5)</code></pre>
+<p><img src="figure/tsne_vs_factors.Rmd/flash-2-1.png" width="360" style="display: block; margin: auto;" /></p>
+<pre><code># Backfitting 1 factors (tolerance: 3.87e-05)...
+#   Difference between iterations is within 1.0e+01...
+#   Difference between iterations is within 1.0e+00...
+# Wrapping up...
+# Done.</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">

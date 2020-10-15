@@ -72,7 +72,8 @@ FLASH with the default prior choices does no better than PCA in
 separating the two clusters.
 
 ```{r flash-1, fig.width=3, fig.height=2.5}
-fl1  <- flash(X,greedy.Kmax = 1,nullcheck = FALSE,verbose.lvl = 0)
+fl1  <- flash(X,greedy.Kmax = 1,backfit = TRUE,nullcheck = FALSE,
+              verbose.lvl = 0)
 y    <- drop(fl1$loadings.pm[[1]])
 pdat <- data.frame(cluster,flash = y)
 p4 <- ggplot(pdat,aes(x = cluster,y = flash)) +
@@ -82,7 +83,7 @@ print(p4)
 ```
 
 By contrast, FLASH with a unimodal prior on the loadings *can*
-separate the two clusters so long as a random initialization is used.
+separate the two clusters with a random initialization.
 
 ```{r flash-2, fig.width=3, fig.height=2.5}
 fl2 <- flash.init(X)

@@ -1,4 +1,3 @@
-# TO DO: Explain here what this script is for.
 library(glmnet)
 library(ggplot2)
 library(cowplot)

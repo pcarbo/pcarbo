@@ -14,22 +14,30 @@ y    <- drop(X %*% beta + rnorm(n))
 # different.
 fit <- glmnet(X,y,alpha = 0.9,standardize = FALSE)
 b   <- as.matrix(coef(fit))[-1,]
-print(summary(range(b[1,] - b[2,])))
+print(max(abs(b[1,] - b[2,])))
 print(fit$npasses)
 
 # If we make the convergence criteria more stringent, the estimates
 # become the same, but it takes many more iterations of the
-# coordinate-wise updates to reach the solution.
+# coordinate-wise updates to reach the solution (in which the two
+# estimates are the same, or nearly the same).
 fit <- glmnet(X,y,alpha = 0.9,thresh = 1e-15,standardize = FALSE)
 b   <- as.matrix(coef(fit))[-1,]
-print(summary(range(b[1,] - b[2,])))
+print(max(abs(b[1,] - b[2,])))
 print(fit$npasses)
 
-fit <- mr.ash(X,y,sa = c(0,1,2),pi = c(0,0.5,0.5),
-              update.pi = FALSE,update.sigma = FALSE,max.iter = 100)
-print(min(fit$varobj),digits = 12)
+# Does the coordinate ascent algorithm for mr.ash have a similar
+# convergence difficulty? Here we fit a mr.ash model with prior b ~
+# 0.5*N(0,1) + 0.5*N(0,2). Even after running 100 iterations, the
+# estimates of b1 and b2 are very different still.
+fit <- mr.ash(X,y,sa = c(0,1,2),pi = c(0,0.5,0.5),update.pi = FALSE,
+              update.sigma = FALSE,max.iter = 100)
 print(fit$beta)
+
+# The coordinate ascent updates eventually reach the solution but only
+# after many more iterations (in which the two estimates are the same,
+# or nearly the same).
 fit <- mr.ash(X,y,sa = c(0,1,2),pi = c(0,0.5,0.5),
-              update.pi = FALSE,update.sigma = FALSE,max.iter = 10000)
+              update.pi = FALSE,update.sigma = FALSE,max.iter = 8000)
 print(min(fit$varobj),digits = 12)
 print(fit$beta)

@@ -30,14 +30,14 @@ print(fit$npasses)
 # convergence difficulty? Here we fit a mr.ash model with prior b ~
 # 0.5*N(0,1) + 0.5*N(0,2). Even after running 100 iterations, the
 # estimates of b1 and b2 are very different still.
-fit <- mr.ash(X,y,sa = c(0,1,2),pi = c(0,0.5,0.5),update.pi = FALSE,
-              update.sigma = FALSE,max.iter = 100)
+fit <- mr.ash(X,y,sigma = 1,sa = c(0,1,2),pi = c(0,0.5,0.5),
+              update.pi = FALSE,update.sigma = FALSE,max.iter = 100)
 print(fit$beta)
 
 # The coordinate ascent updates eventually reach the solution but only
 # after many more iterations (in which the two estimates are the same,
 # or nearly the same).
-fit <- mr.ash(X,y,sa = c(0,1,2),pi = c(0,0.5,0.5),
+fit <- mr.ash(X,y,sigma = 1,sa = c(0,1,2),pi = c(0,0.5,0.5),
               update.pi = FALSE,update.sigma = FALSE,max.iter = 8000)
 print(min(fit$varobj),digits = 12)
 print(fit$beta)

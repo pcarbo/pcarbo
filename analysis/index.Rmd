@@ -5,6 +5,11 @@ site: workflowr::wflow_site
 output: workflowr::wflow_html
 ---
 
+```{r knitr-opts, include=FALSE}
+knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
+                      fig.align = "center",dpi = 120)
+```
+					  
 Analyses
 --------
 
@@ -21,3 +26,22 @@ Other things
 + [So you want to install source packages on your Mac?](r-macos.html)
 
 + [Multicore matrix computation in R](demo.matrix.multicore.html)
+
+Emojis
+------
+
+Playing around with the R package [emo][emo]:
+
+```{r emojis}
+library(emo)
+cat(ji("truck"),
+    ji("pencil"),
+    ji("pushpin"),
+    ji("pig"),
+	"\n")
+```
+
+You can use `emo::jis` to get the full list of the several thousand
+available emojis.
+
+[emo]: https://github.com/hadley/emo

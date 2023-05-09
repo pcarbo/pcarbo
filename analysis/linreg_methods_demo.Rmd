@@ -1,0 +1,104 @@
+---
+title: "Exploring methods for large-scale multiple linear regression"
+author: Peter Carbonetto
+output: workflowr::wflow_html
+---
+
+*Add overview here.*
+
+```{r knitr-opts, include=FALSE}
+knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
+                      fig.align = "center",dpi = 120)
+```
+
+Load the packages and set the seed so that we may reproduce the
+results more easily.
+
+```{r load-pkgs}
+library(MASS)
+library(SSLASSO)
+library(ggplot2)
+library(cowplot)
+set.seed(1)
+```
+
+Simulate a data set with correlated variables. This scenario is
+similar to Example 1 from [Zou & Hastie 2005][zh2005].
+
+```{r sim-data}
+simulate_predictors_decaying_corr <- function (n, p, s = 0.5)
+  return(mvrnorm(n,rep(0,p),s^abs(outer(1:p,1:p,"-"))))
+simulate_outcomes <- function (X, b, se)
+  return(drop(X %*% b + rnorm(nrow(X),sd = se)))
+p      <- 1000
+se     <- 3
+b      <- rep(0,p)
+b[1:3] <- c(3,1.5,2)
+Xtrain <- simulate_predictors_decaying_corr(200,p,0.5)
+Xtest  <- simulate_predictors_decaying_corr(500,p,0.5)
+train  <- list(X = Xtrain,y = simulate_outcomes(Xtrain,b,se))
+test   <- list(X = Xtest,y = simulate_outcomes(Xtest,b,se))
+btrue  <- b
+```
+
+First let's try both the "adaptive" and "separable" variants of the
+[Spike-and-Slab LASSO][sslasso]:
+
+```{r sslasso-1}
+sslasso_adapt <- with(train,SSLASSO(X,y,penalty = "adaptive",
+                            variance = "unknown"))
+sslasso_sep   <- with(train,SSLASSO(X,y,penalty = "separable",
+                            variance = "unknown"))
+```
+
+Let's take a look at the SSLASSO with separable penalty first. As far
+as I can tell, the SSLASSO does not provide an automated way to select
+the spike and slab penalties, so I'll choose one by hand:
+
+```{r plot-coef-sslasso-sep, fig.height=2.5, fig.width=2.5}
+b <- sslasso_sep$beta[,16]
+qplot(btrue,b) +
+  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
+              linetype = "dashed") +
+  theme_cowplot(font_size = 12)	 
+```
+
+Compare these estimates to the estimates obtained by the adaptive
+SSLASSO:
+
+```{r plot-coef-sslasso-adapt, fig.height=2.5, fig.width=2.5}
+b <- sslasso_adapt$beta[,16]
+qplot(btrue,b) +
+  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
+              linetype = "dashed") +
+  theme_cowplot(font_size = 12)	 
+```
+
+Another annoying thing about the SSLASSO package is that it does not
+provide a "predict" method. So we will have to compute the predictions
+by hand:
+
+```{r predict-sslasso, fig.height=2.5, fig.width=5}
+b0 <- sslasso_sep$intercept[16]
+b  <- sslasso_sep$beta[,16]
+y  <- drop(b0 + test$X %*% b)
+cor(y,test$y)
+p1 <- qplot(test$y,y) +
+  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
+              linetype = "dashed") +
+  ggtitle(paste("cor =",round(cor(test$y,y),3))) +
+  theme_cowplot(font_size = 12)
+b0 <- sslasso_adapt$intercept[16]
+b  <- sslasso_adapt$beta[,16]
+y  <- drop(b0 + test$X %*% b)
+
+p2 <- qplot(test$y,y) +
+  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
+              linetype = "dashed") +
+  ggtitle(paste("cor =",round(cor(test$y,y),3))) +
+  theme_cowplot(font_size = 12)
+plot_grid(p1,p2)
+```
+
+[sslasso]: https://cran.r-project.org/package=SSLASSO
+[zh2005]: https://doi.org/10.1111/j.1467-9868.2005.00503.x

@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Peter Carbonetto" />
+
+
+<title>Exploring methods for large-scale multiple linear regression</title>
+
+<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/readable.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/main/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">pcarbo</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Overview</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/pcarbo/pcarbo">source</a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Exploring methods for large-scale multiple
+linear regression</h1>
+<h4 class="author">Peter Carbonetto</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span>
+workflowr <span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2023-05-09
+</p>
+<p>
+<strong>Checks:</strong> <span
+class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7
+<span class="glyphicon glyphicon-exclamation-sign text-danger"
+aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>pcarbo/analysis/</code> <span
+class="glyphicon glyphicon-question-sign" aria-hidden="true"
+title="This is the local directory in which the code in this file was executed.">
+</span>
+</p>
+<p>
+This reproducible <a href="https://rmarkdown.rstudio.com">R Markdown</a>
+analysis was created with <a
+  href="https://github.com/workflowr/workflowr">workflowr</a> (version
+1.7.0.3). The <em>Checks</em> tab describes the reproducibility checks
+that were applied when the results were created. The <em>Past
+versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date
+</a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git
+repository, you know the exact version of the code that produced these
+results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the
+global environment can affect the analysis in your R Markdown file in
+unknown ways. For reproduciblity it’s best to always run the code in an
+empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed1code">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Seed:</strong>
+<code>set.seed(1)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed1code"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(1)</code> was run prior to running the
+code in the R Markdown file. Setting a seed ensures that any results
+that rely on randomness, e.g. subsampling or permutations, are
+reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Session information:</strong>
+recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package
+versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be
+confident that you successfully produced the results during this
+run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr
+project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree0b8238edae155e56c6125f2a60d85a19156904b3targetblank0b8238ea">
+<span class="glyphicon glyphicon-ok text-success"
+aria-hidden="true"></span> <strong>Repository version:</strong>
+<a href="https://github.com/pcarbo/pcarbo/tree/0b8238edae155e56c6125f2a60d85a19156904b3" target="_blank">0b8238e</a>
+</a>
+</p>
+</div>
+<div
+id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree0b8238edae155e56c6125f2a60d85a19156904b3targetblank0b8238ea"
+class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development
+and connecting the code version to the results is critical for
+reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version
+<a href="https://github.com/pcarbo/pcarbo/tree/0b8238edae155e56c6125f2a60d85a19156904b3" target="_blank">0b8238e</a>.
+See the <em>Past versions</em> tab to see a history of the changes made
+to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for
+the analysis have been committed to Git prior to generating the results
+(you can use <code>wflow_publish</code> or
+<code>wflow_git_commit</code>). workflowr only checks the R Markdown
+file, but you know if there are other scripts or data files that it
+depends on. Below is the status of the Git repository when the results
+were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    analysis/fit-scd-ex-k=10.rds
+    Ignored:    sbatch/makefile_demo/sims/sim0001.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0002.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0003.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0004.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0005.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0006.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0007.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0008.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0009.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0010.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0011.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0012.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0013.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0014.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0015.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0016.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0017.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0018.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0019.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0020.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0021.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0022.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0023.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0024.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0025.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0026.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0027.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0028.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0029.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0030.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0031.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0032.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0033.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0034.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0035.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0036.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0037.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0038.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0039.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0040.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0041.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0042.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0043.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0044.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0045.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0046.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0047.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0048.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0049.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0050.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0051.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0052.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0053.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0054.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0055.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0056.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0057.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0058.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0059.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0060.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0061.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0062.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0063.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0064.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0065.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0066.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0067.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0068.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0069.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0070.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0071.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0072.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0073.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0074.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0075.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0076.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0077.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0078.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0079.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0080.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0081.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0082.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0083.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0084.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0085.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0086.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0087.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0088.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0089.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0090.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0091.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0092.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0093.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0094.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0095.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0096.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0097.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0098.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0099.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0100.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0101.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0102.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0103.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0104.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0105.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0106.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0107.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0108.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0109.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0110.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0111.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0112.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0113.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0114.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0115.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0116.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0117.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0118.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0119.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0120.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0121.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0122.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0123.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0124.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0125.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0126.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0127.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0128.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0129.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0130.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0131.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0132.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0133.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0134.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0135.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0136.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0137.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0138.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0139.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0140.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0141.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0142.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0143.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0144.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0145.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0146.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0147.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0148.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0149.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0150.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0151.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0152.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0153.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0154.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0155.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0156.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0157.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0158.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0159.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0160.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0161.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0162.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0163.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0164.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0165.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0166.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0167.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0168.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0169.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0170.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0171.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0172.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0173.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0174.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0175.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0176.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0177.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0178.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0179.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0180.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0181.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0182.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0183.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0184.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0185.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0186.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0187.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0188.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0189.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0190.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0191.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0192.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0193.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0194.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0195.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0196.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0197.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0198.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0199.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0200.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0201.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0202.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0203.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0204.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0205.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0206.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0207.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0208.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0209.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0210.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0211.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0212.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0213.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0214.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0215.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0216.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0217.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0218.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0219.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0220.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0221.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0222.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0223.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0224.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0225.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0226.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0227.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0228.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0229.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0230.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0231.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0232.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0233.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0234.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0235.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0236.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0237.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0238.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0239.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0240.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0241.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0242.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0243.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0244.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0245.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0246.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0247.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0248.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0249.csv
+    Ignored:    sbatch/makefile_demo/sims/sim0250.csv
+
+Untracked files:
+    Untracked:  R/demo.nmf.R
+    Untracked:  R/nmfmu.R
+    Untracked:  R/scd.R
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not
+included in this status report because it is ok for generated content to
+have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were
+made to the R Markdown (<code>analysis/linreg_methods_demo.Rmd</code>)
+and HTML (<code>docs/linreg_methods_demo.html</code>) files. If you’ve
+configured a remote Git repository (see <code>?wflow_git_remote</code>),
+click on the hyperlinks in the table below to view the files as they
+were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/0b8238edae155e56c6125f2a60d85a19156904b3/analysis/linreg_methods_demo.Rmd" target="_blank">0b8238e</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2023-05-09
+</td>
+<td>
+workflowr::wflow_publish("linreg_methods_demo.Rmd", verbose = TRUE)
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p><em>Add overview here.</em></p>
+<p>Load the packages and set the seed so that we may reproduce the
+results more easily.</p>
+<pre class="r"><code>library(MASS)
+library(SSLASSO)
+library(ggplot2)
+library(cowplot)
+set.seed(1)</code></pre>
+<p>Simulate a data set with correlated variables. This scenario is
+similar to Example 1 from <a
+href="https://doi.org/10.1111/j.1467-9868.2005.00503.x">Zou &amp; Hastie
+2005</a>.</p>
+<pre class="r"><code>simulate_predictors_decaying_corr &lt;- function (n, p, s = 0.5)
+  return(mvrnorm(n,rep(0,p),s^abs(outer(1:p,1:p,&quot;-&quot;))))
+simulate_outcomes &lt;- function (X, b, se)
+  return(drop(X %*% b + rnorm(nrow(X),sd = se)))
+p      &lt;- 1000
+se     &lt;- 3
+b      &lt;- rep(0,p)
+b[1:3] &lt;- c(3,1.5,2)
+Xtrain &lt;- simulate_predictors_decaying_corr(200,p,0.5)
+Xtest  &lt;- simulate_predictors_decaying_corr(500,p,0.5)
+train  &lt;- list(X = Xtrain,y = simulate_outcomes(Xtrain,b,se))
+test   &lt;- list(X = Xtest,y = simulate_outcomes(Xtest,b,se))
+btrue  &lt;- b</code></pre>
+<p>First let’s try both the “adaptive” and “separable” variants of the
+<a href="https://cran.r-project.org/package=SSLASSO">Spike-and-Slab
+LASSO</a>:</p>
+<pre class="r"><code>sslasso_adapt &lt;- with(train,SSLASSO(X,y,penalty = &quot;adaptive&quot;,
+                            variance = &quot;unknown&quot;))
+sslasso_sep   &lt;- with(train,SSLASSO(X,y,penalty = &quot;separable&quot;,
+                            variance = &quot;unknown&quot;))</code></pre>
+<p>Let’s take a look at the SSLASSO with separable penalty first. As far
+as I can tell, the SSLASSO does not provide an automated way to select
+the spike and slab penalties, so I’ll choose one by hand:</p>
+<pre class="r"><code>b &lt;- sslasso_sep$beta[,16]
+qplot(btrue,b) +
+  geom_abline(intercept = 0,slope = 1,color = &quot;deepskyblue&quot;,
+              linetype = &quot;dashed&quot;) +
+  theme_cowplot(font_size = 12)  </code></pre>
+<p><img src="figure/linreg_methods_demo.Rmd/plot-coef-sslasso-sep-1.png" width="300" style="display: block; margin: auto;" /></p>
+<p>Compare these estimates to the estimates obtained by the adaptive
+SSLASSO:</p>
+<pre class="r"><code>b &lt;- sslasso_adapt$beta[,16]
+qplot(btrue,b) +
+  geom_abline(intercept = 0,slope = 1,color = &quot;deepskyblue&quot;,
+              linetype = &quot;dashed&quot;) +
+  theme_cowplot(font_size = 12)  </code></pre>
+<p><img src="figure/linreg_methods_demo.Rmd/plot-coef-sslasso-adapt-1.png" width="300" style="display: block; margin: auto;" /></p>
+<p>Another annoying thing about the SSLASSO package is that it does not
+provide a “predict” method. So we will have to compute the predictions
+by hand:</p>
+<pre class="r"><code>b0 &lt;- sslasso_sep$intercept[16]
+b  &lt;- sslasso_sep$beta[,16]
+y  &lt;- drop(b0 + test$X %*% b)
+cor(y,test$y)
+p1 &lt;- qplot(test$y,y) +
+  geom_abline(intercept = 0,slope = 1,color = &quot;deepskyblue&quot;,
+              linetype = &quot;dashed&quot;) +
+  ggtitle(paste(&quot;cor =&quot;,round(cor(test$y,y),3))) +
+  theme_cowplot(font_size = 12)
+b0 &lt;- sslasso_adapt$intercept[16]
+b  &lt;- sslasso_adapt$beta[,16]
+y  &lt;- drop(b0 + test$X %*% b)
+
+p2 &lt;- qplot(test$y,y) +
+  geom_abline(intercept = 0,slope = 1,color = &quot;deepskyblue&quot;,
+              linetype = &quot;dashed&quot;) +
+  ggtitle(paste(&quot;cor =&quot;,round(cor(test$y,y),3))) +
+  theme_cowplot(font_size = 12)
+plot_grid(p1,p2)</code></pre>
+<p><img src="figure/linreg_methods_demo.Rmd/predict-sslasso-1.png" width="600" style="display: block; margin: auto;" /></p>
+<pre><code># [1] 0.7059288</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span>
+Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()
+# R version 3.6.2 (2019-12-12)
+# Platform: x86_64-apple-darwin15.6.0 (64-bit)
+# Running under: macOS Catalina 10.15.7
+# 
+# Matrix products: default
+# BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+# LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+# 
+# locale:
+# [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+# 
+# attached base packages:
+# [1] stats     graphics  grDevices utils     datasets  methods   base     
+# 
+# other attached packages:
+# [1] cowplot_1.1.1 ggplot2_3.3.6 SSLASSO_1.2-2 MASS_7.3-51.4
+# 
+# loaded via a namespace (and not attached):
+#  [1] tidyselect_1.1.1  xfun_0.29         bslib_0.3.1       purrr_0.3.4      
+#  [5] colorspace_1.4-1  vctrs_0.3.8       generics_0.0.2    htmltools_0.5.4  
+#  [9] yaml_2.2.0        utf8_1.1.4        rlang_1.0.6       jquerylib_0.1.4  
+# [13] later_1.0.0       pillar_1.6.2      glue_1.4.2        withr_2.5.0      
+# [17] DBI_1.1.0         lifecycle_1.0.3   stringr_1.4.0     munsell_0.5.0    
+# [21] gtable_0.3.0      workflowr_1.7.0.3 evaluate_0.14     labeling_0.3     
+# [25] knitr_1.37        fastmap_1.1.0     httpuv_1.5.2      fansi_0.4.0      
+# [29] highr_0.8         Rcpp_1.0.8        promises_1.1.0    scales_1.1.0     
+# [33] jsonlite_1.7.2    farver_2.0.1      fs_1.5.2          digest_0.6.23    
+# [37] stringi_1.4.3     dplyr_1.0.7       rprojroot_2.0.3   grid_3.6.2       
+# [41] cli_3.5.0         tools_3.6.2       magrittr_2.0.1    sass_0.4.0       
+# [45] tibble_3.1.3      crayon_1.4.1      whisker_0.4       pkgconfig_2.0.3  
+# [49] ellipsis_0.3.2    assertthat_0.2.1  rmarkdown_2.11    R6_2.4.1         
+# [53] git2r_0.29.0      compiler_3.6.2</code></pre>
+</div>
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+https://docs.mathjax.org/en/latest/web/configuration.html. This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

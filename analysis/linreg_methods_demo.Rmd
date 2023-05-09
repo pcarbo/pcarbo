@@ -1,5 +1,5 @@
 ---
-title: "Exploring methods for large-scale multiple linear regression"
+title: "Exploring a few methods for large-scale multiple linear regression"
 author: Peter Carbonetto
 output: workflowr::wflow_html
 ---
@@ -17,19 +17,20 @@ results more easily.
 ```{r load-pkgs}
 library(MASS)
 library(SSLASSO)
+library(EMVS)
 library(ggplot2)
 library(cowplot)
 set.seed(1)
 ```
 
-Simulate a data set with correlated variables. This scenario is
+Simulate a data set with correlated variables. This simulation is
 similar to Example 1 from [Zou & Hastie 2005][zh2005].
 
 ```{r sim-data}
 simulate_predictors_decaying_corr <- function (n, p, s = 0.5)
   return(mvrnorm(n,rep(0,p),s^abs(outer(1:p,1:p,"-"))))
 simulate_outcomes <- function (X, b, se)
-  return(drop(X %*% b + rnorm(nrow(X),sd = se)))
+  return(drop(X %*% b - 1 + rnorm(nrow(X),sd = se)))
 p      <- 1000
 se     <- 3
 b      <- rep(0,p)
@@ -41,14 +42,17 @@ test   <- list(X = Xtest,y = simulate_outcomes(Xtest,b,se))
 btrue  <- b
 ```
 
+SSLASSO
+-------
+
 First let's try both the "adaptive" and "separable" variants of the
 [Spike-and-Slab LASSO][sslasso]:
 
 ```{r sslasso-1}
-sslasso_adapt <- with(train,SSLASSO(X,y,penalty = "adaptive",
-                            variance = "unknown"))
-sslasso_sep   <- with(train,SSLASSO(X,y,penalty = "separable",
-                            variance = "unknown"))
+sslasso_adapt <-
+  with(train,SSLASSO(X,y,penalty = "adaptive",variance = "unknown"))
+sslasso_sep <-
+  with(train,SSLASSO(X,y,penalty = "separable",variance = "unknown"))
 ```
 
 Let's take a look at the SSLASSO with separable penalty first. As far
@@ -75,30 +79,88 @@ qplot(btrue,b) +
 ```
 
 Another annoying thing about the SSLASSO package is that it does not
-provide a "predict" method. So we will have to compute the predictions
-by hand:
+provide a "predict" method. So we will compute the predictions by
+hand after extracting the :
 
 ```{r predict-sslasso, fig.height=2.5, fig.width=5}
 b0 <- sslasso_sep$intercept[16]
 b  <- sslasso_sep$beta[,16]
 y  <- drop(b0 + test$X %*% b)
-cor(y,test$y)
 p1 <- qplot(test$y,y) +
   geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
               linetype = "dashed") +
-  ggtitle(paste("cor =",round(cor(test$y,y),3))) +
+  ggtitle(sprintf("separable (cor = %0.3f)",cor(test$y,y))) +
   theme_cowplot(font_size = 12)
 b0 <- sslasso_adapt$intercept[16]
 b  <- sslasso_adapt$beta[,16]
 y  <- drop(b0 + test$X %*% b)
-
 p2 <- qplot(test$y,y) +
   geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
               linetype = "dashed") +
-  ggtitle(paste("cor =",round(cor(test$y,y),3))) +
+  ggtitle(sprintf("adaptive (cor = %0.3f)",cor(test$y,y))) +
   theme_cowplot(font_size = 12)
 plot_grid(p1,p2)
 ```
 
+EMVS
+----
+
+The [EMVS package][emvs] seems to be better documented (unfortunately,
+it was removed from CRAN). It also has two variants with different
+priors, the "independent" prior (which is recommended by the authors)
+and the "conjugate" prior. Let's compare their performance in this
+simulated example.
+
+```{r emvs, results="hide"}
+emvs_conj = with(train,
+  EMVS(y,X,v0 = seq(0.1,2,length.out = 20),v1 = 10,independent = FALSE))
+emvs_ind = with(train,
+  EMVS(y,X,v0 = exp(seq(-18,-1,length.out = 20)),v1 = 1,independent = TRUE))
+```
+
+*Add text here.*
+
+```{r emvs-conj, fig.height=2.5, fig.width=2.5}
+i  <- which.max(emvs_conj$log_g_function)
+b  <- with(emvs_conj,betas[i,] * prob_inclusion[i,])
+qplot(btrue,b) +
+  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
+              linetype = "dashed") +
+  theme_cowplot(font_size = 12)
+```
+
+*Add text here.*
+
+```{r emvs-ind, fig.height=2.5, fig.width=2.5}
+b <- with(emvs_ind,betas[14,] * prob_inclusion[14,])
+qplot(btrue,b) +
+  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
+              linetype = "dashed") +
+  theme_cowplot(font_size = 12)
+```
+
+*Add text here.*
+
+```{r predict-emvs, fig.height=2.5, fig.width=5}
+b0 <- emvs_conj$intersects[i]
+b  <- emvs_conj$betas[i,]
+y  <- drop(b0 + test$X %*% b)
+p1 <- qplot(test$y,y) +
+  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
+              linetype = "dashed") +
+  ggtitle(sprintf("conjugate (cor = %0.3f)",cor(test$y,y))) +
+  theme_cowplot(font_size = 12)
+b0 <- emvs_ind$intersects[14]
+b  <- emvs_ind$beta[14,]
+y  <- drop(b0 + test$X %*% b)
+p2 <- qplot(test$y,y) +
+  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
+              linetype = "dashed") +
+  ggtitle(sprintf("independent (cor = %0.3f)",cor(test$y,y))) +
+  theme_cowplot(font_size = 12)
+plot_grid(p1,p2)
+```
+
+[emvs]: https://cran.r-project.org/package=EMVS
 [sslasso]: https://cran.r-project.org/package=SSLASSO
 [zh2005]: https://doi.org/10.1111/j.1467-9868.2005.00503.x

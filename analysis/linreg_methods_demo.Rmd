@@ -91,6 +91,25 @@ qplot(test$y,y) +
   theme(plot.title = element_text(face = "plain",size = 12))
 ```
 
+Let's compare this to L0Learn with the simpler L0 penalty (which is a
+special case of the L0L1 penalty in which $\gamma = 0$):
+
+```{r l0learn-l0only, fig.height=2.5, fig.width=2.5}
+l0learn_cv <- with(train,L0Learn.cvfit(X,y,penalty = "L0",algorithm = "CD"))
+i <- which.min(l0learn_cv$cvMeans[[1]])
+lambda <- l0learn_cv$fit$lambda[[1]][i]
+y <- as.vector(predict(l0learn_cv,newx = test$X,lambda = lambda))
+qplot(test$y,y) +
+  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
+              linetype = "dashed") +
+  ggtitle(sprintf("mse = %0.3f",mse(test$y,y))) +
+  theme_cowplot(font_size = 12) +
+  theme(plot.title = element_text(face = "plain",size = 12))
+```
+
+Indeed, in this one example at least, L0Learn with the L0L1 penalty
+performs better than the L0 penalty in the prediction task.
+
 SSLASSO
 -------
 

@@ -16,6 +16,7 @@ results more easily.
 
 ```{r load-pkgs}
 library(MASS)
+library(L0Learn)
 library(SSLASSO)
 library(EMVS)
 library(ggplot2)
@@ -23,8 +24,8 @@ library(cowplot)
 set.seed(1)
 ```
 
-Simulate a data set with correlated variables. This simulation is
-similar to Example 1 from [Zou & Hastie 2005][zh2005].
+Simulate a data set with correlated variables in a similar way to
+Example 1 from [Zou & Hastie 2005][zh2005].
 
 ```{r sim-data}
 simulate_predictors_decaying_corr <- function (n, p, s = 0.5)
@@ -42,10 +43,58 @@ test   <- list(X = Xtest,y = simulate_outcomes(Xtest,b,se))
 btrue  <- b
 ```
 
+L0Learn
+-------
+
+First, let's try the [L0Learn][l0learn] from
+[Hazimeh and Mazumder 2020][hm2020]. In the
+[vignette][l0learn-vignette], the authors suggest using the "L0L1" or
+"L0L2" penalties for better predictive performance. The package
+includes an interface to automatically select the penalty parameters
+$\lambda, \gamma$ that minimize the test-set error. (L0Learn has two
+model fitting algorithms; the CD algorithm is faster whereas the
+CDPSI can sometimes produces better fits. For expediency we'll use
+the CD algorithm.)
+
+```{r l0learn}
+l0learn_cv <- with(train,L0Learn.cvfit(X,y,penalty = "L0L1",algorithm = "CD"))
+i <- which.min(sapply(l0learn_cv$cvMeans,min))
+j <- which.min(l0learn_cv$cvMeans[[i]])
+gamma <- l0learn_cv$fit$gamma[i]
+lambda <- l0learn_cv$fit$lambda[[i]][j]
+```
+
+Compare the coefficient estimates against the ground truth:
+
+```{r plot-coef-l0learn, fig.height=2.5, fig.width=2.5}
+b <- as.vector(coef(l0learn_cv,gamma = gamma,lambda = lambda))
+b0 <- b[1]
+b <- b[-1]
+qplot(btrue,b) +
+  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
+              linetype = "dashed") +
+  theme_cowplot(font_size = 12)	 
+```
+
+The mean squared error (MSE) summarizes the accuracy of the
+predictions in the test set examples:
+
+```{r predict-l0learn, fig.height=2.5, fig.width=2.5}
+mse <- function (x, y)
+  mean((x - y)^2)
+y <- as.vector(predict(l0learn_cv,newx = test$X,gamma = gamma,lambda = lambda))
+qplot(test$y,y) +
+  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
+              linetype = "dashed") +
+  ggtitle(sprintf("mse = %0.3f",mse(test$y,y))) +
+  theme_cowplot(font_size = 12) +
+  theme(plot.title = element_text(face = "plain",size = 12))
+```
+
 SSLASSO
 -------
 
-First let's try both the "adaptive" and "separable" variants of the
+Next let's try both the "adaptive" and "separable" variants of the
 [Spike-and-Slab LASSO][sslasso]:
 
 ```{r sslasso-1}
@@ -89,7 +138,7 @@ y  <- drop(b0 + test$X %*% b)
 p1 <- qplot(test$y,y) +
   geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
               linetype = "dashed") +
-  ggtitle(sprintf("separable (cor = %0.3f)",cor(test$y,y))) +
+  ggtitle(sprintf("separable (mse = %0.3f)",mse(test$y,y))) +
   theme_cowplot(font_size = 12)
 b0 <- sslasso_adapt$intercept[16]
 b  <- sslasso_adapt$beta[,16]
@@ -97,7 +146,7 @@ y  <- drop(b0 + test$X %*% b)
 p2 <- qplot(test$y,y) +
   geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
               linetype = "dashed") +
-  ggtitle(sprintf("adaptive (cor = %0.3f)",cor(test$y,y))) +
+  ggtitle(sprintf("adaptive (mse = %0.3f)",mse(test$y,y))) +
   theme_cowplot(font_size = 12)
 plot_grid(p1,p2)
 ```
@@ -148,7 +197,7 @@ y  <- drop(b0 + test$X %*% b)
 p1 <- qplot(test$y,y) +
   geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
               linetype = "dashed") +
-  ggtitle(sprintf("conjugate (cor = %0.3f)",cor(test$y,y))) +
+  ggtitle(sprintf("conjugate (mse = %0.3f)",mse(test$y,y))) +
   theme_cowplot(font_size = 12)
 b0 <- emvs_ind$intersects[14]
 b  <- emvs_ind$beta[14,]
@@ -156,7 +205,7 @@ y  <- drop(b0 + test$X %*% b)
 p2 <- qplot(test$y,y) +
   geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
               linetype = "dashed") +
-  ggtitle(sprintf("independent (cor = %0.3f)",cor(test$y,y))) +
+  ggtitle(sprintf("independent (mse = %0.3f)",mse(test$y,y))) +
   theme_cowplot(font_size = 12)
 plot_grid(p1,p2)
 ```
@@ -164,3 +213,6 @@ plot_grid(p1,p2)
 [emvs]: https://cran.r-project.org/package=EMVS
 [sslasso]: https://cran.r-project.org/package=SSLASSO
 [zh2005]: https://doi.org/10.1111/j.1467-9868.2005.00503.x
+[hm2020]: https://doi.org/10.1287/opre.2019.1919
+[l0learn]: https://cran.r-project.org/package=L0Learn
+[l0learn-vignette]: https://cran.r-project.org/web/packages/L0Learn/vignettes/L0Learn-vignette.html

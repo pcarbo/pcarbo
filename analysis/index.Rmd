@@ -20,6 +20,8 @@ Analyses
 
 + [Linear vs. nonlinear embeddings: a thought experiment](tsne_vs_factors.html)
 
++ [Exploring methods for large-scale multiple linear regression](linreg_methods_demo.html)
+
 Other things
 ------------
 

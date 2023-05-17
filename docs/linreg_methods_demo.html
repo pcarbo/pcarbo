@@ -12,7 +12,7 @@
 <meta name="author" content="Peter Carbonetto" />
 
 
-<title>Exploring a few methods for large-scale multiple linear regression</title>
+<title>Exploring methods for large-scale multiple linear regression</title>
 
 <script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -276,8 +276,8 @@ div.section {
 
 
 
-<h1 class="title toc-ignore">Exploring a few methods for large-scale
-multiple linear regression</h1>
+<h1 class="title toc-ignore">Exploring methods for large-scale multiple
+linear regression</h1>
 <h4 class="author">Peter Carbonetto</h4>
 
 </div>
@@ -307,7 +307,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2023-05-13
+<strong>Last updated:</strong> 2023-05-17
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -438,15 +438,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree8d721cf00b95b7674cd3e358eaf1bdd842384c3btargetblank8d721cfa">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree3083353b6e37535e57d8e372ab21239c5224ed7ctargetblank3083353a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/pcarbo/pcarbo/tree/8d721cf00b95b7674cd3e358eaf1bdd842384c3b" target="_blank">8d721cf</a>
+<a href="https://github.com/pcarbo/pcarbo/tree/3083353b6e37535e57d8e372ab21239c5224ed7c" target="_blank">3083353</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree8d721cf00b95b7674cd3e358eaf1bdd842384c3btargetblank8d721cfa"
+id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree3083353b6e37535e57d8e372ab21239c5224ed7ctargetblank3083353a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -456,7 +456,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/pcarbo/pcarbo/tree/8d721cf00b95b7674cd3e358eaf1bdd842384c3b" target="_blank">8d721cf</a>.
+<a href="https://github.com/pcarbo/pcarbo/tree/3083353b6e37535e57d8e372ab21239c5224ed7c" target="_blank">3083353</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -728,6 +728,9 @@ Untracked files:
     Untracked:  R/nmfmu.R
     Untracked:  R/scd.R
 
+Unstaged changes:
+    Modified:   R/linreg_methods_demo_functions.R
+
 </code></pre>
 <p>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not
@@ -772,6 +775,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/3083353b6e37535e57d8e372ab21239c5224ed7c/analysis/linreg_methods_demo.Rmd" target="_blank">3083353</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2023-05-17
+</td>
+<td>
+workflowr::wflow_publish("linreg_methods_demo.Rmd")
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/pcarbo/2ea7aaaa555ac055da621cc242ba5781e8b12a12/docs/linreg_methods_demo.html" target="_blank">2ea7aaa</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2023-05-13
+</td>
+<td>
+Fixed one of the scatterplots in the linreg_methods_demo.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -907,7 +944,8 @@ library(SSLASSO)
 library(EMVS)
 library(ggplot2)
 library(cowplot)
-set.seed(1)</code></pre>
+set.seed(1)
+source(&quot;../R/linreg_methods_demo_functions.R&quot;)</code></pre>
 <p>Simulate a data set with correlated variables in a similar way to
 Example 1 from <a
 href="https://doi.org/10.1111/j.1467-9868.2005.00503.x">Zou &amp; Hastie
@@ -940,18 +978,14 @@ test-set error. (L0Learn has two model fitting algorithms; the CD
 algorithm is faster whereas the CDPSI can sometimes produces better
 fits. For expediency we’ll use the CD algorithm.)</p>
 <pre class="r"><code>l0learn_cv &lt;- with(train,L0Learn.cvfit(X,y,penalty = &quot;L0L1&quot;,algorithm = &quot;CD&quot;))
-i &lt;- which.min(sapply(l0learn_cv$cvMeans,min))
-j &lt;- which.min(l0learn_cv$cvMeans[[i]])
-gamma &lt;- l0learn_cv$fit$gamma[i]
+i      &lt;- which.min(sapply(l0learn_cv$cvMeans,min))
+j      &lt;- which.min(l0learn_cv$cvMeans[[i]])
+gamma  &lt;- l0learn_cv$fit$gamma[i]
 lambda &lt;- l0learn_cv$fit$lambda[[i]][j]</code></pre>
 <p>Compare the coefficient estimates against the ground truth:</p>
 <pre class="r"><code>b &lt;- as.vector(coef(l0learn_cv,gamma = gamma,lambda = lambda))
-b0 &lt;- b[1]
 b &lt;- b[-1]
-qplot(btrue,b) +
-  geom_abline(intercept = 0,slope = 1,color = &quot;deepskyblue&quot;,
-              linetype = &quot;dashed&quot;) +
-  theme_cowplot(font_size = 12)  </code></pre>
+plot_coefs(btrue,b)</code></pre>
 <p><img src="figure/linreg_methods_demo.Rmd/plot-coef-l0learn-1.png" width="300" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-plot-coef-l0learn-1">
@@ -990,17 +1024,12 @@ Peter Carbonetto
 </table>
 </div>
 </div>
+<p>As expected, the L0 penalty shrinks most of the coefficients to
+zero.</p>
 <p>The mean squared error (MSE) summarizes the accuracy of the
 predictions in the test set examples:</p>
-<pre class="r"><code>mse &lt;- function (x, y)
-  mean((x - y)^2)
-y &lt;- as.vector(predict(l0learn_cv,newx = test$X,gamma = gamma,lambda = lambda))
-qplot(test$y,y) +
-  geom_abline(intercept = 0,slope = 1,color = &quot;deepskyblue&quot;,
-              linetype = &quot;dashed&quot;) +
-  ggtitle(sprintf(&quot;mse = %0.3f&quot;,mse(test$y,y))) +
-  theme_cowplot(font_size = 12) +
-  theme(plot.title = element_text(face = &quot;plain&quot;,size = 12))</code></pre>
+<pre class="r"><code>y &lt;- as.vector(predict(l0learn_cv,newx = test$X,gamma = gamma,lambda = lambda))
+plot_responses(test$y,y)</code></pre>
 <p><img src="figure/linreg_methods_demo.Rmd/predict-l0learn-1.png" width="300" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-predict-l0learn-1">
@@ -1053,8 +1082,45 @@ qplot(test$y,y) +
   theme_cowplot(font_size = 12) +
   theme(plot.title = element_text(face = &quot;plain&quot;,size = 12))</code></pre>
 <p><img src="figure/linreg_methods_demo.Rmd/l0learn-l0only-1.png" width="300" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-l0learn-l0only-1">
+Past versions of l0learn-l0only-1.png
+</button>
+</p>
+<div id="fig-l0learn-l0only-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/2ea7aaaa555ac055da621cc242ba5781e8b12a12/docs/figure/linreg_methods_demo.Rmd/l0learn-l0only-1.png" target="_blank">2ea7aaa</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2023-05-13
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <p>Indeed, in this one example at least, L0Learn with the L0L1 penalty
-performs better than the L0 penalty in the prediction task.</p>
+has better prediction performance than the L0 penalty.</p>
 </div>
 <div id="sslasso" class="section level2">
 <h2>SSLASSO</h2>

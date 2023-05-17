@@ -1,5 +1,5 @@
 ---
-title: "Exploring a few methods for large-scale multiple linear regression"
+title: "Exploring methods for large-scale multiple linear regression"
 author: Peter Carbonetto
 output: workflowr::wflow_html
 ---
@@ -22,6 +22,7 @@ library(EMVS)
 library(ggplot2)
 library(cowplot)
 set.seed(1)
+source("../R/linreg_methods_demo_functions.R")
 ```
 
 Simulate a data set with correlated variables in a similar way to
@@ -58,9 +59,9 @@ the CD algorithm.)
 
 ```{r l0learn}
 l0learn_cv <- with(train,L0Learn.cvfit(X,y,penalty = "L0L1",algorithm = "CD"))
-i <- which.min(sapply(l0learn_cv$cvMeans,min))
-j <- which.min(l0learn_cv$cvMeans[[i]])
-gamma <- l0learn_cv$fit$gamma[i]
+i      <- which.min(sapply(l0learn_cv$cvMeans,min))
+j      <- which.min(l0learn_cv$cvMeans[[i]])
+gamma  <- l0learn_cv$fit$gamma[i]
 lambda <- l0learn_cv$fit$lambda[[i]][j]
 ```
 
@@ -68,27 +69,18 @@ Compare the coefficient estimates against the ground truth:
 
 ```{r plot-coef-l0learn, fig.height=2.5, fig.width=2.5}
 b <- as.vector(coef(l0learn_cv,gamma = gamma,lambda = lambda))
-b0 <- b[1]
 b <- b[-1]
-qplot(btrue,b) +
-  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
-              linetype = "dashed") +
-  theme_cowplot(font_size = 12)	 
+plot_coefs(btrue,b)
 ```
+
+As expected, the L0 penalty shrinks most of the coefficients to zero.
 
 The mean squared error (MSE) summarizes the accuracy of the
 predictions in the test set examples:
 
 ```{r predict-l0learn, fig.height=2.5, fig.width=2.5}
-mse <- function (x, y)
-  mean((x - y)^2)
 y <- as.vector(predict(l0learn_cv,newx = test$X,gamma = gamma,lambda = lambda))
-qplot(test$y,y) +
-  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
-              linetype = "dashed") +
-  ggtitle(sprintf("mse = %0.3f",mse(test$y,y))) +
-  theme_cowplot(font_size = 12) +
-  theme(plot.title = element_text(face = "plain",size = 12))
+plot_responses(test$y,y)
 ```
 
 Let's compare this to L0Learn with the simpler L0 penalty (which is a
@@ -108,7 +100,7 @@ qplot(test$y,y) +
 ```
 
 Indeed, in this one example at least, L0Learn with the L0L1 penalty
-performs better than the L0 penalty in the prediction task.
+has better prediction performance than the L0 penalty.
 
 SSLASSO
 -------

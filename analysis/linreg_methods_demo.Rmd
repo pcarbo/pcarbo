@@ -19,6 +19,7 @@ library(MASS)
 library(L0Learn)
 library(SSLASSO)
 library(EMVS)
+library(R.matlab)
 library(ggplot2)
 library(cowplot)
 set.seed(1)
@@ -42,6 +43,12 @@ Xtest  <- simulate_predictors_decaying_corr(500,p,0.5)
 train  <- list(X = Xtrain,y = simulate_outcomes(Xtrain,b,se))
 test   <- list(X = Xtest,y = simulate_outcomes(Xtest,b,se))
 btrue  <- b
+```
+
+```{r save-mat-data}
+writeMat("train.mat",
+         X = scale(train$X,center = TRUE,scale = FALSE),
+		 y = with(train,y - mean(y)))
 ```
 
 L0Learn
@@ -101,6 +108,41 @@ qplot(test$y,y) +
 
 Indeed, in this one example at least, L0Learn with the L0L1 penalty
 has better prediction performance than the L0 penalty.
+
+Trimmed Lasso
+-------------
+
+ADD BRIEF DESCRIPTION OF TRIMMED LASSO HERE.
+
+Use `trimmed_lasso.m` to run the method. Then load the results:
+
+```{r trimmed-lasso}
+b <- drop(readMat("trimmed_lasso_b.mat")$b)
+```
+
+Compute the MLE of the intercept:
+
+```{r trimmed-lasso-intercept}
+b0 <- with(train,mean(y - X %*% b))
+```
+
+Compare the coef estimates vs. the ground truth:
+
+```{r plot-coef-l0learn, fig.height=2.5, fig.width=2.5}
+plot_coefs(btrue,b)
+```
+
+Compare predicted Y vs. true Y:
+
+```{r predict-trimmed-lasso, fig.height=2.5, fig.width=2.5}
+y <- drop(b0 + test$X %*% b)
+plot_responses(test$y,y)
+```
+
+Notes: (1) Works particularly well in this example because the true is
+indeed very sparse, and we happened to choose the "correct" k (in
+general this will be hard to do). (2) Cross-validation will be need to
+be used to get the right k.
 
 SSLASSO
 -------

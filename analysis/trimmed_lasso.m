@@ -10,6 +10,7 @@
 %   cd ~/trimmed_lasso/gsm
 %   makeit
 %
+rng(1);
 addpath ~/trimmed_lasso
 addpath ~/trimmed_lasso/gsm
 load train

@@ -1,3 +1,4 @@
 R/setblas.o
 R/setblas.so
 analysis/fit-scd-ex-k=10.rds
+analysis/train.mat

@@ -128,7 +128,7 @@ b0 <- with(train,mean(y - X %*% b))
 
 Compare the coef estimates vs. the ground truth:
 
-```{r plot-coef-l0learn, fig.height=2.5, fig.width=2.5}
+```{r plot-coef-trimmed-lasso, fig.height=2.5, fig.width=2.5}
 plot_coefs(btrue,b)
 ```
 

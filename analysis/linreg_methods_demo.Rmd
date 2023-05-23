@@ -14,7 +14,7 @@ knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
 Load the packages and set the seed so that we may reproduce the
 results more easily.
 
-```{r load-pkgs}
+```{r load-pkgs, message=FALSE}
 library(MASS)
 library(L0Learn)
 library(SSLASSO)

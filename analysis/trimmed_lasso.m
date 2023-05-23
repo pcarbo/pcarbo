@@ -14,6 +14,15 @@ rng(1);
 addpath ~/trimmed_lasso
 addpath ~/trimmed_lasso/gsm
 load train
-k = 3;
-[b out] = sparse_approx_gsm_v1_22(X,y,k);
-save('trimmed_lasso_b.mat','b');
+k = [1 3 10 20 100];
+n = length(k);
+m = size(X,2);
+B = zeros(m,n);
+t = 0;
+for i = 1:n
+  [b out] = sparse_approx_gsm_v1_22(X,y,k(i));
+  B(:,i) = b;
+  t = t + out.tElapsed;
+end
+t % Total elapsed time.
+save('trimmed_lasso_coefs.mat','B');

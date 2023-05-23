@@ -117,7 +117,10 @@ ADD BRIEF DESCRIPTION OF TRIMMED LASSO HERE.
 Use `trimmed_lasso.m` to run the method. Then load the results:
 
 ```{r trimmed-lasso}
-b <- drop(readMat("trimmed_lasso_b.mat")$b)
+k <- c(1,3,10,20,100)
+B <- readMat("trimmed_lasso_coefs.mat")$B
+colnames(B) <- paste0("k",k)
+b <-  B[,"k3"]
 ```
 
 Compute the MLE of the intercept:

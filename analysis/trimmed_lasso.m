@@ -1,6 +1,6 @@
-% Code was downloaded from:
+% The MATLAB code was downloaded from
 % https://github.com/tal-amir/sparse-approximation-gsm
-
+%
 % These were the steps taken to compile the MEX file on the midway2 
 % cluster:
 %

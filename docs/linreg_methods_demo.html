@@ -438,15 +438,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotreecd402417370d426030a0f907fe78bf24c07e3efatargetblankcd40241a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree8655897c9e0bc384472f3a70243db85e210da8ectargetblank8655897a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/pcarbo/pcarbo/tree/cd402417370d426030a0f907fe78bf24c07e3efa" target="_blank">cd40241</a>
+<a href="https://github.com/pcarbo/pcarbo/tree/8655897c9e0bc384472f3a70243db85e210da8ec" target="_blank">8655897</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotreecd402417370d426030a0f907fe78bf24c07e3efatargetblankcd40241a"
+id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree8655897c9e0bc384472f3a70243db85e210da8ectargetblank8655897a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -456,7 +456,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/pcarbo/pcarbo/tree/cd402417370d426030a0f907fe78bf24c07e3efa" target="_blank">cd40241</a>.
+<a href="https://github.com/pcarbo/pcarbo/tree/8655897c9e0bc384472f3a70243db85e210da8ec" target="_blank">8655897</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -773,6 +773,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/8655897c9e0bc384472f3a70243db85e210da8ec/analysis/linreg_methods_demo.Rmd" target="_blank">8655897</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2023-05-24
+</td>
+<td>
+workflowr::wflow_publish("linreg_methods_demo.Rmd", verbose = TRUE)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/pcarbo/33e926efdd1de25ff1066ab7a5f69dc7e295c646/docs/linreg_methods_demo.html" target="_blank">33e926e</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2023-05-24
+</td>
+<td>
+Rebuilt the linreg_methods_demo page.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1292,19 +1326,18 @@ has better prediction performance than the L0 penalty.</p>
 <p>The Trimmed Lasso was described by <a
 href="https://doi.org/10.1137/20M1330634">Amir, Basri and Nadler
 2021</a>. It is implemented in <a
-href="https://github.com/tal-amir/sparse-approximation-gsm">MATLAB</a>
-so there is a separate script <code>trimmed_lasso.m</code> to run the
-method. Here we load the results from running the method:</p>
+href="https://github.com/tal-amir/sparse-approximation-gsm">MATLAB</a>,
+so there is a separate script, <code>trimmed_lasso.m</code>, to run the
+method. Having run this script, we now load the results:</p>
 <pre class="r"><code>k &lt;- c(1,3,10,20,100)
 B &lt;- readMat(&quot;trimmed_lasso_coefs.mat&quot;)$B
 colnames(B) &lt;- paste0(&quot;k&quot;,k)
 b &lt;-  B[,&quot;k3&quot;]</code></pre>
 <p>The Trimmed Lasso was run with different settings of the sparsity
-parameter <span class="math inline">\(k\)</span>, so here we take the
+parameter <span class="math inline">\(k\)</span>. Here we take the
 setting of <span class="math inline">\(k\)</span> that is closest to the
-true number of nonzero coefficients (which in this example is also
-3).</p>
-<p>As expected, most of the coefficient estimates are very sparse:</p>
+true number of nonzero coefficients (which in this example is also 3).
+As expected, the coefficient estimates are very sparse:</p>
 <pre class="r"><code>plot_coefs(btrue,b)</code></pre>
 <p><img src="figure/linreg_methods_demo.Rmd/plot-coef-trimmed-lasso-1.png" width="300" style="display: block; margin: auto;" /></p>
 <p>
@@ -1344,8 +1377,8 @@ Peter Carbonetto
 </table>
 </div>
 </div>
-<p>For prediction, we need to estimate the intercept. Here we use the
-MLE:</p>
+<p>For prediction, we need to estimate the intercept. Here we compute
+the MLE:</p>
 <pre class="r"><code>b0 &lt;- with(train,mean(y - X %*% b))</code></pre>
 <p>The Trimmed Lasso is well suited to this example because the true
 coefficients are very sparse, and indeed the prediction accuracy is very
@@ -1391,9 +1424,9 @@ Peter Carbonetto
 </div>
 </div>
 <p>One drawback with the Trimmed Lasso is that cross-validation will be
-needed in general to get the right <span
-class="math inline">\(k\)</span>, and cross-validation is not
-implemented in the software, so we will have to do it ourselves.</p>
+needed to get the right <span class="math inline">\(k\)</span>. Since
+cross-validation is not implemented in the software, we will have to do
+it ourselves.</p>
 </div>
 <div id="sslasso" class="section level2">
 <h2>SSLASSO</h2>

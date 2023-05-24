@@ -117,9 +117,9 @@ Trimmed Lasso
 
 The Trimmed Lasso was described by
 [Amir, Basri and Nadler 2021][abn2021]. It is implemented in
-[MATLAB][trimmed-lasso] so there is a separate script
-`trimmed_lasso.m` to run the method. Here we load the results from
-running the method:
+[MATLAB][trimmed-lasso], so there is a separate script,
+`trimmed_lasso.m`, to run the method. Having run this script, we now
+load the results:
 
 ```{r trimmed-lasso}
 k <- c(1,3,10,20,100)
@@ -129,17 +129,15 @@ b <-  B[,"k3"]
 ```
 
 The Trimmed Lasso was run with different settings of the sparsity
-parameter $k$, so here we take the setting of $k$ that is closest to
+parameter $k$. Here we take the setting of $k$ that is closest to
 the true number of nonzero coefficients (which in this example is also
-3).
-
-As expected, most of the coefficient estimates are very sparse:
+3). As expected, the coefficient estimates are very sparse:
 
 ```{r plot-coef-trimmed-lasso, fig.height=2.5, fig.width=2.5}
 plot_coefs(btrue,b)
 ```
 
-For prediction, we need to estimate the intercept. Here we use the
+For prediction, we need to estimate the intercept. Here we compute the
 MLE:
 
 ```{r trimmed-lasso-intercept}
@@ -156,8 +154,8 @@ plot_responses(test$y,y)
 ```
 
 One drawback with the Trimmed Lasso is that cross-validation will be
-needed in general to get the right $k$, and cross-validation is not
-implemented in the software, so we will have to do it ourselves.
+needed to get the right $k$. Since cross-validation is not implemented
+in the software, we will have to do it ourselves.
 
 SSLASSO
 -------

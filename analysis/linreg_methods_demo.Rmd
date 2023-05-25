@@ -17,6 +17,7 @@ results more easily.
 ```{r load-pkgs, message=FALSE}
 library(MASS)
 library(L0Learn)
+library(bayeslm)
 library(SSLASSO)
 library(EMVS)
 library(R.matlab)
@@ -157,6 +158,30 @@ One drawback with the Trimmed Lasso is that cross-validation will be
 needed to get the right $k$. Since cross-validation is not implemented
 in the software, we will have to do it ourselves.
 
+The Horseshoe
+-------------
+
+Another option is multiple linear regression with the
+[horseshoe prior][horseshoe].  There are several implementations in R
+and MATLAB listed in [this review paper][horseshoe-review]. The
+recent [bayeslm package][bayeslm] package implements an efficient
+slice sampler for multiple linear regression with the horseshoe prior
+and several other priors, so we'll try that.
+
+```{r horseshoe, cache=TRUE, fig.height=2.5, fig.width=5}
+horseshoe <- bayeslm(train$y,train$X,prior = "horseshoe",icept = TRUE,
+                     verb = TRUE, standardize = FALSE,singular = TRUE,
+                     burnin = 1000,N = 4000)
+b <- colMeans(horseshoe$beta)
+b <- b[-1]
+y <- predict(horseshoe,X = test$X,burnin = 1000)
+plot_grid(plot_coefs(btrue,b),
+          plot_responses(test$y,y))
+```
+
+The Horseshoe also effectively shrank the coefficients and produced
+accurate predictions in the example data set.
+
 SSLASSO
 -------
 
@@ -284,3 +309,6 @@ plot_grid(p1,p2)
 [l0learn]: https://cran.r-project.org/package=L0Learn
 [l0learn-vignette]: https://cran.r-project.org/web/packages/L0Learn/vignettes/L0Learn-vignette.html
 [trimmed-lasso]: https://github.com/tal-amir/sparse-approximation-gsm
+[horseshoe]: https://doi.org/10.1093/biomet/asq017
+[horseshoe-review]: https://doi.org/10.1214/19-STS700
+[bayeslm]: https://doi.org/10.1080/10618600.2018.1482762

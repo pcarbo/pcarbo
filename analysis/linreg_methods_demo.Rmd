@@ -60,14 +60,14 @@ L0Learn
 -------
 
 First, let's try the [L0Learn][l0learn] from
-[Hazimeh and Mazumder 2020][hm2020]. In the
+[Hazimeh & Mazumder 2020][hm2020]. In the
 [vignette][l0learn-vignette], the authors suggest using the "L0L1" or
 "L0L2" penalties for better predictive performance. The package
 includes an interface to automatically select the penalty parameters
 $\lambda, \gamma$ that minimize the test-set error. (L0Learn has two
-model fitting algorithms; the CD algorithm is faster whereas the
-CDPSI can sometimes produces better fits. For expediency we'll use
-the CD algorithm.)
+model fitting algorithms; the CD algorithm is faster whereas the CDPSI
+can sometimes produces better fits. For expediency we'll use the CD
+algorithm.)
 
 ```{r l0learn}
 l0learn_cv <- with(train,L0Learn.cvfit(X,y,penalty = "L0L1",algorithm = "CD"))
@@ -118,7 +118,7 @@ Trimmed Lasso
 -------------
 
 The Trimmed Lasso was described by
-[Amir, Basri and Nadler 2021][abn2021]. It is implemented in
+[Amir, Basri & Nadler 2021][abn2021]. It is implemented in
 [MATLAB][trimmed-lasso], so there is a separate script,
 `trimmed_lasso.m`, to run the method. Having run this script, we now
 load the results:
@@ -229,62 +229,76 @@ better choices for the hyperparameter setting than the one given by
 SSLASSO
 -------
 
-Next let's try both the "adaptive" and "separable" variants of the
-[Spike-and-Slab LASSO][sslasso]:
+Now let's try the [Spike-and-Slab LASSO][sslasso], both the "adaptive"
+and "separable" variants. For the SSLASSO with the separable penalty,
+it would be a bit of an unfair advantage to set the prior inclusion
+probability $\theta$ to the true value, so here we set it to a value
+(0.05) larger than the true value (0.003).
 
 ```{r sslasso-1}
-sslasso_adapt <-
-  with(train,SSLASSO(X,y,penalty = "adaptive",variance = "unknown"))
 sslasso_sep <-
-  with(train,SSLASSO(X,y,penalty = "separable",variance = "unknown"))
+with(train,SSLASSO(X,y,penalty = "separable",variance = "unknown",
+                   theta = 0.05))
+sslasso_adapt <-
+  with(train,SSLASSO(X,y,penalty = "adaptive",variance = "unknown",
+                     lambda0 = seq(3,200,length.out = 100),lambda1 = 3))
 ```
+
+Note that there is a bug in SSLASSO: To override the default choice
+for `lambda1`, you need to specify both `lambda0` and `lambda1`.
 
 Let's take a look at the SSLASSO with separable penalty first. As far
 as I can tell, the SSLASSO does not provide an automated way to select
-the spike and slab penalties, so I'll choose one by hand:
+the spike penalty parameter $\lambda_0$, so here, to keep things
+simple, I choose this penalty by hand. (In general we would probably
+want to implement a simple cross-validation scheme to choose this
+penalty, as well as the slab penalty $\lambda_1$, although
+[Rockova & George 2018][rg2018] observe that the performance is not
+very sensitive to the choice of $\lambda_1$, so it seems reasonable to
+try a small number of settings, e.g., $\lambda_1 = \{0.1, 0.5, 1, 5,
+10\}$, similar to what was done in the SSLASSO paper.)
 
 ```{r plot-coef-sslasso-sep, fig.height=2.5, fig.width=2.5}
-b <- sslasso_sep$beta[,16]
-qplot(btrue,b) +
-  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
-              linetype = "dashed") +
-  theme_cowplot(font_size = 12)	 
+i <- 8
+b <- sslasso_sep$beta[,i]
+plot_coefs(btrue,b)
 ```
 
 Compare these estimates to the estimates obtained by the adaptive
 SSLASSO:
 
 ```{r plot-coef-sslasso-adapt, fig.height=2.5, fig.width=2.5}
-b <- sslasso_adapt$beta[,16]
-qplot(btrue,b) +
-  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
-              linetype = "dashed") +
-  theme_cowplot(font_size = 12)	 
+b <- sslasso_adapt$beta[,i]
+plot_coefs(btrue,b)
 ```
 
-Another annoying thing about the SSLASSO package is that it does not
-provide a "predict" method. So we will compute the predictions by
-hand after extracting the :
+Observe that the adaptive variant did a much better job shrinking the
+small coefficients to zero. Both methods accurately estimated the
+residual variance:
+
+```{r sslasso-sigma}
+tail(sslasso_sep$sigmas,n = 1)
+tail(sslasso_adapt$sigmas,n = 1)
+```
+
+SSLASSO package does not provide a "predict" method so we need to
+compute the predictions by hand after extracting the coefficient
+estimates.
 
 ```{r predict-sslasso, fig.height=2.5, fig.width=5}
-b0 <- sslasso_sep$intercept[16]
-b  <- sslasso_sep$beta[,16]
+b0 <- sslasso_sep$intercept[i]
+b  <- sslasso_sep$beta[,i]
 y  <- drop(b0 + test$X %*% b)
-p1 <- qplot(test$y,y) +
-  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
-              linetype = "dashed") +
-  ggtitle(sprintf("separable (mse = %0.3f)",mse(test$y,y))) +
-  theme_cowplot(font_size = 12)
-b0 <- sslasso_adapt$intercept[16]
-b  <- sslasso_adapt$beta[,16]
+p1 <- plot_responses(test$y,y)
+b0 <- sslasso_adapt$intercept[i]
+b  <- sslasso_adapt$beta[,i]
 y  <- drop(b0 + test$X %*% b)
-p2 <- qplot(test$y,y) +
-  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
-              linetype = "dashed") +
-  ggtitle(sprintf("adaptive (mse = %0.3f)",mse(test$y,y))) +
-  theme_cowplot(font_size = 12)
+p2 <- plot_responses(test$y,y)
 plot_grid(p1,p2)
 ```
+
+In this example, the adaptive penalty performed a bit better than the
+separable penalty with $\theta = 0.05$.
 
 EMVS
 ----
@@ -349,6 +363,7 @@ plot_grid(p1,p2)
 [sslasso]: https://cran.r-project.org/package=SSLASSO
 [zh2005]: https://doi.org/10.1111/j.1467-9868.2005.00503.x
 [hm2020]: https://doi.org/10.1287/opre.2019.1919
+[rg2018]: https://doi.org/10.1080/01621459.2016.1260469
 [abn2021]: https://doi.org/10.1137/20M1330634
 [l0learn]: https://cran.r-project.org/package=L0Learn
 [l0learn-vignette]: https://cran.r-project.org/web/packages/L0Learn/vignettes/L0Learn-vignette.html

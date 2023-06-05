@@ -459,15 +459,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree52907b2b154a4ece2f8c49b13a4e901fbd949790targetblank52907b2a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotreecd226d6b34d1af8a2a2759361794fe2d44141849targetblankcd226d6a">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/pcarbo/pcarbo/tree/52907b2b154a4ece2f8c49b13a4e901fbd949790" target="_blank">52907b2</a>
+<a href="https://github.com/pcarbo/pcarbo/tree/cd226d6b34d1af8a2a2759361794fe2d44141849" target="_blank">cd226d6</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotree52907b2b154a4ece2f8c49b13a4e901fbd949790targetblank52907b2a"
+id="strongRepositoryversionstrongahrefhttpsgithubcompcarbopcarbotreecd226d6b34d1af8a2a2759361794fe2d44141849targetblankcd226d6a"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -477,7 +477,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/pcarbo/pcarbo/tree/52907b2b154a4ece2f8c49b13a4e901fbd949790" target="_blank">52907b2</a>.
+<a href="https://github.com/pcarbo/pcarbo/tree/cd226d6b34d1af8a2a2759361794fe2d44141849" target="_blank">cd226d6</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -751,6 +751,9 @@ Untracked files:
     Untracked:  R/scd.R
     Untracked:  analysis/linreg_methods_demo_cache/
 
+Unstaged changes:
+    Modified:   R/linreg_methods_demo_functions.R
+
 </code></pre>
 <p>
 Note that any generated files, e.g. HTML, png, CSS, etc., are not
@@ -795,6 +798,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/pcarbo/pcarbo/blob/cd226d6b34d1af8a2a2759361794fe2d44141849/analysis/linreg_methods_demo.Rmd" target="_blank">cd226d6</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2023-06-05
+</td>
+<td>
+workflowr::wflow_publish("linreg_methods_demo.Rmd", verbose = TRUE)
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/pcarbo/pcarbo/467dc9588303cfad0ee8c7161ccef3d9de584485/docs/linreg_methods_demo.html" target="_blank">467dc95</a>
+</td>
+<td>
+Peter Carbonetto
+</td>
+<td>
+2023-06-05
+</td>
+<td>
+Added overview text at the top of linreg_methods_demo.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -2052,67 +2089,52 @@ separable penalty with <span class="math inline">\(\theta =
 </div>
 <div id="emvs" class="section level2">
 <h2>EMVS</h2>
-<p>The <a href="https://cran.r-project.org/package=EMVS">EMVS
-package</a> seems to be better documented (unfortunately, it was removed
-from CRAN). It also has two variants with different priors, the
-“independent” prior (which is recommended by the authors) and the
-“conjugate” prior. Let’s compare their performance in this simulated
-example.</p>
-<pre class="r"><code>emvs_conj = with(train,
-  EMVS(y,X,v0 = seq(0.1,2,length.out = 20),v1 = 10,independent = FALSE))
-emvs_ind = with(train,
-  EMVS(y,X,v0 = exp(seq(-18,-1,length.out = 20)),v1 = 1,independent = TRUE))</code></pre>
-<p><em>Add text here.</em></p>
+<p>Finally, let’s try the <a
+href="https://doi.org/10.1080/01621459.2013.869223">EMVS method</a>
+implemented the <a href="https://cran.r-project.org/package=EMVS">EMVS
+package</a>. It seems to be fairly well documented (it has a vignette at
+least). Unfortunately, it was removed from CRAN. It also has two
+variants with different priors, the “independent” prior (which is
+recommended by the authors) and the “conjugate” prior. The “backward”
+option for simulated annealing is recommended. Let’s compare the
+performance of the two variants in the simulated example.</p>
+<pre class="r"><code>v0 &lt;- exp(seq(-10,-1,length.out = 20))
+emvs_conj &lt;- EMVS(train$y,train$X,v0 = v0,v1 = 1,independent = FALSE,
+                  direction = &quot;backward&quot;,standardize = FALSE,epsilon = 1e-6)
+emvs_ind &lt;- EMVS(train$y,train$X,v0 = v0,v1 = 1,independent = TRUE,
+                 direction = &quot;backward&quot;,standardize = FALSE,epsilon = 1e-6)</code></pre>
+<p>For both variants, a variety of settings for the “spike” parameter
+<span class="math inline">\(v_0\)</span> can be chosen to explore the
+results at different settings, similar to how the results of the Lasso
+are sometimes explored by varying the penalty strength parameter <span
+class="math inline">\(\lambda\)</span>.</p>
+<p>The EMVS coefficients can be thresholded using the posterior
+inclusion probabilities. A convenient feature of the “conjugate” prior
+is that it gives a posterior probability for each setting of <span
+class="math inline">\(v_0\)</span> which can be used to select the best
+setting:</p>
 <pre class="r"><code>i  &lt;- which.max(emvs_conj$log_g_function)
-b  &lt;- with(emvs_conj,betas[i,] * prob_inclusion[i,])
-qplot(btrue,b) +
-  geom_abline(intercept = 0,slope = 1,color = &quot;deepskyblue&quot;,
-              linetype = &quot;dashed&quot;) +
-  theme_cowplot(font_size = 12)</code></pre>
-<p><img src="figure/linreg_methods_demo.Rmd/emvs-conj-1.png" width="300" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-emvs-conj-1">
-Past versions of emvs-conj-1.png
-</button>
-</p>
-<div id="fig-emvs-conj-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<a href="https://github.com/pcarbo/pcarbo/blob/6182121cf30a7bc351295fd5323b6beb97138404/docs/figure/linreg_methods_demo.Rmd/emvs-conj-1.png" target="_blank">6182121</a>
-</td>
-<td>
-Peter Carbonetto
-</td>
-<td>
-2023-05-09
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><em>Add text here.</em></p>
-<pre class="r"><code>b &lt;- with(emvs_ind,betas[14,] * prob_inclusion[14,])
-qplot(btrue,b) +
-  geom_abline(intercept = 0,slope = 1,color = &quot;deepskyblue&quot;,
-              linetype = &quot;dashed&quot;) +
-  theme_cowplot(font_size = 12)</code></pre>
+b0 &lt;- emvs_conj$intersects[i]
+b  &lt;- emvs_conj$betas[i,]
+js &lt;- which(emvs_conj$prob_inclusion[i,] &lt; 0.5)
+b[js] &lt;- 0
+emvs_conj$b0 &lt;- b0
+emvs_conj$b  &lt;- b
+plot_coefs(btrue,b)</code></pre>
+<p><img src="figure/linreg_methods_demo.Rmd/emvs-2-1.png" width="300" style="display: block; margin: auto;" /></p>
+<p>The independent prior does not provide an automatic way to select
+<span class="math inline">\(v_0\)</span>, so instead here we choose it
+by hand (more generally, we may want to implement some sort of
+cross-validation to choose <span
+class="math inline">\(v_0\)</span>).</p>
+<pre class="r"><code>i  &lt;- 1
+b0 &lt;- emvs_ind$intersects[i]
+b  &lt;- emvs_ind$betas[i,]
+js &lt;- which(emvs_ind$prob_inclusion[i,] &lt; 0.5)
+b[js] &lt;- 0
+emvs_ind$b0 &lt;- b0
+emvs_ind$b  &lt;- b
+plot_coefs(btrue,b)</code></pre>
 <p><img src="figure/linreg_methods_demo.Rmd/emvs-ind-1.png" width="300" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-emvs-ind-1">
@@ -2151,23 +2173,13 @@ Peter Carbonetto
 </table>
 </div>
 </div>
-<p><em>Add text here.</em></p>
-<pre class="r"><code>b0 &lt;- emvs_conj$intersects[i]
-b  &lt;- emvs_conj$betas[i,]
-y  &lt;- drop(b0 + test$X %*% b)
-p1 &lt;- qplot(test$y,y) +
-  geom_abline(intercept = 0,slope = 1,color = &quot;deepskyblue&quot;,
-              linetype = &quot;dashed&quot;) +
-  ggtitle(sprintf(&quot;conjugate (mse = %0.3f)&quot;,mse(test$y,y))) +
-  theme_cowplot(font_size = 12)
-b0 &lt;- emvs_ind$intersects[14]
-b  &lt;- emvs_ind$beta[14,]
-y  &lt;- drop(b0 + test$X %*% b)
-p2 &lt;- qplot(test$y,y) +
-  geom_abline(intercept = 0,slope = 1,color = &quot;deepskyblue&quot;,
-              linetype = &quot;dashed&quot;) +
-  ggtitle(sprintf(&quot;independent (mse = %0.3f)&quot;,mse(test$y,y))) +
-  theme_cowplot(font_size = 12)
+<p>As the authors indicated, the independent prior produces much better
+predictions than the conjugate prior. Still, even the better performing
+variant of EMVS gives among the worse results for this data set.</p>
+<pre class="r"><code>y_conj &lt;- drop(with(emvs_conj,b0 + test$X %*% b))
+y_ind &lt;- drop(with(emvs_ind,b0 + test$X %*% b))
+p1 &lt;- plot_responses(test$y,y_conj)
+p2 &lt;- plot_responses(test$y,y_ind)
 plot_grid(p1,p2)</code></pre>
 <p><img src="figure/linreg_methods_demo.Rmd/predict-emvs-1.png" width="600" style="display: block; margin: auto;" /></p>
 <p>

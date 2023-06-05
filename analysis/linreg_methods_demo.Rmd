@@ -326,59 +326,69 @@ separable penalty with $\theta = 0.05$.
 EMVS
 ----
 
-The [EMVS package][emvs] seems to be better documented (unfortunately,
-it was removed from CRAN). It also has two variants with different
-priors, the "independent" prior (which is recommended by the authors)
-and the "conjugate" prior. Let's compare their performance in this
+Finally, let's try the [EMVS method][emvs] implemented the
+[EMVS package][emvs-package]. It seems to be fairly well documented
+(it has a vignette at least). Unfortunately, it was removed from
+CRAN. It also has two variants with different priors, the
+"independent" prior (which is recommended by the authors) and the
+"conjugate" prior. The "backward" option for simulated annealing is
+recommended. Let's compare the performance of the two variants in the
 simulated example.
 
-```{r emvs, results="hide"}
-emvs_conj = with(train,
-  EMVS(y,X,v0 = seq(0.1,2,length.out = 20),v1 = 10,independent = FALSE))
-emvs_ind = with(train,
-  EMVS(y,X,v0 = exp(seq(-18,-1,length.out = 20)),v1 = 1,independent = TRUE))
+```{r emvs-1, results="hide"}
+v0 <- exp(seq(-10,-1,length.out = 20))
+emvs_conj <- EMVS(train$y,train$X,v0 = v0,v1 = 1,independent = FALSE,
+                  direction = "backward",standardize = FALSE,epsilon = 1e-6)
+emvs_ind <- EMVS(train$y,train$X,v0 = v0,v1 = 1,independent = TRUE,
+                 direction = "backward",standardize = FALSE,epsilon = 1e-6)
 ```
 
-*Add text here.*
+For both variants, a variety of settings for the "spike" parameter
+$v_0$ can be chosen to explore the results at different settings,
+similar to how the results of the Lasso are sometimes explored by
+varying the penalty strength parameter $\lambda$.
 
-```{r emvs-conj, fig.height=2.5, fig.width=2.5}
+The EMVS coefficients can be thresholded using the posterior inclusion
+probabilities. A convenient feature of the "conjugate" prior is that
+it gives a posterior probability for each setting of $v_0$ which can
+be used to select the best setting:
+
+```{r emvs-2, fig.height=2.5, fig.width=2.5}
 i  <- which.max(emvs_conj$log_g_function)
-b  <- with(emvs_conj,betas[i,] * prob_inclusion[i,])
-qplot(btrue,b) +
-  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
-              linetype = "dashed") +
-  theme_cowplot(font_size = 12)
-```
-
-*Add text here.*
-
-```{r emvs-ind, fig.height=2.5, fig.width=2.5}
-b <- with(emvs_ind,betas[14,] * prob_inclusion[14,])
-qplot(btrue,b) +
-  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
-              linetype = "dashed") +
-  theme_cowplot(font_size = 12)
-```
-
-*Add text here.*
-
-```{r predict-emvs, fig.height=2.5, fig.width=5}
 b0 <- emvs_conj$intersects[i]
 b  <- emvs_conj$betas[i,]
-y  <- drop(b0 + test$X %*% b)
-p1 <- qplot(test$y,y) +
-  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
-              linetype = "dashed") +
-  ggtitle(sprintf("conjugate (mse = %0.3f)",mse(test$y,y))) +
-  theme_cowplot(font_size = 12)
-b0 <- emvs_ind$intersects[14]
-b  <- emvs_ind$beta[14,]
-y  <- drop(b0 + test$X %*% b)
-p2 <- qplot(test$y,y) +
-  geom_abline(intercept = 0,slope = 1,color = "deepskyblue",
-              linetype = "dashed") +
-  ggtitle(sprintf("independent (mse = %0.3f)",mse(test$y,y))) +
-  theme_cowplot(font_size = 12)
+js <- which(emvs_conj$prob_inclusion[i,] < 0.5)
+b[js] <- 0
+emvs_conj$b0 <- b0
+emvs_conj$b  <- b
+plot_coefs(btrue,b)
+```
+
+The independent prior does not provide an automatic way to select
+$v_0$, so instead here we choose it by hand (more generally, we may
+want to implement some sort of cross-validation to choose $v_0$).
+
+```{r emvs-ind, fig.height=2.5, fig.width=2.5}
+i  <- 1
+b0 <- emvs_ind$intersects[i]
+b  <- emvs_ind$betas[i,]
+js <- which(emvs_ind$prob_inclusion[i,] < 0.5)
+b[js] <- 0
+emvs_ind$b0 <- b0
+emvs_ind$b  <- b
+plot_coefs(btrue,b)
+```
+
+As the authors indicated, the independent prior produces much better
+predictions than the conjugate prior. Still, even the better
+performing variant of EMVS gives among the worse results for this data
+set.
+
+```{r predict-emvs, fig.height=2.5, fig.width=5}
+y_conj <- drop(with(emvs_conj,b0 + test$X %*% b))
+y_ind <- drop(with(emvs_ind,b0 + test$X %*% b))
+p1 <- plot_responses(test$y,y_conj)
+p2 <- plot_responses(test$y,y_ind)
 plot_grid(p1,p2)
 ```
 
@@ -394,6 +404,8 @@ plot_grid(p1,p2)
 [horseshoe]: https://doi.org/10.1093/biomet/asq017
 [horseshoe-review]: https://doi.org/10.1214/19-STS700
 [horseshoe-package]: https://cran.r-project.org/package=horseshoe
+[emvs]: https://doi.org/10.1080/01621459.2013.869223
+[emvs-package]: https://cran.r-project.org/package=EMVS
 [bayeslm]: https://doi.org/10.1080/10618600.2018.1482762
 [dl]: https://doi.org/10.1080/01621459.2014.960967
 [dlbayes]: https://github.com/xylimeng/BayesianVariableSelection

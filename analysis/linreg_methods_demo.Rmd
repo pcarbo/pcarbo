@@ -4,7 +4,10 @@ author: Peter Carbonetto
 output: workflowr::wflow_html
 ---
 
-*Add overview here.*
+The goal here is to try out several recent R packages implementing
+methods for large-scale multiple linear regression, including L0Learn,
+the Spike-and-Slab LASSO, the Trimmed Lasso, EMVS, and methods with the
+Horseshoe and Dirichlet-Laplace priors.
 
 ```{r knitr-opts, include=FALSE}
 knitr::opts_chunk$set(comment = "#",collapse = TRUE,results = "hold",
